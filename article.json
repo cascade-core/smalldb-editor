@@ -1,0 +1,248 @@
+{
+	"_": "<?php printf('_%c%c}%c',34,10,10);__halt_compiler();?>",
+	"states": {
+		"draft": {
+			"state": "draft",
+			"url": "",
+			"label": "Draft",
+			"color": "#EEEEEE"
+		},
+		"published": {
+			"state": "published",
+			"url": "",
+			"label": "Published",
+			"color": "#99FF33"
+		},
+		"rejected": {
+			"state": "rejected",
+			"url": "",
+			"label": "Rejected",
+			"color": "#FF6633"
+		},
+		"submitted": {
+			"state": "submitted",
+			"url": "",
+			"label": "Submitted",
+			"color": "#EEEEEE"
+		},
+		"waiting": {
+			"state": "waiting",
+			"url": "",
+			"label": "Waiting",
+			"color": "#EEEEEE"
+		}
+	},
+	"actions": {
+		"submit": {
+			"transitions": {
+				"draft": {
+					"label": "submit",
+					"color": "#000000",
+					"targets": [
+						"submitted"
+					]
+				}
+			}
+		},
+		"accept": {
+			"transitions": {
+				"submitted": {
+					"label": "accept",
+					"color": "#000000",
+					"targets": [
+						"waiting",
+						"published"
+					]
+				}
+			}
+		},
+		"reject": {
+			"transitions": {
+				"submitted": {
+					"label": "reject",
+					"color": "#000000",
+					"targets": [
+						"rejected"
+					]
+				}
+			}
+		},
+		"withdraw": {
+			"transitions": {
+				"submitted": {
+					"label": "withdraw",
+					"color": "#000000",
+					"targets": [
+						"draft"
+					]
+				}
+			}
+		},
+		"create": {
+			"transitions": {
+				"": {
+					"label": "create",
+					"color": "#000000",
+					"targets": [
+						"draft"
+					]
+				}
+			},
+			"heading": "New article",
+			"label": "Create",
+			"returns": "new_id",
+			"block": {
+				"inputs": {
+					"item": null
+				},
+				"outputs": {
+					"ref": "return_value"
+				}
+			}
+		},
+		"publish": {
+			"transitions": {
+				"waiting": {
+					"label": "publish",
+					"color": "#000000",
+					"targets": [
+						"published"
+					]
+				}
+			}
+		},
+		"return": {
+			"transitions": {
+				"submitted": {
+					"label": "return",
+					"color": "#000000",
+					"targets": [
+						"draft"
+					]
+				}
+			}
+		},
+		"edit": {
+			"transitions": {
+				"submitted": {
+					"label": "edit",
+					"color": "#000000",
+					"targets": [
+						"submitted"
+					]
+				},
+				"draft": {
+					"label": "edit",
+					"color": "#000000",
+					"targets": [
+						"draft"
+					]
+				}
+			},
+			"heading": "Edit article",
+			"label": "Edit",
+			"block": {
+				"inputs": {
+					"ref": null,
+					"item": null
+				},
+				"outputs": []
+			}
+		},
+		"hide": {
+			"transitions": {
+				"published": {
+					"label": "hide",
+					"color": "#000000",
+					"targets": [
+						"submitted"
+					]
+				},
+				"waiting": {
+					"label": "hide",
+					"color": "#000000",
+					"targets": [
+						"submitted"
+					]
+				}
+			}
+		},
+		"listing": {
+			"heading": "Articles"
+		},
+		"show": {
+			"heading": "{title}",
+			"heading_without_links": true
+		}
+	},
+	"class": "ExampleApplication\\UniversalStateMachine",
+	"include": [
+		"article.graphml"
+	],
+	"name": "Article",
+	"desc": "Article",
+	"table": "article",
+	"flupdo_resource": "database",
+	"io_name": "item",
+	"url": "\/article\/{id}",
+	"parent_url": "\/article",
+	"default_access_policy": null,
+	"state_select": "state",
+	"properties": {
+		"id": {
+			"type": "number",
+			"label": "ID",
+			"is_pk": true,
+			"link": "\/article\/{id}",
+			"calculated": true
+		},
+		"title": {
+			"type": "text",
+			"label": "Title",
+			"required": true,
+			"link": "\/article\/{id}"
+		},
+		"state": {
+			"type": "text",
+			"label": "State",
+			"calculated": true
+		},
+		"perex": {
+			"type": "textarea",
+			"label": "Perex",
+			"required": true,
+			"tabular_hidden": true,
+			"class": "perex",
+			"rows": 10
+		},
+		"body_md": {
+			"type": "markdownarea",
+			"label": "Text",
+			"required": true,
+			"tabular_hidden": true,
+			"rows": 24
+		},
+		"created": {
+			"type": "datetime",
+			"label": "Created",
+			"format": "%Y-%m-%d %H:%M",
+			"readonly": true,
+			"tabular_hidden": false,
+			"tabular_width": "84",
+			"calculated": true
+		},
+		"modified": {
+			"type": "datetime",
+			"label": "Modified",
+			"format": "%Y-%m-%d %H:%M",
+			"readonly": true,
+			"tabular_hidden": false,
+			"tabular_width": "84",
+			"calculated": true
+		}
+	},
+	"default_filters": {
+		"order_by": "created",
+		"order_asc": false
+	}
+}

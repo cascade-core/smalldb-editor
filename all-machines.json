@@ -1,0 +1,2232 @@
+
+{
+	"article": {
+		"_": "<?php printf('_%c%c}%c',34,10,10);__halt_compiler();?>",
+		"states": {
+			"draft": {
+				"state": "draft",
+				"url": "",
+				"label": "Draft",
+				"color": "#EEEEEE"
+			},
+			"published": {
+				"state": "published",
+				"url": "",
+				"label": "Published",
+				"color": "#99FF33"
+			},
+			"rejected": {
+				"state": "rejected",
+				"url": "",
+				"label": "Rejected",
+				"color": "#FF6633"
+			},
+			"submitted": {
+				"state": "submitted",
+				"url": "",
+				"label": "Submitted",
+				"color": "#EEEEEE"
+			},
+			"waiting": {
+				"state": "waiting",
+				"url": "",
+				"label": "Waiting",
+				"color": "#EEEEEE"
+			}
+		},
+		"actions": {
+			"submit": {
+				"transitions": {
+					"draft": {
+						"label": "submit",
+						"color": "#000000",
+						"targets": [
+							"submitted"
+						]
+					}
+				}
+			},
+			"accept": {
+				"transitions": {
+					"submitted": {
+						"label": "accept",
+						"color": "#000000",
+						"targets": [
+							"waiting",
+							"published"
+						]
+					}
+				}
+			},
+			"reject": {
+				"transitions": {
+					"submitted": {
+						"label": "reject",
+						"color": "#000000",
+						"targets": [
+							"rejected"
+						]
+					}
+				}
+			},
+			"withdraw": {
+				"transitions": {
+					"submitted": {
+						"label": "withdraw",
+						"color": "#000000",
+						"targets": [
+							"draft"
+						]
+					}
+				}
+			},
+			"create": {
+				"transitions": {
+					"": {
+						"label": "create",
+						"color": "#000000",
+						"targets": [
+							"draft"
+						]
+					}
+				},
+				"heading": "New article",
+				"label": "Create",
+				"returns": "new_id",
+				"block": {
+					"inputs": {
+						"item": null
+					},
+					"outputs": {
+						"ref": "return_value"
+					}
+				}
+			},
+			"publish": {
+				"transitions": {
+					"waiting": {
+						"label": "publish",
+						"color": "#000000",
+						"targets": [
+							"published"
+						]
+					}
+				}
+			},
+			"return": {
+				"transitions": {
+					"submitted": {
+						"label": "return",
+						"color": "#000000",
+						"targets": [
+							"draft"
+						]
+					}
+				}
+			},
+			"edit": {
+				"transitions": {
+					"submitted": {
+						"label": "edit",
+						"color": "#000000",
+						"targets": [
+							"submitted"
+						]
+					},
+					"draft": {
+						"label": "edit",
+						"color": "#000000",
+						"targets": [
+							"draft"
+						]
+					}
+				},
+				"heading": "Edit article",
+				"label": "Edit",
+				"block": {
+					"inputs": {
+						"ref": null,
+						"item": null
+					},
+					"outputs": []
+				}
+			},
+			"hide": {
+				"transitions": {
+					"published": {
+						"label": "hide",
+						"color": "#000000",
+						"targets": [
+							"submitted"
+						]
+					},
+					"waiting": {
+						"label": "hide",
+						"color": "#000000",
+						"targets": [
+							"submitted"
+						]
+					}
+				}
+			},
+			"listing": {
+				"heading": "Articles"
+			},
+			"show": {
+				"heading": "{title}",
+				"heading_without_links": true
+			}
+		},
+		"class": "ExampleApplication\\UniversalStateMachine",
+		"include": [
+			"article.graphml"
+		],
+		"name": "Article",
+		"desc": "Article",
+		"table": "article",
+		"flupdo_resource": "database",
+		"io_name": "item",
+		"url": "\/article\/{id}",
+		"parent_url": "\/article",
+		"default_access_policy": null,
+		"state_select": "state",
+		"properties": {
+			"id": {
+				"type": "number",
+				"label": "ID",
+				"is_pk": true,
+				"link": "\/article\/{id}",
+				"calculated": true
+			},
+			"title": {
+				"type": "text",
+				"label": "Title",
+				"required": true,
+				"link": "\/article\/{id}"
+			},
+			"state": {
+				"type": "text",
+				"label": "State",
+				"calculated": true
+			},
+			"perex": {
+				"type": "textarea",
+				"label": "Perex",
+				"required": true,
+				"tabular_hidden": true,
+				"class": "perex",
+				"rows": 10
+			},
+			"body_md": {
+				"type": "markdownarea",
+				"label": "Text",
+				"required": true,
+				"tabular_hidden": true,
+				"rows": 24
+			},
+			"created": {
+				"type": "datetime",
+				"label": "Created",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			},
+			"modified": {
+				"type": "datetime",
+				"label": "Modified",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			}
+		},
+		"default_filters": {
+			"order_by": "created",
+			"order_asc": false
+		}
+	},
+	"auction": {
+		"_": "<?php printf('_%c%c}%c',34,10,10);__halt_compiler();?>",
+		"states": {
+			"Bidding": {
+				"url": "",
+				"label": "Bidding",
+				"color": "#EEEEEE",
+				"state": "Bidding"
+			},
+			"Ding1": {
+				"url": "",
+				"label": "Ding1",
+				"color": "#EEEEEE",
+				"state": "Ding1"
+			},
+			"Ding2": {
+				"url": "",
+				"label": "Ding2",
+				"color": "#EEEEEE",
+				"state": "Ding2"
+			},
+			"Enqueued": {
+				"url": "",
+				"label": "Enqueued",
+				"color": "#EEEEEE",
+				"state": "Enqueued"
+			},
+			"Failed": {
+				"url": "",
+				"label": "Failed",
+				"color": "#FF6633",
+				"state": "Failed"
+			},
+			"Sold": {
+				"url": "",
+				"label": "Sold",
+				"color": "#99FF33",
+				"state": "Sold"
+			}
+		},
+		"actions": {
+			"start": {
+				"transitions": {
+					"Enqueued": {
+						"label": "start",
+						"color": "#000000",
+						"targets": [
+							"Bidding"
+						]
+					}
+				}
+			},
+			"sell": {
+				"transitions": {
+					"Ding2": {
+						"label": "sell",
+						"color": "#000000",
+						"targets": [
+							"Sold"
+						]
+					}
+				}
+			},
+			"edit": {
+				"transitions": {
+					"Enqueued": {
+						"label": "edit",
+						"color": "#000000",
+						"targets": [
+							"Enqueued"
+						]
+					}
+				},
+				"heading": "Edit auction",
+				"label": "Edit",
+				"block": {
+					"inputs": {
+						"ref": null,
+						"item": null
+					},
+					"outputs": []
+				}
+			},
+			"create": {
+				"transitions": {
+					"": {
+						"label": "create",
+						"color": "#000000",
+						"targets": [
+							"Enqueued"
+						]
+					}
+				},
+				"heading": "New auction",
+				"label": "Create",
+				"returns": "new_id",
+				"block": {
+					"inputs": {
+						"item": null
+					},
+					"outputs": {
+						"ref": "return_value"
+					}
+				}
+			},
+			"fail": {
+				"transitions": {
+					"Bidding": {
+						"label": "fail",
+						"color": "#000000",
+						"targets": [
+							"Failed"
+						]
+					}
+				}
+			},
+			"ding": {
+				"transitions": {
+					"Bidding": {
+						"label": "ding",
+						"color": "#000000",
+						"targets": [
+							"Ding1"
+						],
+						"args": [
+							"Ding1"
+						]
+					},
+					"Ding1": {
+						"label": "ding",
+						"color": "#000000",
+						"targets": [
+							"Ding2"
+						],
+						"args": [
+							"Ding2"
+						]
+					}
+				},
+				"heading": "Ding",
+				"label": "Ding",
+				"method": "setState",
+				"block": {
+					"inputs": {
+						"ref": null,
+						"item": null
+					},
+					"outputs": {
+						"done": "return_value"
+					}
+				}
+			},
+			"bid": {
+				"transitions": {
+					"Bidding": {
+						"label": "bid",
+						"color": "#000000",
+						"targets": [
+							"Bidding"
+						]
+					},
+					"Ding1": {
+						"label": "bid",
+						"color": "#000000",
+						"targets": [
+							"Bidding"
+						]
+					},
+					"Ding2": {
+						"label": "bid",
+						"color": "#000000",
+						"targets": [
+							"Bidding"
+						]
+					}
+				}
+			},
+			"listing": {
+				"heading": "Auctions"
+			},
+			"show": {
+				"heading": "{title}",
+				"heading_without_links": true
+			}
+		},
+		"class": "ExampleApplication\\UniversalStateMachine",
+		"include": [
+			"auction.graphml"
+		],
+		"name": "Auction",
+		"desc": "Auction",
+		"table": "auction",
+		"flupdo_resource": "database",
+		"io_name": "item",
+		"url": "\/auction\/{id}",
+		"parent_url": "\/auction",
+		"default_access_policy": null,
+		"state_select": "state",
+		"properties": {
+			"id": {
+				"type": "number",
+				"label": "ID",
+				"is_pk": true,
+				"link": "\/auction\/{id}",
+				"calculated": true
+			},
+			"title": {
+				"type": "text",
+				"label": "Title",
+				"required": true,
+				"link": "\/auction\/{id}"
+			},
+			"state": {
+				"type": "text",
+				"label": "State",
+				"calculated": true
+			},
+			"price": {
+				"type": "number",
+				"label": "Price",
+				"format": "%d EUR"
+			},
+			"description_md": {
+				"type": "markdownarea",
+				"label": "Description",
+				"required": true,
+				"tabular_hidden": true,
+				"rows": 24
+			},
+			"created": {
+				"type": "datetime",
+				"label": "Created",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			},
+			"modified": {
+				"type": "datetime",
+				"label": "Modified",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			}
+		},
+		"default_filters": {
+			"order_by": "created",
+			"order_asc": false
+		}
+	},
+	"bug": {
+		"_": "<?php printf('_%c%c}%c',34,10,10);__halt_compiler();?>",
+		"states": {
+			"Assigned": {
+				"url": "",
+				"label": "Assigned",
+				"color": "#EEEEEE",
+				"state": "Assigned"
+			},
+			"Closed": {
+				"url": "",
+				"label": "Closed",
+				"color": "#99FF33",
+				"state": "Closed"
+			},
+			"New": {
+				"url": "",
+				"label": "New",
+				"color": "#EEEEEE",
+				"state": "New"
+			},
+			"Reopened": {
+				"url": "",
+				"label": "Reopened",
+				"color": "#EEEEEE",
+				"state": "Reopened"
+			},
+			"Resolved": {
+				"url": "",
+				"label": "Resolved",
+				"color": "#EEEEEE",
+				"state": "Resolved"
+			}
+		},
+		"actions": {
+			"close": {
+				"transitions": {
+					"Resolved": {
+						"label": "close",
+						"color": "#000000",
+						"targets": [
+							"Closed"
+						]
+					}
+				}
+			},
+			"report": {
+				"transitions": {
+					"": {
+						"label": "report",
+						"color": "#000000",
+						"targets": [
+							"New"
+						]
+					}
+				},
+				"heading": "New bug",
+				"label": "Report",
+				"returns": "new_id",
+				"method": "create",
+				"block": {
+					"inputs": {
+						"item": null
+					},
+					"outputs": {
+						"ref": "return_value"
+					}
+				}
+			},
+			"edit": {
+				"transitions": {
+					"New": {
+						"label": "edit",
+						"color": "#000000",
+						"targets": [
+							"New"
+						]
+					}
+				},
+				"heading": "Edit bug",
+				"label": "Edit",
+				"block": {
+					"inputs": {
+						"ref": null,
+						"item": null
+					},
+					"outputs": []
+				}
+			},
+			"assign": {
+				"transitions": {
+					"New": {
+						"label": "assign",
+						"color": "#000000",
+						"targets": [
+							"Assigned"
+						]
+					},
+					"Reopened": {
+						"label": "assign",
+						"color": "#000000",
+						"targets": [
+							"Assigned"
+						]
+					}
+				}
+			},
+			"resolve": {
+				"transitions": {
+					"Assigned": {
+						"label": "resolve",
+						"color": "#000000",
+						"targets": [
+							"Resolved"
+						]
+					},
+					"New": {
+						"label": "resolve",
+						"color": "#000000",
+						"targets": [
+							"Resolved"
+						]
+					}
+				}
+			},
+			"reopen": {
+				"transitions": {
+					"Resolved": {
+						"label": "reopen",
+						"color": "#000000",
+						"targets": [
+							"Reopened"
+						]
+					},
+					"Closed": {
+						"label": "reopen",
+						"color": "#000000",
+						"targets": [
+							"Reopened"
+						]
+					}
+				}
+			},
+			"listing": {
+				"heading": "Bugs"
+			},
+			"show": {
+				"heading": "{title}",
+				"heading_without_links": true
+			}
+		},
+		"class": "ExampleApplication\\UniversalStateMachine",
+		"include": [
+			"bug.graphml"
+		],
+		"name": "Bug",
+		"desc": "Bug",
+		"table": "bug",
+		"flupdo_resource": "database",
+		"io_name": "item",
+		"url": "\/bug\/{id}",
+		"parent_url": "\/bug",
+		"default_access_policy": null,
+		"state_select": "state",
+		"properties": {
+			"id": {
+				"type": "number",
+				"label": "ID",
+				"is_pk": true,
+				"link": "\/bug\/{id}",
+				"calculated": true
+			},
+			"title": {
+				"type": "text",
+				"label": "Title",
+				"required": true,
+				"link": "\/bug\/{id}"
+			},
+			"state": {
+				"type": "text",
+				"label": "State",
+				"calculated": true
+			},
+			"description_md": {
+				"type": "markdownarea",
+				"label": "Description",
+				"required": true,
+				"tabular_hidden": true,
+				"rows": 24
+			},
+			"reporter": {
+				"type": "text",
+				"label": "Reporter",
+				"required": true
+			},
+			"assignee": {
+				"type": "text",
+				"label": "Assignee",
+				"required": false
+			},
+			"created": {
+				"type": "datetime",
+				"label": "Created",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			},
+			"modified": {
+				"type": "datetime",
+				"label": "Modified",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			}
+		},
+		"default_filters": {
+			"order_by": "created",
+			"order_asc": false
+		}
+	},
+	"eshop_order": {
+		"_": "<?php printf('_%c%c}%c',34,10,10);__halt_compiler();?>",
+		"states": {
+			"Canceled": {
+				"url": "",
+				"label": "Canceled",
+				"color": "#FF6633",
+				"state": "Canceled"
+			},
+			"Delivered": {
+				"url": "",
+				"label": "Delivered",
+				"color": "#99FF33",
+				"state": "Delivered"
+			},
+			"Dispatched": {
+				"url": "",
+				"label": "Dispatched",
+				"color": "#EEEEEE",
+				"state": "Dispatched"
+			},
+			"New": {
+				"url": "",
+				"label": "New",
+				"color": "#EEEEEE",
+				"state": "New"
+			},
+			"Partial": {
+				"url": "",
+				"label": "Partial",
+				"color": "#EEEEEE",
+				"state": "Partial"
+			},
+			"Prepared": {
+				"url": "",
+				"label": "Prepared",
+				"color": "#EEEEEE",
+				"state": "Prepared"
+			},
+			"Preparing": {
+				"url": "",
+				"label": "Preparing",
+				"color": "#EEEEEE",
+				"state": "Preparing"
+			}
+		},
+		"actions": {
+			"deliver": {
+				"transitions": {
+					"Dispatched": {
+						"label": "deliver",
+						"color": "#000000",
+						"targets": [
+							"Delivered"
+						]
+					}
+				}
+			},
+			"finish": {
+				"transitions": {
+					"Preparing": {
+						"label": "finish",
+						"color": "#000000",
+						"targets": [
+							"Prepared"
+						]
+					}
+				}
+			},
+			"begin": {
+				"transitions": {
+					"New": {
+						"label": "begin",
+						"color": "#000000",
+						"targets": [
+							"Preparing"
+						]
+					}
+				}
+			},
+			"create": {
+				"transitions": {
+					"": {
+						"label": "create",
+						"color": "#000000",
+						"targets": [
+							"New"
+						]
+					}
+				},
+				"heading": "New e-shop order",
+				"label": "Create",
+				"returns": "new_id",
+				"method": "create",
+				"block": {
+					"inputs": {
+						"item": null
+					},
+					"outputs": {
+						"ref": "return_value"
+					}
+				}
+			},
+			"pause": {
+				"transitions": {
+					"Preparing": {
+						"label": "pause",
+						"color": "#000000",
+						"targets": [
+							"Partial"
+						]
+					}
+				}
+			},
+			"dispatch": {
+				"transitions": {
+					"Prepared": {
+						"label": "dispatch",
+						"color": "#000000",
+						"targets": [
+							"Dispatched"
+						]
+					}
+				}
+			},
+			"continuePreparing": {
+				"transitions": {
+					"Partial": {
+						"label": "continuePreparing",
+						"color": "#000000",
+						"targets": [
+							"Preparing"
+						]
+					}
+				}
+			},
+			"cancel": {
+				"transitions": {
+					"Partial": {
+						"label": "cancel",
+						"color": "#000000",
+						"targets": [
+							"Canceled"
+						]
+					},
+					"Dispatched": {
+						"label": "cancel",
+						"color": "#000000",
+						"targets": [
+							"Canceled"
+						]
+					},
+					"Prepared": {
+						"label": "cancel",
+						"color": "#000000",
+						"targets": [
+							"Canceled"
+						]
+					},
+					"Preparing": {
+						"label": "cancel",
+						"color": "#000000",
+						"targets": [
+							"Canceled"
+						]
+					},
+					"New": {
+						"label": "cancel",
+						"color": "#000000",
+						"targets": [
+							"Canceled"
+						]
+					}
+				}
+			},
+			"listing": {
+				"heading": "Orders in e-shop"
+			},
+			"show": {
+				"heading": "Order #{id}",
+				"heading_without_links": true
+			},
+			"edit": {
+				"heading": "Edit e-shop order",
+				"label": "Edit",
+				"block": {
+					"inputs": {
+						"ref": null,
+						"item": null
+					},
+					"outputs": []
+				}
+			}
+		},
+		"class": "ExampleApplication\\UniversalStateMachine",
+		"include": [
+			"eshop_order.graphml"
+		],
+		"name": "Order",
+		"desc": "Order in e-shop",
+		"table": "eshop_order",
+		"flupdo_resource": "database",
+		"io_name": "item",
+		"url": "\/eshop-order\/{id}",
+		"parent_url": "\/eshop-order",
+		"default_access_policy": null,
+		"state_select": "state",
+		"properties": {
+			"id": {
+				"type": "number",
+				"label": "ID",
+				"is_pk": true,
+				"link": "\/eshop-order\/{id}",
+				"calculated": true
+			},
+			"state": {
+				"type": "text",
+				"label": "State",
+				"calculated": true
+			},
+			"customer": {
+				"type": "text",
+				"label": "Customer name",
+				"required": true
+			},
+			"address": {
+				"type": "textarea",
+				"label": "Delivery address",
+				"tabular_hidden": true,
+				"required": true
+			},
+			"items": {
+				"type": "textarea",
+				"label": "Items",
+				"tabular_hidden": true,
+				"required": true
+			},
+			"total_price": {
+				"type": "number",
+				"label": "Total price",
+				"required": true,
+				"format": "%d EUR"
+			},
+			"created": {
+				"type": "datetime",
+				"label": "Created",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			},
+			"modified": {
+				"type": "datetime",
+				"label": "Modified",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			}
+		},
+		"default_filters": {
+			"order_by": "created",
+			"order_asc": false
+		}
+	},
+	"eshop_product": {
+		"_": "<?php printf('_%c%c}%c',34,10,10);__halt_compiler();?>",
+		"states": {
+			"Available": {
+				"url": "",
+				"label": "Available",
+				"color": "#99FF33",
+				"state": "Available"
+			},
+			"Discontinued": {
+				"url": "",
+				"label": "Discontinued",
+				"color": "#FF6633",
+				"state": "Discontinued"
+			},
+			"On the way": {
+				"url": "",
+				"label": "On the way",
+				"color": "#EEEEEE",
+				"state": "On the way"
+			},
+			"Out of stock": {
+				"url": "",
+				"label": "Out of stock",
+				"color": "#EEEEEE",
+				"state": "Out of stock"
+			},
+			"Preorder": {
+				"url": "",
+				"label": "Preorder",
+				"color": "#EEEEEE",
+				"state": "Preorder"
+			}
+		},
+		"actions": {
+			"create": {
+				"transitions": {
+					"": {
+						"label": "create",
+						"color": "#000000",
+						"targets": [
+							"Preorder",
+							"Available"
+						]
+					}
+				},
+				"heading": "New e-shop product",
+				"label": "Create",
+				"returns": "new_id",
+				"method": "create",
+				"block": {
+					"inputs": {
+						"item": null
+					},
+					"outputs": {
+						"ref": "return_value"
+					}
+				}
+			},
+			"edit": {
+				"transitions": {
+					"Preorder": {
+						"label": "edit",
+						"color": "#000000",
+						"targets": [
+							"Preorder"
+						]
+					},
+					"Available": {
+						"label": "edit",
+						"color": "#000000",
+						"targets": [
+							"Available"
+						]
+					},
+					"Out of stock": {
+						"label": "edit",
+						"color": "#000000",
+						"targets": [
+							"Out of stock"
+						]
+					},
+					"On the way": {
+						"label": "edit",
+						"color": "#000000",
+						"targets": [
+							"On the way"
+						]
+					}
+				},
+				"heading": "Edit e-shop product",
+				"label": "Edit",
+				"block": {
+					"inputs": {
+						"ref": null,
+						"item": null
+					},
+					"outputs": []
+				}
+			},
+			"setAvailability": {
+				"transitions": {
+					"Preorder": {
+						"label": "setAvailability",
+						"color": "#333399",
+						"targets": [
+							"Available",
+							"Out of stock",
+							"On the way",
+							"Discontinued"
+						]
+					},
+					"Available": {
+						"label": "setAvailability",
+						"color": "#333399",
+						"targets": [
+							"Out of stock",
+							"On the way",
+							"Discontinued"
+						]
+					},
+					"Out of stock": {
+						"label": "setAvailability",
+						"color": "#333399",
+						"targets": [
+							"On the way",
+							"Available",
+							"Discontinued"
+						]
+					},
+					"On the way": {
+						"label": "setAvailability",
+						"color": "#333399",
+						"targets": [
+							"Discontinued",
+							"Available"
+						]
+					}
+				}
+			},
+			"listing": {
+				"heading": "Products in e-shop"
+			},
+			"show": {
+				"heading": "{title}",
+				"heading_without_links": true
+			}
+		},
+		"class": "ExampleApplication\\UniversalStateMachine",
+		"include": [
+			"eshop_product.graphml"
+		],
+		"name": "Product",
+		"desc": "Product in e-shop",
+		"table": "eshop_product",
+		"flupdo_resource": "database",
+		"io_name": "item",
+		"url": "\/eshop-product\/{id}",
+		"parent_url": "\/eshop-product",
+		"default_access_policy": null,
+		"state_select": "state",
+		"properties": {
+			"id": {
+				"type": "number",
+				"label": "ID",
+				"is_pk": true,
+				"link": "\/eshop-product\/{id}",
+				"calculated": true
+			},
+			"state": {
+				"type": "text",
+				"label": "State",
+				"calculated": true
+			},
+			"title": {
+				"type": "text",
+				"label": "Title",
+				"required": true
+			},
+			"description_md": {
+				"type": "markdownarea",
+				"label": "Description",
+				"tabular_hidden": true,
+				"required": true
+			},
+			"price": {
+				"type": "number",
+				"label": "Price",
+				"required": true,
+				"format": "%d EUR"
+			},
+			"created": {
+				"type": "datetime",
+				"label": "Created",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			},
+			"modified": {
+				"type": "datetime",
+				"label": "Modified",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			}
+		},
+		"default_filters": {
+			"order_by": "created",
+			"order_asc": false
+		}
+	},
+	"supervisor_process": {
+		"_": "<?php printf('_%c%c}%c',34,10,10);__halt_compiler();?>",
+		"states": {
+			"Backoff": {
+				"url": "",
+				"label": "Backoff",
+				"color": "#EEEEEE",
+				"state": "Backoff"
+			},
+			"Exited": {
+				"url": "",
+				"label": "Exited",
+				"color": "#FF6633",
+				"state": "Exited"
+			},
+			"Fatal": {
+				"url": "",
+				"label": "Fatal",
+				"color": "#FF6633",
+				"state": "Fatal"
+			},
+			"Running": {
+				"url": "",
+				"label": "Running",
+				"color": "#99FF33",
+				"state": "Running"
+			},
+			"Starting": {
+				"url": "",
+				"label": "Starting",
+				"color": "#EEEEEE",
+				"state": "Starting"
+			},
+			"Stopped": {
+				"url": "",
+				"label": "Stopped",
+				"color": "#FF6633",
+				"state": "Stopped"
+			},
+			"Stopping": {
+				"url": "",
+				"label": "Stopping",
+				"color": "#EEEEEE",
+				"state": "Stopping"
+			}
+		},
+		"actions": {
+			"die": {
+				"transitions": {
+					"Starting": {
+						"label": "die",
+						"color": "#000000",
+						"targets": [
+							"Backoff"
+						]
+					}
+				}
+			},
+			"stopped": {
+				"transitions": {
+					"Stopping": {
+						"label": "stopped",
+						"color": "#000000",
+						"targets": [
+							"Stopped"
+						]
+					}
+				}
+			},
+			"started": {
+				"transitions": {
+					"Starting": {
+						"label": "started",
+						"color": "#000000",
+						"targets": [
+							"Running"
+						]
+					}
+				}
+			},
+			"died": {
+				"transitions": {
+					"Backoff": {
+						"label": "died",
+						"color": "#000000",
+						"targets": [
+							"Fatal"
+						]
+					}
+				}
+			},
+			"create": {
+				"transitions": {
+					"": {
+						"label": "create",
+						"color": "#000000",
+						"targets": [
+							"Stopped"
+						]
+					}
+				},
+				"heading": "New process",
+				"label": "Create",
+				"returns": "new_id",
+				"method": "create",
+				"block": {
+					"inputs": {
+						"item": null
+					},
+					"outputs": {
+						"ref": "return_value"
+					}
+				}
+			},
+			"restart": {
+				"transitions": {
+					"Backoff": {
+						"label": "restart",
+						"color": "#000000",
+						"targets": [
+							"Starting"
+						]
+					}
+				}
+			},
+			"exit": {
+				"transitions": {
+					"Running": {
+						"label": "exit",
+						"color": "#000000",
+						"targets": [
+							"Exited"
+						]
+					}
+				}
+			},
+			"stop": {
+				"transitions": {
+					"Running": {
+						"label": "stop",
+						"color": "#000000",
+						"targets": [
+							"Stopping"
+						]
+					},
+					"Starting": {
+						"label": "stop",
+						"color": "#000000",
+						"targets": [
+							"Stopping"
+						]
+					}
+				}
+			},
+			"start": {
+				"transitions": {
+					"Stopped": {
+						"label": "start",
+						"color": "#000000",
+						"targets": [
+							"Starting"
+						]
+					},
+					"Fatal": {
+						"label": "start",
+						"color": "#000000",
+						"targets": [
+							"Starting"
+						]
+					},
+					"Exited": {
+						"label": "start",
+						"color": "#000000",
+						"targets": [
+							"Starting"
+						]
+					}
+				}
+			},
+			"listing": {
+				"heading": "Processes"
+			},
+			"show": {
+				"heading": "Process #{id}",
+				"heading_without_links": true
+			},
+			"edit": {
+				"heading": "Edit process",
+				"label": "Edit",
+				"block": {
+					"inputs": {
+						"ref": null,
+						"item": null
+					},
+					"outputs": []
+				}
+			}
+		},
+		"class": "ExampleApplication\\UniversalStateMachine",
+		"include": [
+			"supervisor_process.graphml"
+		],
+		"name": "Process",
+		"desc": "Process controlled by supervisor",
+		"table": "supervisor_process",
+		"flupdo_resource": "database",
+		"io_name": "item",
+		"url": "\/supervisor-process\/{id}",
+		"parent_url": "\/supervisor-process",
+		"default_access_policy": null,
+		"state_select": "state",
+		"properties": {
+			"id": {
+				"type": "number",
+				"label": "ID",
+				"is_pk": true,
+				"link": "\/supervisor-process\/{id}",
+				"calculated": true
+			},
+			"state": {
+				"type": "text",
+				"label": "State",
+				"calculated": true
+			},
+			"command": {
+				"type": "text",
+				"label": "Command",
+				"required": true
+			},
+			"created": {
+				"type": "datetime",
+				"label": "Created",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			},
+			"modified": {
+				"type": "datetime",
+				"label": "Modified",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			}
+		},
+		"default_filters": {
+			"order_by": "created",
+			"order_asc": false
+		}
+	},
+	"taxi_order": {
+		"_": "<?php printf('_%c%c}%c',34,10,10);__halt_compiler();?>",
+		"states": {
+			"Accepted": {
+				"url": "",
+				"label": "Accepted",
+				"color": "#EEEEEE",
+				"state": "Accepted"
+			},
+			"Canceled": {
+				"url": "",
+				"label": "Canceled",
+				"color": "#FF6633",
+				"state": "Canceled"
+			},
+			"Finished": {
+				"url": "",
+				"label": "Finished",
+				"color": "#99FF33",
+				"state": "Finished"
+			},
+			"New": {
+				"url": "",
+				"label": "New",
+				"color": "#EEEEEE",
+				"state": "New"
+			},
+			"On the way": {
+				"url": "",
+				"label": "On the way",
+				"color": "#EEEEEE",
+				"state": "On the way"
+			},
+			"Waiting": {
+				"url": "",
+				"label": "Waiting",
+				"color": "#EEEEEE",
+				"state": "Waiting"
+			}
+		},
+		"actions": {
+			"arrive": {
+				"transitions": {
+					"Accepted": {
+						"label": "arrive",
+						"color": "#000000",
+						"targets": [
+							"Waiting"
+						]
+					}
+				}
+			},
+			"pay": {
+				"transitions": {
+					"On the way": {
+						"label": "pay",
+						"color": "#000000",
+						"targets": [
+							"Finished"
+						]
+					}
+				}
+			},
+			"accept": {
+				"transitions": {
+					"New": {
+						"label": "accept",
+						"color": "#000000",
+						"targets": [
+							"Accepted"
+						]
+					}
+				}
+			},
+			"create": {
+				"transitions": {
+					"": {
+						"label": "create",
+						"color": "#000000",
+						"targets": [
+							"New"
+						]
+					}
+				},
+				"heading": "New order",
+				"label": "Create",
+				"returns": "new_id",
+				"method": "create",
+				"block": {
+					"inputs": {
+						"item": null
+					},
+					"outputs": {
+						"ref": "return_value"
+					}
+				}
+			},
+			"depart": {
+				"transitions": {
+					"Waiting": {
+						"label": "depart",
+						"color": "#000000",
+						"targets": [
+							"On the way"
+						]
+					}
+				}
+			},
+			"reject": {
+				"transitions": {
+					"Accepted": {
+						"label": "reject",
+						"color": "#000000",
+						"targets": [
+							"New"
+						]
+					},
+					"Waiting": {
+						"label": "reject",
+						"color": "#000000",
+						"targets": [
+							"New"
+						]
+					}
+				}
+			},
+			"update": {
+				"transitions": {
+					"On the way": {
+						"label": "update",
+						"color": "#000000",
+						"targets": [
+							"On the way"
+						]
+					},
+					"Waiting": {
+						"label": "update",
+						"color": "#000000",
+						"targets": [
+							"Waiting"
+						]
+					}
+				}
+			},
+			"cancel": {
+				"transitions": {
+					"New": {
+						"label": "cancel",
+						"color": "#000000",
+						"targets": [
+							"Canceled"
+						]
+					},
+					"Accepted": {
+						"label": "cancel",
+						"color": "#000000",
+						"targets": [
+							"Canceled"
+						]
+					},
+					"Waiting": {
+						"label": "cancel",
+						"color": "#000000",
+						"targets": [
+							"Canceled"
+						]
+					}
+				}
+			},
+			"listing": {
+				"heading": "Taxi orders"
+			},
+			"show": {
+				"heading": "Taxi order #{id}",
+				"heading_without_links": true
+			},
+			"edit": {
+				"heading": "Edit order",
+				"label": "Edit",
+				"block": {
+					"inputs": {
+						"ref": null,
+						"item": null
+					},
+					"outputs": []
+				}
+			}
+		},
+		"class": "ExampleApplication\\UniversalStateMachine",
+		"include": [
+			"taxi_order.graphml"
+		],
+		"name": "Taxi order",
+		"desc": "Taxi order",
+		"table": "taxi_order",
+		"flupdo_resource": "database",
+		"io_name": "item",
+		"url": "\/taxi-order\/{id}",
+		"parent_url": "\/taxi-order",
+		"default_access_policy": null,
+		"state_select": "state",
+		"properties": {
+			"id": {
+				"type": "number",
+				"label": "ID",
+				"is_pk": true,
+				"link": "\/taxi-order\/{id}",
+				"calculated": true
+			},
+			"state": {
+				"type": "text",
+				"label": "State",
+				"calculated": true
+			},
+			"customer": {
+				"type": "text",
+				"label": "Customer name",
+				"required": true
+			},
+			"pickup_address": {
+				"type": "textarea",
+				"label": "Pickup address",
+				"required": true
+			},
+			"pickup_time": {
+				"type": "datetime",
+				"label": "Pickup time",
+				"required": true
+			},
+			"destination": {
+				"type": "textarea",
+				"label": "Destination address",
+				"required": false
+			},
+			"price": {
+				"type": "textarea",
+				"label": "Price",
+				"required": false,
+				"format": "%d EUR"
+			},
+			"assigned_vehicle": {
+				"type": "textarea",
+				"label": "Vehicle",
+				"required": false
+			},
+			"created": {
+				"type": "datetime",
+				"label": "Created",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			},
+			"modified": {
+				"type": "datetime",
+				"label": "Modified",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			}
+		},
+		"default_filters": {
+			"order_by": "created",
+			"order_asc": false
+		}
+	},
+	"user": {
+		"_": "<?php printf('_%c%c}%c',34,10,10);__halt_compiler();?>",
+		"states": {
+			"Banned": {
+				"url": "",
+				"label": "Banned",
+				"color": "#EEEEEE",
+				"state": "Banned"
+			},
+			"Code sent": {
+				"url": "",
+				"label": "Code sent",
+				"color": "#EEEEEE",
+				"state": "Code sent"
+			},
+			"Confirmed": {
+				"url": "",
+				"label": "Confirmed",
+				"color": "#EEEEEE",
+				"state": "Confirmed"
+			},
+			"New": {
+				"url": "",
+				"label": "New",
+				"color": "#EEEEEE",
+				"state": "New"
+			},
+			"Verified": {
+				"url": "",
+				"label": "Verified",
+				"color": "#EEEEEE",
+				"state": "Verified"
+			}
+		},
+		"actions": {
+			"register": {
+				"transitions": {
+					"": {
+						"label": "register",
+						"color": "#000000",
+						"targets": [
+							"New"
+						]
+					}
+				},
+				"heading": "New user",
+				"label": "Create",
+				"returns": "new_id",
+				"method": "create",
+				"block": {
+					"inputs": {
+						"item": null
+					},
+					"outputs": {
+						"ref": "return_value"
+					}
+				}
+			},
+			"confirm": {
+				"transitions": {
+					"New": {
+						"label": "confirm",
+						"color": "#000000",
+						"targets": [
+							"Confirmed"
+						]
+					}
+				}
+			},
+			"sendCode": {
+				"transitions": {
+					"Confirmed": {
+						"label": "sendCode",
+						"color": "#000000",
+						"targets": [
+							"Code sent"
+						]
+					}
+				}
+			},
+			"verifyWithCode": {
+				"transitions": {
+					"Code sent": {
+						"label": "verifyWithCode",
+						"color": "#000000",
+						"targets": [
+							"Verified"
+						]
+					}
+				}
+			},
+			"unban": {
+				"transitions": {
+					"Banned": {
+						"label": "unban",
+						"color": "#008000",
+						"targets": [
+							"New",
+							"Confirmed",
+							"Code sent",
+							"Verified"
+						]
+					}
+				}
+			},
+			"editAddress": {
+				"transitions": {
+					"Verified": {
+						"label": "editAddress",
+						"color": "#000000",
+						"targets": [
+							"Confirmed"
+						]
+					}
+				}
+			},
+			"verify": {
+				"transitions": {
+					"New": {
+						"label": "verify",
+						"color": "#000000",
+						"targets": [
+							"Verified"
+						]
+					},
+					"Confirmed": {
+						"label": "verify",
+						"color": "#000000",
+						"targets": [
+							"Verified"
+						]
+					},
+					"Code sent": {
+						"url": "",
+						"label": "verify",
+						"color": "#000000",
+						"targets": [
+							"Verified"
+						]
+					}
+				}
+			},
+			"ban": {
+				"transitions": {
+					"New": {
+						"label": "ban",
+						"color": "#800000",
+						"targets": [
+							"Banned"
+						]
+					},
+					"Confirmed": {
+						"label": "ban",
+						"color": "#800000",
+						"targets": [
+							"Banned"
+						]
+					},
+					"Code sent": {
+						"label": "ban",
+						"color": "#800000",
+						"targets": [
+							"Banned"
+						]
+					},
+					"Verified": {
+						"label": "ban",
+						"color": "#800000",
+						"targets": [
+							"Banned"
+						]
+					}
+				}
+			},
+			"listing": {
+				"heading": "Users"
+			},
+			"show": {
+				"heading": "{name}",
+				"heading_without_links": true
+			},
+			"edit": {
+				"heading": "Edit order",
+				"label": "Edit",
+				"block": {
+					"inputs": {
+						"ref": null,
+						"item": null
+					},
+					"outputs": []
+				}
+			}
+		},
+		"class": "ExampleApplication\\UniversalStateMachine",
+		"include": [
+			"user.graphml"
+		],
+		"name": "User",
+		"desc": "User",
+		"table": "user",
+		"flupdo_resource": "database",
+		"io_name": "item",
+		"url": "\/user\/{id}",
+		"parent_url": "\/user",
+		"default_access_policy": null,
+		"state_select": "state",
+		"properties": {
+			"id": {
+				"type": "number",
+				"label": "ID",
+				"is_pk": true,
+				"link": "\/taxi-order\/{id}",
+				"calculated": true
+			},
+			"state": {
+				"type": "text",
+				"label": "State",
+				"calculated": true
+			},
+			"name": {
+				"type": "text",
+				"label": "Name",
+				"required": true
+			},
+			"email": {
+				"type": "email",
+				"label": "e-mail",
+				"required": true
+			},
+			"address": {
+				"type": "textarea",
+				"label": "address",
+				"required": true,
+				"tabular_hidden": true
+			},
+			"created": {
+				"type": "datetime",
+				"label": "Created",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			},
+			"modified": {
+				"type": "datetime",
+				"label": "Modified",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			}
+		},
+		"default_filters": {
+			"order_by": "created",
+			"order_asc": false
+		}
+	},
+	"vps": {
+		"_": "<?php printf('_%c%c}%c',34,10,10);__halt_compiler();?>",
+		"states": {
+			"Initiating": {
+				"url": "",
+				"label": "Initiating",
+				"color": "#EEEEEE",
+				"state": "Initiating"
+			},
+			"Offline": {
+				"url": "",
+				"label": "Offline",
+				"color": "#FF6633",
+				"state": "Offline"
+			},
+			"Online": {
+				"url": "",
+				"label": "Online",
+				"color": "#99FF33",
+				"state": "Online"
+			},
+			"Starting": {
+				"url": "",
+				"label": "Starting",
+				"color": "#EEEEEE",
+				"state": "Starting"
+			},
+			"Stopping": {
+				"url": "",
+				"label": "Stopping",
+				"color": "#EEEEEE",
+				"state": "Stopping"
+			}
+		},
+		"actions": {
+			"failed": {
+				"transitions": {
+					"Starting": {
+						"label": "failed",
+						"color": "#000000",
+						"targets": [
+							"Offline"
+						]
+					}
+				}
+			},
+			"initialized": {
+				"transitions": {
+					"Initiating": {
+						"label": "initialized",
+						"color": "#000000",
+						"targets": [
+							"Offline"
+						]
+					}
+				}
+			},
+			"stopped": {
+				"transitions": {
+					"Stopping": {
+						"label": "stopped",
+						"color": "#000000",
+						"targets": [
+							"Offline"
+						]
+					}
+				}
+			},
+			"start": {
+				"transitions": {
+					"Offline": {
+						"label": "start",
+						"color": "#000000",
+						"targets": [
+							"Starting"
+						]
+					}
+				}
+			},
+			"create": {
+				"transitions": {
+					"": {
+						"label": "create",
+						"color": "#000000",
+						"targets": [
+							"Initiating"
+						]
+					}
+				},
+				"heading": "New VPS",
+				"label": "Create",
+				"returns": "new_id",
+				"method": "create",
+				"block": {
+					"inputs": {
+						"item": null
+					},
+					"outputs": {
+						"ref": "return_value"
+					}
+				}
+			},
+			"kill": {
+				"transitions": {
+					"Online": {
+						"label": "kill",
+						"color": "#000000",
+						"targets": [
+							"Offline"
+						]
+					}
+				}
+			},
+			"delete": {
+				"transitions": {
+					"Offline": {
+						"label": "delete",
+						"color": "#000000",
+						"targets": [
+							""
+						]
+					}
+				}
+			},
+			"started": {
+				"transitions": {
+					"Starting": {
+						"label": "started",
+						"color": "#000000",
+						"targets": [
+							"Online"
+						]
+					}
+				}
+			},
+			"stop": {
+				"transitions": {
+					"Online": {
+						"label": "stop",
+						"color": "#000000",
+						"targets": [
+							"Stopping"
+						]
+					}
+				}
+			},
+			"edit": {
+				"transitions": {
+					"Offline": {
+						"label": "edit",
+						"color": "#000000",
+						"targets": [
+							"Offline"
+						]
+					}
+				},
+				"heading": "Edit VPS",
+				"label": "Edit",
+				"block": {
+					"inputs": {
+						"ref": null,
+						"item": null
+					},
+					"outputs": []
+				}
+			},
+			"listing": {
+				"heading": "VPS"
+			},
+			"show": {
+				"heading": "VPS #{id}",
+				"heading_without_links": true
+			}
+		},
+		"class": "ExampleApplication\\UniversalStateMachine",
+		"include": [
+			"vps.graphml"
+		],
+		"name": "VPS",
+		"desc": "VPS",
+		"table": "vps",
+		"flupdo_resource": "database",
+		"io_name": "item",
+		"url": "\/vps\/{id}",
+		"parent_url": "\/vps",
+		"default_access_policy": null,
+		"state_select": "state",
+		"properties": {
+			"id": {
+				"type": "number",
+				"label": "ID",
+				"is_pk": true,
+				"link": "\/taxi-order\/{id}",
+				"calculated": true
+			},
+			"state": {
+				"type": "text",
+				"label": "State",
+				"calculated": true
+			},
+			"owner": {
+				"type": "text",
+				"label": "Owner",
+				"required": true
+			},
+			"system_image": {
+				"type": "select",
+				"label": "System image",
+				"options": {
+					"Debian": "Debian",
+					"Suse": "Suse",
+					"Redhat": "Redhat",
+					"FreeBSD": "FreeBSD",
+					"DOS": "DOS"
+				},
+				"required": true
+			},
+			"created": {
+				"type": "datetime",
+				"label": "Created",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			},
+			"modified": {
+				"type": "datetime",
+				"label": "Modified",
+				"format": "%Y-%m-%d %H:%M",
+				"readonly": true,
+				"tabular_hidden": false,
+				"tabular_width": "84",
+				"calculated": true
+			}
+		},
+		"default_filters": {
+			"order_by": "created",
+			"order_asc": false
+		}
+	}
+}
