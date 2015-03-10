@@ -1,0 +1,21 @@
+{
+	"name": "cascade/smalldb_editor",
+	"type": "cascade-plugin",
+	"description": "Visual Smalldb state machine editor",
+	"license": "Apache-2.0",
+	"authors": [
+		{
+			"name": "Martin Adámek",
+			"email": "adamema4@fel.cvut.cz"
+		}
+	],
+	"extra": {
+		"plugin": "block_editor"
+	},
+	"require": {
+		"cascade/composer-plugin": ">=1.1",
+		"cascade/duf": "dev-master",
+		"cascade/admin": "dev-master"
+	}
+}
+
