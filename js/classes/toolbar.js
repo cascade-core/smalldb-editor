@@ -333,13 +333,11 @@ Toolbar.prototype._toggleParentProperties = function() {
  * @private
  */
 Toolbar.prototype._undo = function() {
-	var undo = this.editor.session.get('undo', true);
-	if (undo && undo.length) {
+	var undo = this.editor.session.get('undo', true) || [];
+	if (undo.length) {
 		// save current state to redo
 		var oldData = JSON.stringify(JSON.parse(this.editor.$el.val()));
-		var redo = this.editor.session.get('redo', true);
-		redo = redo || [];
-		undo = JSON.parse(undo);
+		var redo = this.editor.session.get('redo', true) || [];
 		var prev = undo.pop();
 		redo.push(oldData);
 		this.editor.$el.val(prev);
@@ -362,13 +360,11 @@ Toolbar.prototype._undo = function() {
  * @private
  */
 Toolbar.prototype._redo = function() {
-	var redo = this.editor.session.get('redo', true);
-	if (redo && redo.length) {
+	var redo = this.editor.session.get('redo', true) || [];
+	if (redo.length) {
 		// save current state to undo
 		var oldData = JSON.stringify(JSON.parse(this.editor.$el.val()));
-		var undo = this.editor.session.get('undo', true);
-		var undo = undo || [];
-		var redo = JSON.parse(redo);
+		var undo = this.editor.session.get('undo', true) || [];
 		var next = redo.pop();
 		undo.push(oldData);
 
