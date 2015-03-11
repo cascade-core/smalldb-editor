@@ -10,7 +10,7 @@
 		}
 	],
 	"extra": {
-		"plugin": "block_editor"
+		"plugin": "smalldb_editor"
 	},
 	"require": {
 		"cascade/composer-plugin": ">=1.1",
