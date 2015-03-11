@@ -362,5 +362,6 @@ Canvas.prototype.getCenter = function() {
  * @returns {object}
  */
 Canvas.prototype.getZoom = function() {
-	return Math.round(parseFloat(sessionStorage.zoom) * 10) / 10;
+	var zoom = this.editor.session.get('zoom');
+	return Math.round(parseFloat(zoom) * 10) / 10;
 };

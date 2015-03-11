@@ -19,7 +19,21 @@
 
 function TPL_html5__smalldb_editor__training_dummy($t, $id, $d, $so)
 {
-	echo "<textarea id=\"", htmlspecialchars($id), "\" class=\"smalldb_editor\" cols=\"70\" rows=\"30\">",
+	echo "\t<!-- Smalldb Editor plugin -->\n",
+		"\t<link rel=\"stylesheet\" href=\"//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css\" type=\"text/css\">\n",
+		"\t<link rel=\"stylesheet\" href=\"/plugin/smalldb_editor/css/smalldb_editor.css\" type=\"text/css\">\n",
+		"\t<script type=\"text/javascript\" src=\"https://code.jquery.com/jquery-2.1.1.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/jquery/gettext.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/state.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/placeholder.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/canvas.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/toolbar.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/smalldb_editor.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/smalldb_editor.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/init.js\"></script>\n",
+		"\n";
+	echo "<h2>Smalldb Editor</h2>\n";
+	echo "<textarea id=\"", htmlspecialchars($id), "\" class=\"smalldb_editor\" cols=\"25\" rows=\"80\" style=\"display: block; width: 99%;\">",
 		json_encode($d, JSON_HEX_TAG | JSON_HEX_AMP | JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
 		"</textarea>";
 }

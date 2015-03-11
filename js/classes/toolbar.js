@@ -44,11 +44,11 @@ Toolbar.prototype.render = function($container) {
 	$(document).on('click', 'a.' + className, this._toggleFullScreen.bind(this));
 	this.$toolbar.append(this.$fullscreen);
 
-	// parent block properties button
+	// parent state properties button
 	this.$parent = $('<a>');
 	className = SmalldbEditor._namespace + '-parent-properties-toggle';
 	this.$parent.html('<i class="fa fa-fw fa-cogs"></i> P');
-	this.$parent.attr('title', 'Edit parent block properties [Ctrl + Shift + P]');
+	this.$parent.attr('title', 'Edit parent state properties [Ctrl + Shift + P]');
 	this.$parent.attr('href', '#parent-properties');
 	this.$parent.addClass(className);
 	$(document).on('click', 'a.' + className, this._toggleParentProperties.bind(this));
@@ -92,7 +92,7 @@ Toolbar.prototype.render = function($container) {
 	this.$copy = $('<a>').addClass('disabled');
 	className = SmalldbEditor._namespace + '-copy';
 	this.$copy.html('<i class="fa fa-fw fa-copy"></i> C');
-	this.$copy.attr('title', 'Copy active block [Ctrl + C]');
+	this.$copy.attr('title', 'Copy active state [Ctrl + C]');
 	this.$copy.attr('href', '#copy');
 	this.$copy.addClass(className);
 	$(document).on('click', 'a.' + className, this._copy.bind(this));
@@ -102,7 +102,7 @@ Toolbar.prototype.render = function($container) {
 	this.$cut = $('<a>').addClass('disabled');
 	className = SmalldbEditor._namespace + '-cut';
 	this.$cut.html('<i class="fa fa-fw fa-cut"></i> X');
-	this.$cut.attr('title', 'Cut active block [Ctrl + X]');
+	this.$cut.attr('title', 'Cut active state [Ctrl + X]');
 	this.$cut.attr('href', '#cut');
 	this.$cut.addClass(className);
 	$(document).on('click', 'a.' + className, this._cut.bind(this));
@@ -112,7 +112,7 @@ Toolbar.prototype.render = function($container) {
 	this.$paste = $('<a>').addClass('disabled');
 	className = SmalldbEditor._namespace + '-paste';
 	this.$paste.html('<i class="fa fa-fw fa-paste"></i> P');
-	this.$paste.attr('title', 'Paste block [Ctrl + V]');
+	this.$paste.attr('title', 'Paste state [Ctrl + V]');
 	this.$paste.attr('href', '#paste');
 	this.$paste.addClass(className);
 	$(document).on('click', 'a.' + className, this._paste.bind(this));
@@ -154,7 +154,7 @@ Toolbar.prototype.render = function($container) {
 
 	// disable selection
 	$(document).off('click.disable-selection', this.canvas.$container)
-			   .on('click.disable-selection', this.canvas.$container, this.disableSelection.bind(this));
+		.on('click.disable-selection', this.canvas.$container, this.disableSelection.bind(this));
 
 	this.$container.append(this.$toolbar);
 	this.updateDisabledClasses();
@@ -163,14 +163,14 @@ Toolbar.prototype.render = function($container) {
 };
 
 /**
- * Disables block selection, used as on click handler
+ * Disables state selection, used as on click handler
  *
  * @param {MouseEvent} [e] - Event
  */
 Toolbar.prototype.disableSelection = function(e) {
 	if (!e || ($(e.target).is('canvas') && !this.canvas.selection)) {
-		for (var id in this.editor.blocks) {
-			this.editor.blocks[id].deactivate();
+		for (var id in this.editor.states) {
+			this.editor.states[id].deactivate();
 		}
 	}
 	this.canvas.selection = false;
@@ -215,9 +215,9 @@ Toolbar.prototype._keydown = function(e) {
 	}
 
 	var code = e.keyCode ? e.keyCode : e.which;
-	if ((e.metaKey || e.ctrlKey) && code === 65) { // ctrl + a => select all blocks
-		for (var id in this.editor.blocks) {
-			this.editor.blocks[id].activate();
+	if ((e.metaKey || e.ctrlKey) && code === 65) { // ctrl + a => select all states
+		for (var id in this.editor.states) {
+			this.editor.states[id].activate();
 		}
 		return false;
 	} else if ((e.metaKey || e.ctrlKey) && code === 67) { // ctrl + c => copy
@@ -243,22 +243,22 @@ Toolbar.prototype._keydown = function(e) {
 		this.$reload.addClass('hover');
 		this._reloadPalette();
 		return false;
-	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 80) { // ctrl + shift + p => parent block properties
+	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 80) { // ctrl + shift + p => parent state properties
 		this.$parent.addClass('hover');
 		this._toggleParentProperties();
 	} else if (code === 46 || ((e.metaKey || e.ctrlKey) && code === 8)) { // del / ctrl + backspace => remove selection
-		if (!window.confirm(_('Do you realy want to delete selected blocks?'))) {
+		if (!window.confirm(_('Do you realy want to delete selected states?'))) {
 			return false;
 		}
-		for (var id in this.editor.blocks) {
-			if (this.editor.blocks[id].isActive()) {
-				this.editor.blocks[id].remove();
+		for (var id in this.editor.states) {
+			if (this.editor.states[id].isActive()) {
+				this.editor.states[id].remove();
 			}
 		}
 		this.canvas.redraw();
 	} else if (code === 27) { // esc => disable selection
-		for (var id in this.editor.blocks) {
-			this.editor.blocks[id].deactivate();
+		for (var id in this.editor.states) {
+			this.editor.states[id].deactivate();
 		}
 	} else if (code === 48) { // 0 => reset zoom
 		this._zoomReset();
@@ -314,7 +314,7 @@ Toolbar.prototype._toggleFullScreen = function() {
 };
 
 /**
- * Toggles parent block properties editor
+ * Toggles parent state properties editor
  *
  * @returns {boolean}
  * @private
@@ -333,17 +333,19 @@ Toolbar.prototype._toggleParentProperties = function() {
  * @private
  */
 Toolbar.prototype._undo = function() {
-	if (sessionStorage.undo && JSON.parse(sessionStorage.undo).length) {
+	var undo = this.editor.session.get('undo', true);
+	if (undo && undo.length) {
 		// save current state to redo
 		var oldData = JSON.stringify(JSON.parse(this.editor.$el.val()));
-		var redo = sessionStorage.redo ? JSON.parse(sessionStorage.redo) : [];
-		var undo = JSON.parse(sessionStorage.undo);
+		var redo = this.editor.session.get('redo', true);
+		redo = redo || [];
+		undo = JSON.parse(undo);
 		var prev = undo.pop();
 		redo.push(oldData);
 		this.editor.$el.val(prev);
 
-		sessionStorage.undo = JSON.stringify(undo);
-		sessionStorage.redo = JSON.stringify(redo);
+		this.editor.session.set('undo', undo, true);
+		this.editor.session.set('redo', redo, true);
 
 		this.editor.refresh();
 
@@ -360,19 +362,21 @@ Toolbar.prototype._undo = function() {
  * @private
  */
 Toolbar.prototype._redo = function() {
-	if (sessionStorage.redo && JSON.parse(sessionStorage.redo).length) {
+	var redo = this.editor.session.get('redo', true);
+	if (redo && redo.length) {
 		// save current state to undo
 		var oldData = JSON.stringify(JSON.parse(this.editor.$el.val()));
-		var undo = sessionStorage.undo ? JSON.parse(sessionStorage.undo) : [];
-		var redo = JSON.parse(sessionStorage.redo);
+		var undo = this.editor.session.get('undo', true);
+		var undo = undo || [];
+		var redo = JSON.parse(redo);
 		var next = redo.pop();
 		undo.push(oldData);
 
 		this.editor.$el.val(next);
 		this.editor.refresh();
 
-		sessionStorage.undo = JSON.stringify(undo);
-		sessionStorage.redo = JSON.stringify(redo);
+		this.editor.session.set('undo', undo, true);
+		this.editor.session.set('redo', redo, true);
 
 		this.updateDisabledClasses();
 	}
@@ -381,7 +385,7 @@ Toolbar.prototype._redo = function() {
 };
 
 /**
- * Copies active block(s)
+ * Copies active state(s)
  *
  * @returns {boolean}
  * @private
@@ -391,8 +395,8 @@ Toolbar.prototype._copy = function() {
 	var box = this.editor.getBoundingBox(true);
 	var midX = box.minX + (box.maxX - box.minX) / 2;
 	var midY = box.minY + (box.maxY - box.minY) / 2;
-	for (var i in this.editor.blocks) {
-		var b = this.editor.blocks[i];
+	for (var i in this.editor.states) {
+		var b = this.editor.states[i];
 		if (b.isActive()) {
 			ret[b.id] = b.serialize();
 			ret[b.id].x -= midX + this.canvas.options.canvasExtraWidth;
@@ -400,7 +404,7 @@ Toolbar.prototype._copy = function() {
 		}
 	}
 	if (ret) {
-		localStorage.clipboard = JSON.stringify(ret);
+		this.editor.storage.set('clipboard', ret, true);
 		this.updateDisabledClasses();
 	}
 
@@ -408,7 +412,7 @@ Toolbar.prototype._copy = function() {
 };
 
 /**
- * Cuts active block(s)
+ * Cuts active state(s)
  *
  * @returns {boolean}
  * @private
@@ -418,8 +422,8 @@ Toolbar.prototype._cut = function() {
 	var box = this.editor.getBoundingBox(true);
 	var midX = box.minX + (box.maxX - box.minX) / 2;
 	var midY = box.minY + (box.maxY - box.minY) / 2;
-	for (var id in this.editor.blocks) {
-		var b = this.editor.blocks[id];
+	for (var id in this.editor.states) {
+		var b = this.editor.states[id];
 		if (b.isActive()) {
 			ret[b.id] = b.remove();
 			ret[b.id].x -= midX + this.canvas.options.canvasExtraWidth;
@@ -427,7 +431,7 @@ Toolbar.prototype._cut = function() {
 		}
 	}
 	if (ret) {
-		localStorage.clipboard = JSON.stringify(ret);
+		this.editor.storage.set('clipboard', ret, true);
 		this.canvas.redraw();
 		this.updateDisabledClasses();
 	}
@@ -436,39 +440,39 @@ Toolbar.prototype._cut = function() {
 };
 
 /**
- * Pastes blocks from clipboard
+ * Pastes states from clipboard
  *
  * @returns {boolean}
  * @private
  */
 Toolbar.prototype._paste = function() {
-	var blocks;
-	if (localStorage.clipboard && (blocks = JSON.parse(localStorage.clipboard))) {
+	var states = this.editor.storage.get('clipboard', true);
+	if (states) {
 		var center = this.canvas.getCenter();
 		this.disableSelection();
-		for (var id in blocks) {
-			var b = blocks[id];
-			var exists = id in this.editor.blocks;
+		for (var id in states) {
+			var b = states[id];
+			var exists = id in this.editor.states;
 			if (exists) {
-				id = this.editor.blocks[id].getNewId();
+				id = this.editor.states[id].getNewId();
 				if (!id) {
 					continue;
 				}
 			}
-			var block = new State(id, b, this.editor);
-			this.editor.blocks[id] = block;
+			var state = new state(id, b, this.editor);
+			this.editor.states[id] = state;
 			if (exists) {
-				block.x += 10;
-				block.y += 10;
+				state.x += 10;
+				state.y += 10;
 				b.x += 10;
 				b.y += 10;
 			}
-			block.x += center.x;
-			block.y += center.y;
-			block.render();
-			block.activate();
+			state.x += center.x;
+			state.y += center.y;
+			state.render();
+			state.activate();
 		}
-		localStorage.clipboard = JSON.stringify(blocks);
+		this.editor.storage.set('clipboard', states, true);
 		this.canvas.redraw();
 		this.editor.onChange();
 		this.updateDisabledClasses();
@@ -483,26 +487,29 @@ Toolbar.prototype._paste = function() {
 Toolbar.prototype.updateDisabledClasses = function() {
 	// set disabled class to toolbar buttons
 	var active = false;
-	for (var id in this.editor.blocks) {
-		if (this.editor.blocks[id].isActive()) {
+	for (var id in this.editor.states) {
+		if (this.editor.states[id].isActive()) {
 			active = true;
 			break;
 		}
 	}
 
-	if (sessionStorage.undo && JSON.parse(sessionStorage.undo).length) {
+	var undo = this.editor.session.get('undo', true);
+	if (undo && undo.length) {
 		this.$undo.removeClass('disabled');
 	} else {
 		this.$undo.addClass('disabled');
 	}
 
-	if (sessionStorage.redo && JSON.parse(sessionStorage.redo).length) {
+	var redo = this.editor.session.get('redo', true);
+	if (redo && redo.length) {
 		this.$redo.removeClass('disabled');
 	} else {
 		this.$redo.addClass('disabled');
 	}
 
-	if (localStorage.clipboard && JSON.parse(localStorage.clipboard)) {
+	var clipboard = this.editor.storage.get('clipboard', true);
+	if (clipboard) {
 		this.$paste.removeClass('disabled');
 	} else {
 		this.$paste.addClass('disabled');
@@ -544,7 +551,8 @@ Toolbar.prototype.updateDisabledClasses = function() {
 Toolbar.prototype._zoomTo = function(scale) {
 	// 0.1 precision
 	scale = Math.round(scale * 10) / 10;
-	sessionStorage.zoom = this._zoom = scale;
+	this._zoom = scale;
+	this.editor.session.set('zoom', scale);
 	var centerX = this.canvas.getCenter().x * scale;
 	var centerY = this.canvas.getCenter().y * scale;
 	this.canvas.$containerInner.css({
