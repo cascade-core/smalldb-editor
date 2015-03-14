@@ -16,25 +16,25 @@
  * limitations under the License.
  */
 
-.block-editor {
+.smalldb-editor {
 	position: relative;
 	border: 1px solid #aaa;
 	background: #fff;
 	color: #000;
 }
 
-.block-editor-container {
+.smalldb-editor-container {
 	position: relative;
 	overflow: scroll;
 }
 
-.block-editor-container-inner {
+.smalldb-editor-container-inner {
 	-webkit-transform-origin: top left;
 	-moz-transform-origin: top left;
 	transform-origin: top left;
 }
 
-.block-editor-palette {
+.smalldb-editor-palette {
 	display: none;
 	position: absolute;
 	top: 24px;
@@ -51,13 +51,13 @@
 	padding-top: 28px;
 }
 
-.block-editor-toolbar:hover + .block-editor-palette,
-.block-editor-palette:hover {
+.smalldb-editor-toolbar:hover + .smalldb-editor-palette,
+.smalldb-editor-palette:hover {
 	display: block;
 	border-bottom: 0;
 }
 
-.block-editor-toolbar {
+.smalldb-editor-toolbar {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -70,10 +70,10 @@
 	z-index: 150;
 }
 
-.block-editor-block,
-.block-editor-toolbar,
-.block-editor-variable-editor-title,
-.block-editor-palette {
+.smalldb-editor-state,
+.smalldb-editor-toolbar,
+.smalldb-editor-variable-editor-title,
+.smalldb-editor-palette {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -82,68 +82,69 @@
 	user-select: none;
 }
 
-.block-editor-toolbar a {
+.smalldb-editor-toolbar a {
 	text-align: center;
 }
 
-.block-editor-filter {
+.smalldb-editor-filter {
 	position: absolute;
 	left: 10px;
 	top: 8px;
 }
 
-.block-editor-block {
+.smalldb-editor-state {
 	border: 1px solid #333;
-	border-collapse: collapse;
+	border-radius: 35px;
+	background: lightyellow;
 	z-index: 10;
 	position: absolute;
 	padding: 0;
 	margin: 0;
-	background: rgba(255, 255, 255, 0.7);
+	background: rgba(255, 255, 230, 0.7);
 }
 
-.block-editor-block.block-editor-active,
-.block-editor-block.block-editor-active:hover {
+.smalldb-editor-state.smalldb-editor-active,
+.smalldb-editor-state.smalldb-editor-active:hover {
 	background: #efe;
 }
 
-.block-editor-block.block-editor-active .block-editor-block-header {
+.smalldb-editor-state.smalldb-editor-active .smalldb-editor-state-header {
 	background: #bfb;
 }
 
-.block-editor-clone {
+.smalldb-editor-clone {
 	z-index: 150;
 }
 
-.block-editor-palette .block-editor-block {
+.smalldb-editor-palette .smalldb-editor-state {
 	position: relative;
 	margin: 10px;
 }
 
-.block-editor-block:hover {
+.smalldb-editor-state:hover {
 	background: rgba(255, 255, 255, 1);
 	z-index: 20;
 }
 
-.block-editor-block th,
-.block-editor-block td {
+.smalldb-editor-state th,
+.smalldb-editor-state td {
 	font-size: 9px;
 	vertical-align: top;
 }
 
-.block-editor-block-header {
+.smalldb-editor-state-header {
 	background: rgba(238, 238, 238, 0.7);
 	padding: 3px 1em;
 	border-bottom: 1px solid #333;
 }
 
-.block-editor-block-header a {
+.smalldb-editor-state-header a {
 	color: #666;
 }
 
-.block-editor-block-doc,
-.block-editor-block-edit,
-.block-editor-block-remove {
+.smalldb-editor-state-doc,
+.smalldb-editor-state-edit,
+.smalldb-editor-state-remove {
 	position: absolute;
 	top: -19px;
 	right: -1px;
@@ -161,96 +162,96 @@
 	vertical-align: top;
 }
 
-.block-editor-block-doc:hover,
-.block-editor-block-edit:hover {
+.smalldb-editor-state-doc:hover,
+.smalldb-editor-state-edit:hover {
 	background: #efe;
 }
 
-.block-editor-block-remove:hover {
+.smalldb-editor-state-remove:hover {
 	background: #fcc;
 }
 
-.block-editor-block-doc {
+.smalldb-editor-state-doc {
 	left: 0;
 	right: auto;
 }
 
-.block-editor-block-edit {
+.smalldb-editor-state-edit {
 	left: 22px;
 	right: auto;
 }
 
-.block-editor-palette .block-editor-block:hover .block-editor-block-doc,
-.block-editor-palette .block-editor-block:hover .block-editor-block-edit,
-.block-editor-palette .block-editor-block:hover .block-editor-block-remove {
+.smalldb-editor-palette .smalldb-editor-state:hover .smalldb-editor-state-doc,
+.smalldb-editor-palette .smalldb-editor-state:hover .smalldb-editor-state-edit,
+.smalldb-editor-palette .smalldb-editor-state:hover .smalldb-editor-state-remove {
 	display: none;
 }
 
-.block-editor-block:hover .block-editor-block-doc,
-.block-editor-block:hover .block-editor-block-edit,
-.block-editor-block:hover .block-editor-block-remove {
+.smalldb-editor-state:hover .smalldb-editor-state-doc,
+.smalldb-editor-state:hover .smalldb-editor-state-edit,
+.smalldb-editor-state:hover .smalldb-editor-state-remove {
 	display: block;
 }
 
-.block-editor-block-id {
+.smalldb-editor-state-id {
 	font-weight: bold;
 	text-align: center;
 }
 
-.block-editor-block-type {
+.smalldb-editor-state-type {
 	text-align: center;
 	font-style: italic;
 	font-weight: normal;
 }
 
-.block-editor-block-inputs {
+.smalldb-editor-state-inputs {
 	text-align: left;
 	padding: 3px 10px 3px 3px;
 }
 
-.block-editor-block-input {
+.smalldb-editor-state-input {
 	display: block;
 }
 
-.block-editor-block-input.default {
+.smalldb-editor-state-input.default {
 	color: #999;
 }
 
-.block-editor-block-input.selecting,
-.block-editor-block-output.selecting {
+.smalldb-editor-state-input.selecting,
+.smalldb-editor-state-output.selecting {
 	color: #c60;
 }
 
-.block-editor-block-input.missing,
-.block-editor-block-output.missing {
+.smalldb-editor-state-input.missing,
+.smalldb-editor-state-output.missing {
 	color: #f00;
 	font-style: italic;
 }
 
-.block-editor-block-input.hover-invalid,
-.block-editor-block-output.hover-invalid {
+.smalldb-editor-state-input.hover-invalid,
+.smalldb-editor-state-output.hover-invalid {
 	color: #f00;
 }
 
-.block-editor-block-input.hover-valid,
-.block-editor-block-output.hover-valid {
+.smalldb-editor-state-input.hover-valid,
+.smalldb-editor-state-output.hover-valid {
 	color: #0c0;
 }
 
-.block-editor-block-outputs {
+.smalldb-editor-state-outputs {
 	text-align: right;
 	padding: 3px 3px 3px 10px;
 }
 
-.block-editor-block-outputs div {
+.smalldb-editor-state-outputs div {
 	cursor: pointer;
 }
 
-.block-editor * {
+.smalldb-editor * {
 	box-sizing: border-box;
 }
 
-.block-editor-toolbar a {
+.smalldb-editor-toolbar a {
 	display: inline-block;
 	width: 20px;
 	height: 20px;
@@ -258,21 +259,21 @@
 	border: 1px solid #aaa;
 }
 
-.block-editor-toolbar a.hover,
-.block-editor-toolbar a:hover {
+.smalldb-editor-toolbar a.hover,
+.smalldb-editor-toolbar a:hover {
 	border: 1px solid #666;
 	background: #efe;
 }
 
-.block-editor-toolbar a.disabled,
-.block-editor-toolbar a.disabled:hover {
+.smalldb-editor-toolbar a.disabled,
+.smalldb-editor-toolbar a.disabled:hover {
 	background: #fff;
 	border-color: #aaa;
 	color: #666;
 	opacity: 0.5;
 }
 
-.block-editor-toolbar-divider {
+.smalldb-editor-toolbar-divider {
 	background: #aaa;
 	width: 1px;
 	margin: 0 2px !important;
@@ -280,7 +281,7 @@
 	display: inline-block;
 }
 
-.block-editor-fullscreen {
+.smalldb-editor-fullscreen {
 	position: fixed;
 	top: 6%;
 	left: 1%;
@@ -292,17 +293,17 @@
 	box-shadow: 0 2px 10px rgba(0, 0, 0, .2);
 }
 
-.block-editor-fullscreen .block-editor-palette {
+.smalldb-editor-fullscreen .smalldb-editor-palette {
 	display: block;
 	width: 150px;
 }
 
-.block-editor-fullscreen .block-editor-palette:hover {
+.smalldb-editor-fullscreen .smalldb-editor-palette:hover {
 	width: auto;
 	max-width: 300px;
 }
 
-.block-editor-variable-editor {
+.smalldb-editor-variable-editor {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -318,13 +319,13 @@
 	text-align: center;
 }
 
-.block-editor-variable-editor-title {
+.smalldb-editor-variable-editor-title {
 	text-align: center;
 	padding: 4px 0;
 	border-bottom: 1px solid #999;
 }
 
-.block-editor-variable-editor-close {
+.smalldb-editor-variable-editor-close {
 	float: right;
 	border-left: 1px solid #999;
 	text-decoration: none;
@@ -337,20 +338,20 @@
 	top: 0;
 }
 
-.block-editor-variable-editor-close:hover {
+.smalldb-editor-variable-editor-close:hover {
 	background: #ccc;
 }
 
-.block-editor-variable-editor textarea {
+.smalldb-editor-variable-editor textarea {
 	outline: none;
 }
 
-.block-editor-variable-editor-tabs {
+.smalldb-editor-variable-editor-tabs {
 	text-align: left;
 	margin: 2px 10px 10px;
 }
 
-.block-editor-variable-editor-tabs a {
+.smalldb-editor-variable-editor-tabs a {
 	border: 0;
 	padding: 4px 6px 6px;
 	position: relative;
@@ -361,39 +362,39 @@
 	margin-right: 5px;
 }
 
-.block-editor-variable-editor-tabs a:hover {
+.smalldb-editor-variable-editor-tabs a:hover {
 	padding: 3px 5px 4px;
 	border: 1px solid #999;
 }
 
-.block-editor-variable-editor-tabs a.active {
+.smalldb-editor-variable-editor-tabs a.active {
 	padding: 3px 5px 4px;
 	border: 1px solid #999;
 	border-bottom: 1px solid #fff;
 }
 
-.block-editor-variable-editor input[type="submit"] {
+.smalldb-editor-variable-editor input[type="submit"] {
 	margin: 10px;
 }
 
-.block-editor-variable-editor-desc {
+.smalldb-editor-variable-editor-desc {
 	text-align: left;
 	font-size: 12px;
 	margin: 10px;
 }
 
-.block-editor-variable-editor select {
+.smalldb-editor-variable-editor select {
 	margin: 9px 10px 10px;
 	float: right;
 }
 
-.block-editor-variable-editor textarea {
+.smalldb-editor-variable-editor textarea {
 	width: 380px;
 	height: 170px !important;
 	margin: 0 9px;
 }
 
-.block-editor-selection {
+.smalldb-editor-selection {
 	z-index: 150;
 	position: absolute;
 	border: 1px solid #89B;
@@ -403,7 +404,7 @@
 	border-color: #8B9;
 }
 
-.block-editor-toolbar > * {
+.smalldb-editor-toolbar > * {
 	overflow: hidden;
 	vertical-align: top;
 	margin-top: 3px;

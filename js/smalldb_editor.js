@@ -19,7 +19,7 @@
 	"use strict";
 
 	/**
-	 * Registers block editor plugin to jQuery
+	 * Registers smalldb editor plugin to jQuery
 	 *
 	 * @param {Array} [options]
 	 * @returns {jQuery} provides fluent interface

@@ -1,5 +1,5 @@
 /**
- * Block Editor 2.0
+ * state Editor 2.0
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
@@ -14,7 +14,7 @@ var SmalldbEditor = function(el, options) {
 	/** @property {string} defaults default options */
 	this.defaults = {
 		historyLimit: 1000, // count of remembered changes,
-		canvasOffset: 30, // px start rendering blocks from top left corner of diagram - canvasOffset
+		canvasOffset: 100, // px start rendering states from top left corner of diagram - canvasOffset
 		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
 		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
 		canvasSpeed: 2, // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
@@ -24,8 +24,8 @@ var SmalldbEditor = function(el, options) {
 	};
 
 	// create namespaced storages
-	this.session = new Storage(sessionStorage, BlockEditor._namespace);
-	this.storage = new Storage(localStorage, BlockEditor._namespace);
+	this.session = new Storage(sessionStorage, SmalldbEditor._namespace);
+	this.storage = new Storage(localStorage, SmalldbEditor._namespace);
 
 	// options stored in data attribute
 	var meta = this.$el.data(this._namespace + '-opts');
@@ -36,13 +36,13 @@ var SmalldbEditor = function(el, options) {
 	// reference to self
     this.$el.data(SmalldbEditor._namespace, this);
 
-	// init block editor
+	// init state editor
 	this._createContainer();
 	this._init();
 };
 
 /** @property {string} _namespace plugin namespace */
-SmalldbEditor._namespace = 'block-editor';
+SmalldbEditor._namespace = 'smalldb-editor';
 
 /**
  * Creates container
@@ -58,12 +58,26 @@ SmalldbEditor.prototype._createContainer = function() {
 };
 
 /**
+ * Places states to some position on canvas
+ */
+SmalldbEditor.prototype.placeStates = function() {
+	var a = 10, b = 10, c = 1;
+	for (var i in this.states) {
+		this.states[i].x = a;
+		this.states[i].y = b;
+		a += 100;
+		b += c * 100;
+		c *= -1;
+	}
+};
+
+/**
  * Initialization, loads palette data via AJAX
  *
  * @private
  */
 SmalldbEditor.prototype._init = function() {
-	// reset undo & redo history when URL changed (new block loaded)
+	// reset undo & redo history when URL changed (new state loaded)
 	if (this.session.get('url') !== location.href) {
 		this.session.set('url', location.href);
 		this.session.reset('undo');
@@ -74,19 +88,21 @@ SmalldbEditor.prototype._init = function() {
 	this.session.set('zoom', 1.0);
 
 	this.canvas = new Canvas(this); // create canvas
+	this.toolbar = new Toolbar(this); // create toolbar
+	this.toolbar.render(this.$container);
 	this.processData(); // load and process data from textarea
+	this.placeStates(); // find position for each state
 	this.box = this.getBoundingBox();
 	this.canvas.render(this.box);
 	this.render();
 	this.canvas.$container.scroll(); // force scroll event to save center of viewport
-
 
 	// load palette data from cache and trigger reloading
 	//var self = this;
 	//var callback = function(data) {
 	//	self.storage.set('palette', data, true);
 	//	self.canvas = new Canvas(self); // create canvas
-	//	self.palette = new Palette(self, data); // create blocks palette
+	//	self.palette = new Palette(self, data); // create states palette
 	//	self.processData(); // load and process data from textarea
 	//	self.box = self.getBoundingBox();
 	//	self.canvas.render(self.box);
@@ -97,7 +113,7 @@ SmalldbEditor.prototype._init = function() {
 	//if (localStorage.palette) {
 	//	callback(JSON.parse(localStorage.palette)); // load instantly from cache
 	//	setTimeout(function() {
-	//		self.palette.toolbar.$reload.click(); // and trigger reloading immediately
+	//		self.toolbar.$reload.click(); // and trigger reloading immediately
 	//	}, 100);
 	//} else {
 	//	$.get(this.options.paletteData).done(callback);
@@ -105,33 +121,55 @@ SmalldbEditor.prototype._init = function() {
 };
 
 /**
- * Parses textarea data and initializes parent block properties and child blocks
+ * Parses textarea data and initializes machine properties, actions and states
  */
 SmalldbEditor.prototype.processData = function() {
 	this.data = JSON.parse(this.$el.val());
 	this.states = {};
-	console.log(this.data);
+	this.actions = {};
+
+	// machine properties
+	this.properties = {};
+	for (var opt in this.data) {
+		if ($.inArray(opt, ['states', 'actions']) === -1) {
+			this.properties[opt] = this.data[opt];
+		}
+	}
 
 	// states
+	this.states.__start__ = new State('start', {}, this);
 	if (this.data.states) {
 		for (var id in this.data.states) {
 			this.states[id] = new State(id, this.data.states[id], this);
 		}
 	}
+	this.states.__end__ = new State('end', {}, this);
+
+	// actions
+	if (this.data.actions) {
+		for (var id in this.data.actions) {
+			this.actions[id] = new Action(id, this.data.actions[id], this);
+		}
+	}
 };
 
 /**
- * Renders block editor
+ * Renders state editor
  */
 SmalldbEditor.prototype.render = function() {
-	// render all blocks first to get their offset
+	// render all states first to get their offset
 	for (var id in this.states) {
 		this.states[id].render();
 	}
 
-	// then render connections
-	for (var id in this.states) {
-		this.states[id].renderConnections();
+	// then render all transitions
+	var endFound = false;
+	for (var id in this.actions) {
+		endFound |= this.actions[id].renderTransitions(this.states);
+	}
+	if (!endFound) {
+		this.states.__end__.remove();
+		delete this.states.__end__;
 	}
 
 	// scroll to top left corner of diagram bounding box
@@ -144,7 +182,7 @@ SmalldbEditor.prototype.render = function() {
 /**
  * Finds diagram bounding box
  *
- * @param {boolean} [active] - Process all or only active blocks
+ * @param {boolean} [active] - Process all or only active states
  * @returns {{minX: number, maxX: number, minY: number, maxY: number}}
  */
 SmalldbEditor.prototype.getBoundingBox = function(active) {
@@ -152,14 +190,14 @@ SmalldbEditor.prototype.getBoundingBox = function(active) {
 	var minY = Infinity, maxY = -Infinity;
 
 	for (var id in this.states) {
-		var b = this.states[id];
-		if (active && !b.isActive()) {
+		var s = this.states[id];
+		if (active && !s.isActive()) {
 			continue;
 		}
-		minX = Math.min(minX, b.x);
-		maxX = Math.max(maxX, b.x + (b.$container ? b.$container.outerWidth() : 100));
-		minY = Math.min(minY, b.y);
-		maxY = Math.max(maxY, b.y + (b.$container ? b.$container.outerHeight() : 100));
+		minX = Math.min(minX, s.x);
+		maxX = Math.max(maxX, s.x + (s.$container ? s.$container.outerWidth() : 50));
+		minY = Math.min(minY, s.y);
+		maxY = Math.max(maxY, s.y + (s.$container ? s.$container.outerHeight() : 50));
 	}
 
 	return {
@@ -172,7 +210,7 @@ SmalldbEditor.prototype.getBoundingBox = function(active) {
  * Refreshes editor based on textarea data
  */
 SmalldbEditor.prototype.refresh = function() {
-	// remove old blocks
+	// remove old states
 	for (var id in this.states) {
 		this.states[id].$container.remove();
 	}
@@ -180,7 +218,7 @@ SmalldbEditor.prototype.refresh = function() {
 	// update data
 	this.processData();
 
-	// redraw all blocks
+	// redraw all states
 	for (var id in this.states) {
 		this.states[id].render();
 	}
@@ -190,12 +228,12 @@ SmalldbEditor.prototype.refresh = function() {
 };
 
 /**
- * Adds new block to this editor instance
+ * Adds new state to this editor instance
  *
- * @param {string} id - New block identification
- * @param {Object} data - JSON object with block data
+ * @param {string} id - New state identification
+ * @param {Object} data - JSON object with state data
  */
-SmalldbEditor.prototype.addBlock = function(id, data) {
+SmalldbEditor.prototype.addState = function(id, data) {
 	this.states[id] = new State(id, data, this);
 	this.states[id].render();
 	this.onChange();
@@ -220,27 +258,27 @@ SmalldbEditor.prototype.onChange = function() {
 		this.session.reset('redo');
 	}
 
-	this.palette.toolbar.updateDisabledClasses();
+	this.toolbar.updateDisabledClasses();
 
 	// set data to textarea
 	this.$el.val(newData);
 };
 
 /**
- * Serializes all blocks and parent block information to JSON string
+ * Serializes all states and parent state information to JSON string
  *
  * @returns {string}
  */
 SmalldbEditor.prototype.serialize = function() {
-	var blocks = {};
+	var states = {};
 	for (var i in this.states) {
 		var b = this.states[i];
-		blocks[b.id] = b.serialize();
+		states[b.id] = b.serialize();
 	}
 
 	var ret = {
 		'_': this.properties._, // security
-		'blocks': blocks
+		'states': states
 	};
 	for (var t in this.properties) {
 		ret[t] = this.properties[t];

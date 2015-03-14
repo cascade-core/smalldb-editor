@@ -123,7 +123,7 @@ Canvas.prototype._create = function() {
  * @private
  */
 Canvas.prototype._onMouseDown = function(e) {
-	if ((e.metaKey || e.ctrlKey) && $(e.target).is('canvas')) { // selecting blocks
+	if ((e.metaKey || e.ctrlKey) && $(e.target).is('canvas')) { // selecting states
 		this._cursor = {
 			x: e.pageX - this.$container.offset().left + this.$container.scrollLeft(),
 			y: e.pageY - this.$container.offset().top + this.$container.scrollTop()
@@ -137,8 +137,8 @@ Canvas.prototype._onMouseDown = function(e) {
 		return;
 	}
 
-	var block = $(e.target).closest('table.' + SmalldbEditor._namespace + '-block')[0];
-	if (!block) {
+	var state = $(e.target).closest('table.' + SmalldbEditor._namespace + '-state')[0];
+	if (!state) {
 		var zoom = this.getZoom();
 		var speed = this.options.canvasSpeed / zoom;
 		this._moving = true;
@@ -200,7 +200,7 @@ Canvas.prototype._onScroll = function(e) {
 };
 
 /**
- * Completes selection of blocks
+ * Completes selection of states
  *
  * @param {MouseEvent} e - Event
  * @private
@@ -210,26 +210,26 @@ Canvas.prototype._onMouseUp = function(e) {
 		var zoom = this.getZoom();
 		this._cursor.x /= zoom;
 		this._cursor.y /= zoom;
-		for (var id in this.editor.blocks) {
-			var b = this.editor.blocks[id];
+		for (var id in this.editor.states) {
+			var s = this.editor.states[id];
 			var currX = e.pageX - this.$container.offset().left + this.$container.scrollLeft();
 			var currY = e.pageY - this.$container.offset().top + this.$container.scrollTop();
 			currX /= zoom;
 			currY /= zoom;
-			var blockX = b.position().left;
-			var blockXW = b.position().left + b.$container.width();
-			var blockY = b.position().top;
-			var blockYH = b.position().top + b.$container.height();
+			var stateX = s.position().left;
+			var stateXW = s.position().left + s.$container.width();
+			var stateY = s.position().top;
+			var stateYH = s.position().top + s.$container.height();
 
-			if (currX - this._cursor.x < 0) { // right to left selection => allow selecting just part of block
-				if (currX < blockXW && this._cursor.x > blockX &&
-					((currY > blockY && this._cursor.y < blockYH) || (this._cursor.y > blockY && currY < blockYH))) {
-					b.activate();
+			if (currX - this._cursor.x < 0) { // right to left selection => allow selecting just part of state
+				if (currX < stateXW && this._cursor.x > stateX &&
+					((currY > stateY && this._cursor.y < stateYH) || (this._cursor.y > stateY && currY < stateYH))) {
+					s.activate();
 				}
-			} else { // left to right selection => select only whole block
-				if (currX > blockXW && this._cursor.x < blockX &&
-					((currY > blockYH && this._cursor.y < blockY) || this._cursor.y > blockYH && currY < blockY)) {
-					b.activate();
+			} else { // left to right selection => select only whole state
+				if (currX > stateXW && this._cursor.x < stateX &&
+					((currY > stateYH && this._cursor.y < stateY) || this._cursor.y > stateYH && currY < stateY)) {
+					s.activate();
 				}
 			}
 		}
@@ -253,7 +253,7 @@ Canvas.prototype._onMouseUp = function(e) {
  * @param {string} [color='#000'] defaults to black
  * @private
  */
-Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
+Canvas.prototype._drawConnection = function(label, fromX, fromY, toX, toY, color) {
 	// line style
 	color = color || '#000';
 	this.context.save();
@@ -263,17 +263,56 @@ Canvas.prototype._drawConnection = function(fromX, fromY, toX, toY, color) {
 	this.context.lineWidth = 1.4;
 
 	// control points based on x-diff
-	var diffX = Math.abs(toX - fromX) / 2;
-	var cp1X = fromX + diffX;
+	var diffX = (toX - fromX) / 2;
+	var diffY = (toY - fromY) / 2;
+	var cp1X = Math.max(fromX + diffX, fromX + 100);
 	var cp1Y = fromY;
-	var cp2X = toX - diffX;
+	var cp2X = Math.min(toX - diffX, toX - 100);
 	var cp2Y = toY;
 
 	// draw curved line
 	this.context.moveTo(fromX, fromY);
-	this.context.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, toX, toY);
+	this.context.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, toX - 5, toY);
 	this.context.stroke();
 	this.context.closePath();
+	this._writeText(label, fromX + diffX * 2 / 5, fromY + diffY * 2 / 5)
+
+	// draw arrow in the end point
+	this._drawArrow(toX, toY, color);
+};
+
+/**
+ * Draws cycle connection line with arrow pointing to end
+ *
+ * @param {number} fromX
+ * @param {number} fromY
+ * @param {number} toX
+ * @param {number} toY
+ * @param {string} [color='#000'] defaults to black
+ * @private
+ */
+Canvas.prototype._drawCycleConnection = function(label, fromX, fromY, toX, toY, color) {
+	// line style
+	color = color || '#000';
+	this.context.save();
+	this.context.beginPath();
+	this.context.fillStyle = color;
+	this.context.strokeStyle = color;
+	this.context.lineWidth = 1.4;
+
+	// control points
+	var diffX = (toX - fromX) / 2;
+	var cp1X = fromX + 60;
+	var cp1Y = fromY - 40;
+	var cp2X = toX - 60;
+	var cp2Y = toY - 40;
+
+	// draw curved line
+	this.context.moveTo(fromX, fromY);
+	this.context.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, toX - 5, toY);
+	this.context.stroke();
+	this.context.closePath();
+	this._writeText(label, fromX + diffX, fromY - 35)
 
 	// draw arrow in the end point
 	this._drawArrow(toX, toY, color);
@@ -342,8 +381,8 @@ Canvas.prototype._writeText = function(text, x, y) {
 Canvas.prototype.redraw = function() {
 	this.context.clearRect(0, 0, this.width, this.height);
 	this._drawBackground();
-	for (var id in this.editor.blocks) {
-		this.editor.blocks[id].renderConnections();
+	for (var id in this.editor.actions) {
+		this.editor.actions[id].renderTransitions(this.editor.states);
 	}
 };
 

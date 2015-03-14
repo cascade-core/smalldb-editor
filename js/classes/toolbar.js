@@ -6,9 +6,8 @@
  * @param {SmalldbEditor} editor - reference to plugin instance
  * @class
  */
-var Toolbar = function(editor, palette) {
+var Toolbar = function(editor) {
 	this.editor = editor;
-	this.palette = palette;
 	this.canvas = editor.canvas;
 	this._zoom = this.canvas.getZoom();
 	this._zoomStep = 0.1;
@@ -53,16 +52,6 @@ Toolbar.prototype.render = function($container) {
 	this.$parent.addClass(className);
 	$(document).on('click', 'a.' + className, this._toggleParentProperties.bind(this));
 	this.$toolbar.append(this.$parent);
-
-	// palette refresh button
-	this.$reload = $('<a>');
-	className = SmalldbEditor._namespace + '-palette-reload';
-	this.$reload.html('<i class="fa fa-fw fa-refresh"></i> R');
-	this.$reload.attr('title', 'Reload palette data [Ctrl + Shift + R]');
-	this.$reload.attr('href', '#reload-palette');
-	this.$reload.addClass(className);
-	$(document).on('click', 'a.' + className, this._reloadPalette.bind(this));
-	this.$toolbar.append(this.$reload);
 
 	this.$toolbar.append($divider.clone());
 
@@ -455,7 +444,7 @@ Toolbar.prototype._paste = function() {
 					continue;
 				}
 			}
-			var state = new state(id, b, this.editor);
+			var state = new State(id, b, this.editor);
 			this.editor.states[id] = state;
 			if (exists) {
 				state.x += 10;
