@@ -14,6 +14,7 @@ var SmalldbEditor = function(el, options) {
 	/** @property {string} defaults default options */
 	this.defaults = {
 		historyLimit: 1000, // count of remembered changes,
+		splineTension: 0.3, // used to render connections, more means higher elasticity of connections
 		canvasOffset: 100, // px start rendering states from top left corner of diagram - canvasOffset
 		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
 		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
@@ -59,15 +60,58 @@ SmalldbEditor.prototype._createContainer = function() {
 
 /**
  * Places states to some position on canvas
+ * uses tarjan's algorithm and renders states based on topological order
  */
 SmalldbEditor.prototype.placeStates = function() {
-	var a = 10, b = 10, c = 1;
-	for (var i in this.states) {
-		this.states[i].x = a;
-		this.states[i].y = b;
-		a += 100;
-		b += c * 100;
-		c *= -1;
+	// create nodes
+	var nodes = [], indexed = {};
+	for (var id in this.states) {
+		var node = new Node(id);
+		nodes.push(node);
+		indexed[id] = node;
+	}
+
+	// create edges
+	for (var id in this.actions) {
+		var action = this.actions[id];
+		for (var t in action.transitions) {
+			var targets = action.transitions[t].getTargets();
+			var from = indexed[t];
+			for (var target in targets) {
+				var to = indexed[targets[target]];
+				from.connections.push(to);
+			}
+		}
+	}
+
+	// find strongly connected components
+	var graph = new Graph(nodes);
+	var tarjan = new Tarjan(graph);
+	var components = tarjan.run();
+
+	// compute max width of each component
+	var max = 0, step = 120;
+	for (var i in components) {
+		var scc = components[i];
+		var width = scc.length * step;
+		max = Math.max(max, width);
+	}
+
+	var a, b = 10, c = -1;
+	// components are sorted in reverse topological order
+	for (var i = components.length - 1; i >= 0; i--) {
+		var scc = components[i];
+		var width = scc.length * step;
+		a = 10 + (max - width) / 2;
+		for (var j = scc.length - 1; j >= 0; j--) {
+			var state = this.states[scc[j].name];
+			state.x = a;
+			state.y = b;
+			a += step;
+			b += c * 50;
+			c *= -1;
+		}
+		b += step;
 	}
 };
 
@@ -84,9 +128,7 @@ SmalldbEditor.prototype._init = function() {
 		this.session.reset('redo');
 	}
 
-	// reset zoom
-	this.session.set('zoom', 1.0);
-
+	this.session.set('zoom', 1.0); // reset zoom
 	this.canvas = new Canvas(this); // create canvas
 	this.toolbar = new Toolbar(this); // create toolbar
 	this.toolbar.render(this.$container);
@@ -96,28 +138,6 @@ SmalldbEditor.prototype._init = function() {
 	this.canvas.render(this.box);
 	this.render();
 	this.canvas.$container.scroll(); // force scroll event to save center of viewport
-
-	// load palette data from cache and trigger reloading
-	//var self = this;
-	//var callback = function(data) {
-	//	self.storage.set('palette', data, true);
-	//	self.canvas = new Canvas(self); // create canvas
-	//	self.palette = new Palette(self, data); // create states palette
-	//	self.processData(); // load and process data from textarea
-	//	self.box = self.getBoundingBox();
-	//	self.canvas.render(self.box);
-	//	self.palette.render();
-	//	self.render();
-	//	self.canvas.$container.scroll(); // force scroll event to save center of viewport
-	//};
-	//if (localStorage.palette) {
-	//	callback(JSON.parse(localStorage.palette)); // load instantly from cache
-	//	setTimeout(function() {
-	//		self.toolbar.$reload.click(); // and trigger reloading immediately
-	//	}, 100);
-	//} else {
-	//	$.get(this.options.paletteData).done(callback);
-	//}
 };
 
 /**
@@ -146,10 +166,19 @@ SmalldbEditor.prototype.processData = function() {
 	this.states.__end__ = new State('end', {}, this);
 
 	// actions
+	var endFound = false;
 	if (this.data.actions) {
 		for (var id in this.data.actions) {
-			this.actions[id] = new Action(id, this.data.actions[id], this);
+			var a = new Action(id, this.data.actions[id], this);
+			endFound |= a.usesEndNode(this.states);
+			this.actions[id] = a;
 		}
+	}
+
+	// remove end node when never used
+	if (!endFound) {
+		this.states.__end__.remove();
+		delete this.states.__end__;
 	}
 };
 
@@ -163,13 +192,8 @@ SmalldbEditor.prototype.render = function() {
 	}
 
 	// then render all transitions
-	var endFound = false;
 	for (var id in this.actions) {
-		endFound |= this.actions[id].renderTransitions(this.states);
-	}
-	if (!endFound) {
-		this.states.__end__.remove();
-		delete this.states.__end__;
+		this.actions[id].renderTransitions(this.states);
 	}
 
 	// scroll to top left corner of diagram bounding box

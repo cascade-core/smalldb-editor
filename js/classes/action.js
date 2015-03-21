@@ -25,13 +25,30 @@ Action.prototype._processData = function(data) {
 };
 
 /**
- * Renders transitions to canvas
+ * Finds out whether this action uses end node
  *
  * @param {array} states
  * @returns {boolean} is there any transition to __end__ state?
  */
-Action.prototype.renderTransitions = function(states) {
+Action.prototype.usesEndNode = function(states) {
 	var endFound = false;
+	for (var id in this.transitions) {
+		var targets = this.transitions[id].getTargets();
+		for (var t in targets) {
+			if (targets[t] === '') {
+				endFound = true;
+			}
+		}
+	}
+	return endFound;
+};
+
+/**
+ * Renders transitions to canvas
+ *
+ * @param {array} states
+ */
+Action.prototype.renderTransitions = function(states) {
 	for (var id in this.transitions) {
 		var from = states[id].position();
 		from.top += states[id].$container.outerHeight() / 2;
@@ -39,19 +56,16 @@ Action.prototype.renderTransitions = function(states) {
 		var targets = this.transitions[id].getTargets();
 		for (var t in targets) {
 			if (targets[t] === '') {
-				endFound = true;
 				targets[t] = '__end__';
 			}
-			console.log(targets[t], states, states[targets[t]]);
 			var to = states[targets[t]].position();
 			to.top += states[targets[t]].$container.outerHeight() / 2;
 			var label = this.transitions[id].action.id;
 			if (id === targets[t]) {
-				this.canvas._drawCycleConnection(label, from.left, from.top, to.left, to.top);
+				this.canvas._drawCycleConnection(label, new Point(from.left, from.top), new Point(to.left, to.top));
 			} else {
-				this.canvas._drawConnection(label, from.left, from.top, to.left, to.top);
+				this.canvas.drawConnection(label, new Point(from.left, from.top), new Point(to.left, to.top));
 			}
 		}
 	}
-	return endFound;
 };
