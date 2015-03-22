@@ -18,6 +18,7 @@
 
 .smalldb-editor {
 	position: relative;
+	text-align: center;
 	border: 1px solid #aaa;
 	background: #fff;
 	color: #000;
@@ -94,11 +95,11 @@
 
 .smalldb-editor-state {
 	border: 1px solid #333;
-	border-radius: 35px;
-	background: lightyellow;
+	line-height: 20px;
+	border-radius: 50%;
 	z-index: 10;
 	position: absolute;
-	padding: 0;
+	padding: 3px;
 	margin: 0;
 	background: rgba(255, 255, 230, 0.7);
 }
@@ -132,24 +133,18 @@
 	vertical-align: top;
 }
 
-.smalldb-editor-state-header {
-	background: rgba(238, 238, 238, 0.7);
-	padding: 3px 1em;
-	border-bottom: 1px solid #333;
-}
-
 .smalldb-editor-state-header a {
 	color: #666;
 }
 
-.smalldb-editor-state-doc,
-.smalldb-editor-state-edit,
 .smalldb-editor-state-remove {
 	position: absolute;
-	top: -19px;
-	right: -1px;
+	top: -15px;
+	right: 0px;
+	z-index: 1;
 	background: rgba(238, 238, 238, 0.7);
 	border: 1px solid #333;
+	border-radius: 50%;
 	text-decoration: none;
 	display: none;
 	color: #000;
@@ -160,11 +155,6 @@
 	text-align: center;
 	overflow: hidden;
 	vertical-align: top;
-}
-
-.smalldb-editor-state-doc:hover,
-.smalldb-editor-state-edit:hover {
-	background: #efe;
 }
 
 .smalldb-editor-state-remove:hover {
@@ -196,55 +186,6 @@
 .smalldb-editor-state-id {
 	font-weight: bold;
 	text-align: center;
-}
-
-.smalldb-editor-state-type {
-	text-align: center;
-	font-style: italic;
-	font-weight: normal;
-}
-
-.smalldb-editor-state-inputs {
-	text-align: left;
-	padding: 3px 10px 3px 3px;
-}
-
-.smalldb-editor-state-input {
-	display: block;
-}
-
-.smalldb-editor-state-input.default {
-	color: #999;
-}
-
-.smalldb-editor-state-input.selecting,
-.smalldb-editor-state-output.selecting {
-	color: #c60;
-}
-
-.smalldb-editor-state-input.missing,
-.smalldb-editor-state-output.missing {
-	color: #f00;
-	font-style: italic;
-}
-
-.smalldb-editor-state-input.hover-invalid,
-.smalldb-editor-state-output.hover-invalid {
-	color: #f00;
-}
-
-.smalldb-editor-state-input.hover-valid,
-.smalldb-editor-state-output.hover-valid {
-	color: #0c0;
-}
-
-.smalldb-editor-state-outputs {
-	text-align: right;
-	padding: 3px 3px 3px 10px;
-}
-
-.smalldb-editor-state-outputs div {
-	cursor: pointer;
 }
 
 .smalldb-editor * {

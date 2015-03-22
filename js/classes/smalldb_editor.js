@@ -15,7 +15,7 @@ var SmalldbEditor = function(el, options) {
 	this.defaults = {
 		historyLimit: 1000, // count of remembered changes,
 		splineTension: 0.3, // used to render connections, more means higher elasticity of connections
-		canvasOffset: 100, // px start rendering states from top left corner of diagram - canvasOffset
+		canvasOffset: 75, // px start rendering states from top left corner of diagram - canvasOffset
 		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
 		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
 		canvasSpeed: 2, // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
@@ -90,7 +90,7 @@ SmalldbEditor.prototype.placeStates = function() {
 	var components = tarjan.run();
 
 	// compute max width of each component
-	var max = 0, step = 120;
+	var max = 0, step = 150;
 	for (var i in components) {
 		var scc = components[i];
 		var width = scc.length * step;
@@ -170,7 +170,7 @@ SmalldbEditor.prototype.processData = function() {
 	if (this.data.actions) {
 		for (var id in this.data.actions) {
 			var a = new Action(id, this.data.actions[id], this);
-			endFound |= a.usesEndNode(this.states);
+			endFound |= a.usesEndNode();
 			this.actions[id] = a;
 		}
 	}
@@ -206,7 +206,7 @@ SmalldbEditor.prototype.render = function() {
 /**
  * Finds diagram bounding box
  *
- * @param {boolean} [active] - Process all or only active states
+ * @param {Boolean} [active] - Process all or only active states
  * @returns {{minX: number, maxX: number, minY: number, maxY: number}}
  */
 SmalldbEditor.prototype.getBoundingBox = function(active) {

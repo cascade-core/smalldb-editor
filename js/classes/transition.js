@@ -16,7 +16,7 @@ var Transition = function(action, data) {
 /**
  * Gets targets of this transition
  *
- * @returns {array}
+ * @returns {Array}
  */
 Transition.prototype.getTargets = function() {
 	if ('targets' in this.data) {

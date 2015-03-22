@@ -188,7 +188,7 @@ Toolbar.prototype._reloadPalette = function() {
  * Keydown handler, binds keyboard shortcuts
  *
  * @param {KeyboardEvent} e - Event
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 Toolbar.prototype._keydown = function(e) {
@@ -261,7 +261,7 @@ Toolbar.prototype._keydown = function(e) {
 /**
  * Toggles fullscreen mode
  *
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 Toolbar.prototype._toggleFullScreen = function() {
@@ -305,7 +305,7 @@ Toolbar.prototype._toggleFullScreen = function() {
 /**
  * Toggles parent state properties editor
  *
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 Toolbar.prototype._toggleParentProperties = function() {
@@ -318,7 +318,7 @@ Toolbar.prototype._toggleParentProperties = function() {
 /**
  * Undo last action
  *
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 Toolbar.prototype._undo = function() {
@@ -345,7 +345,7 @@ Toolbar.prototype._undo = function() {
 /**
  * Redo last reverted action
  *
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 Toolbar.prototype._redo = function() {
@@ -372,7 +372,7 @@ Toolbar.prototype._redo = function() {
 /**
  * Copies active state(s)
  *
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 Toolbar.prototype._copy = function() {
@@ -399,7 +399,7 @@ Toolbar.prototype._copy = function() {
 /**
  * Cuts active state(s)
  *
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 Toolbar.prototype._cut = function() {
@@ -427,7 +427,7 @@ Toolbar.prototype._cut = function() {
 /**
  * Pastes states from clipboard
  *
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 Toolbar.prototype._paste = function() {
@@ -530,7 +530,7 @@ Toolbar.prototype.updateDisabledClasses = function() {
 /**
  * Zooms to given scale
  *
- * @param {number} scale
+ * @param {Number} scale
  * @private
  */
 Toolbar.prototype._zoomTo = function(scale) {

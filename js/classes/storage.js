@@ -2,7 +2,7 @@
  * Simple storage wrapper
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
- * @param {object} storage
+ * @param {Object} storage
  * @param {string} namespace
  * @class
  */
@@ -24,7 +24,7 @@ Storage.prototype._key = function(key) {
 
 /**
  * @param {string} key
- * @param {boolean} json - return JSON object
+ * @param {Boolean} json - return JSON object
  * @returns {Object}
  * @private
  */
@@ -41,7 +41,7 @@ Storage.prototype.get = function(key, json) {
  *
  * @param {string} key
  * @param {mixed} value
- * @param {boolean} json - save JSON string of {value}
+ * @param {Boolean} json - save JSON string of {value}
  * @returns {Object}
  */
 Storage.prototype.set = function(key, value, json) {

@@ -16,6 +16,7 @@ var State = function(id, data, editor) {
 
 	this.x = data.x;
 	this.y = data.y;
+	this.connections = [];
 };
 
 /**
@@ -72,6 +73,44 @@ State.prototype.position = function() {
 };
 
 /**
+ * Gets current state container center position inside canvas
+ *
+ * @returns {?Point}
+ */
+State.prototype.center = function() {
+	if (!this.$container) {
+		return null;
+	}
+
+	var position = this.position();
+	position.top += this.$container.outerHeight() / 2;
+	position.left += this.$container.outerWidth() / 2;
+	return new Point(position.left, position.top);
+};
+
+/**
+ * Gets point on ellipses
+ *
+ * @param {Point} other - starting point
+ * @returns {Point}
+ */
+State.prototype.getBorderPoint = function(other) {
+	if (!this.$container) {
+		return new Point(this.x, this.y);
+	}
+
+	var pos = this.center();
+	var a = this.$container.outerWidth() / 2;
+	var b = this.$container.outerHeight() / 2;
+	var alfa = Point.angle(pos, other) || 0;
+	var signX = (alfa < Math.PI / 2 || alfa > 3 * Math.PI / 2) ? 1 : -1;
+	var signY = (alfa > Math.PI || alfa > 3 * Math.PI / 2) ? 1 : -1;
+	pos.x += signX * (a * b) / Math.sqrt(b * b + a * a * Math.pow(Math.tan(alfa), 2));
+	pos.y += signY * (a * b) / Math.sqrt(a * a + (b * b) / Math.pow(Math.tan(alfa), 2));
+	return pos;
+};
+
+/**
  * Removes state from canvas
  *
  * @returns {Object} state data in JSON object
@@ -90,61 +129,37 @@ State.prototype.remove = function() {
  * Redraw this state
  */
 State.prototype.redraw = function() {
-	this.$container.remove();
-	delete this.$container;
-	this.render();
-	this.canvas.redraw();
+	if (this.$container) {
+		this.$container.remove();
+		delete this.$container;
+		this.render();
+		this.canvas.redraw();
+	}
 };
 
 /**
  * Adds connection to this state
  *
- * @param {Array} source - Source state id and variable name
- * @param {string} target -
- * @returns {?boolean} false when source state not present inside canvas or no name for wildcard variable provided
+ * @param {Array} targets - array of target state ids
  */
-State.prototype.addConnection = function(source, target) {
-	// create new input variable
-	if (target === '*') {
-		var editor = new Editor(this, this.editor, target);
-		target = editor.getNewName();
-		if (target === null) {
-			return false;
+State.prototype.addConnection = function(targets) {
+	for (var t in targets) {
+		if (this.connections.indexOf(targets[t]) === -1) {
+			this.connections.push(targets[t]);
 		}
 	}
-
-	// create new output variable
-	if (source[1] === '*') {
-		var editor = new Editor(this, this.editor, target);
-		source[1] = editor.getNewName(true, source[0]);
-		if (source[1] === null) {
-			return false;
-		}
-	}
-
-	if (this.connections[target]) {
-		// check if connection not exists
-		for	(var i = 0; i < this.connections[target].length; i += 2) {
-			if (this.connections[target][i] === source[0] && this.connections[target][i + 1] === source[1]) {
-				return false;
-			}
-		}
-
-		// connection to this target already exists, prompt for aggregation func
-		if (this.connections[target][0] !== '') {
-			var func = this.getNewAggregationFunc();
-			if (!func) {
-				return false;
-			}
-			this.connections[target].unshift('', func);
-		}
-	} else {
-		this.connections[target] = [];
-	}
-	this.connections[target].push(source[0], source[1]);
 	this.redraw();
-	this.$container.find('.' + SmalldbEditor._namespace + '-invar-' + (target === '*' ? '_asterisk_' : target)).removeClass('default');
 	this.editor.onChange();
+};
+
+/**
+ * Is there a connection from this state to given target state?
+ *
+ * @param {State} target
+ * @returns {Boolean}
+ */
+State.prototype.isConnected = function(target) {
+	return this.connections.indexOf(target) !== -1;
 };
 
 /**
@@ -156,7 +171,7 @@ State.prototype.addConnection = function(source, target) {
  */
 State.prototype._onDragStart = function(e) {
 	var $target = $(e.target);
-	if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(SmalldbEditor._namespace + '-smalldb-output')) {
+	if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(SmalldbEditor._namespace + '-state-output')) {
 		$target.addClass('selecting');
 		$('body').on({
 			'mousemove.state-editor': $.proxy(function(e) {
@@ -166,7 +181,7 @@ State.prototype._onDragStart = function(e) {
 				this._onDragEndFromOutput.call(this, e, $target);
 			}, this)
 		});
-	} else if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(SmalldbEditor._namespace + '-smalldb-input')) {
+	} else if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(SmalldbEditor._namespace + '-state-input')) {
 		$target.addClass('selecting');
 		$('body').on({
 			'mousemove.state-editor': $.proxy(function(e) {
@@ -218,13 +233,13 @@ State.prototype._onDragOverFromOutput = function(e, $target) {
 
 	// highlight target
 	$('.' + SmalldbEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-smalldb-output')) {
+	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-output')) {
 		$(e.target).addClass('hover-invalid');
 	}
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-smalldb-input')) {
+	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-input')) {
 		$(e.target).addClass('hover-valid');
 		var id = $(e.target).closest('.' + SmalldbEditor._namespace + '-state')
-			   .find('.' + SmalldbEditor._namespace + '-smalldb-id').text();
+			   .find('.' + SmalldbEditor._namespace + '-state-id').text();
 		var state = this.editor.states[id];
 		x = state.position().left - 3;
 		y = state.position().top - 29
@@ -245,15 +260,15 @@ State.prototype._onDragOverFromOutput = function(e, $target) {
 State.prototype._onDragEndFromOutput = function(e, $target) {
 	var source = [this.id, $target.text()];
 	// create connection
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-smalldb-input')) {
+	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-input')) {
 		var id = $(e.target).closest('.' + SmalldbEditor._namespace + '-state')
-							.find('.' + SmalldbEditor._namespace + '-smalldb-id').text();
+							.find('.' + SmalldbEditor._namespace + '-state-id').text();
 		var target = $(e.target).data('variable');
 		this.editor.states[id].addConnection(source, target);
 	}
 
 	// clean up
-	$('.' + SmalldbEditor._namespace + '-smalldb-output.selecting').removeClass('selecting');
+	$('.' + SmalldbEditor._namespace + '-state-output.selecting').removeClass('selecting');
 	$('.' + SmalldbEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
 	this.canvas.redraw();
 	$('body').off('mousemove.state-editor mouseup.state-editor');
@@ -285,13 +300,13 @@ State.prototype._onDragOverFromInput = function(e, $target) {
 
 	// highlight target
 	$('.' + SmalldbEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-smalldb-input')) {
+	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-input')) {
 		$(e.target).addClass('hover-invalid');
 	}
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-smalldb-output')) {
+	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-output')) {
 		$(e.target).addClass('hover-valid');
 		var id = $(e.target).closest('.' + SmalldbEditor._namespace + '-state')
-							.find('.' + SmalldbEditor._namespace + '-smalldb-id').text();
+							.find('.' + SmalldbEditor._namespace + '-state-id').text();
 		var state = this.editor.states[id];
 		x = state.position().left + 1
 		  + state.$container.outerWidth();
@@ -313,15 +328,15 @@ State.prototype._onDragOverFromInput = function(e, $target) {
  */
 State.prototype._onDragEndFromInput = function(e, $target) {
 	// create connection
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-smalldb-output')) {
+	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-output')) {
 		var id = $(e.target).closest('.' + SmalldbEditor._namespace + '-state')
-							.find('.' + SmalldbEditor._namespace + '-smalldb-id').text();
+							.find('.' + SmalldbEditor._namespace + '-state-id').text();
 		var target = $(e.target).text();
 		this.editor.states[this.id].addConnection([id, target], $target.data('variable'));
 	}
 
 	// clean up
-	$('.' + SmalldbEditor._namespace + '-smalldb-input.selecting').removeClass('selecting');
+	$('.' + SmalldbEditor._namespace + '-state-input.selecting').removeClass('selecting');
 	$('.' + SmalldbEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
 	this.canvas.redraw();
 	$('body').off('mousemove.state-editor mouseup.state-editor');
@@ -378,8 +393,8 @@ State.prototype._onDragEnd = function(e) {
 /**
  * Updates current state position
  *
- * @param {number} dx - horizontal difference in px
- * @param {number} dy - vertical difference in px
+ * @param {Number} dx - horizontal difference in px
+ * @param {Number} dy - vertical difference in px
  */
 State.prototype.updatePosition = function(dx, dy) {
 	this.x -= dx;
@@ -412,7 +427,7 @@ State.prototype._onClick = function(e) {
 /**
  * Is current state selected?
  *
- * @returns {boolean}
+ * @returns {Boolean}
  */
 State.prototype.isActive = function() {
 	return !!this._active; // cast as bool
@@ -464,21 +479,6 @@ State.prototype._create = function() {
 	// header with state id and state type
 	var $header = this._createHeader();
 
-	// inputs
-	this.$inputs = $('<td class="' + SmalldbEditor._namespace + '-smalldb-inputs" />');
-	for (var variable in this.values) {
-		this.addInput(variable);
-	}
-	for (var conn in this.connections) {
-		this.addInput(conn);
-	}
-
-	// outputs
-	//this.$outputs = $('<td class="' + SmalldbEditor._namespace + '-smalldb-outputs" />');
-	//for (var variable in this.defaults.outputs) {
-	//	this.addOutput(variable);
-	//}
-
 	this.$container.append($('<tr />').append($header));
 	this.$container.append($('<tr />').append(this.$inputs).append(this.$outputs));
 };
@@ -490,61 +490,18 @@ State.prototype._create = function() {
  * @private
  */
 State.prototype._createHeader = function() {
-	var $id = $('<div class="' + SmalldbEditor._namespace + '-smalldb-id">');
+	var $id = $('<div class="' + SmalldbEditor._namespace + '-state-id">');
 	$id.on('dblclick', this._changeId.bind(this));
-	var $type = $('<div class="' + SmalldbEditor._namespace + '-smalldb-type">');
-	$type.text(this.type);
-	$type.on('dblclick', this._changeType.bind(this));
 
-	var $removeButton = $('<a href="#remove" class="' + SmalldbEditor._namespace + '-smalldb-remove"><i class="fa fa-fw fa-trash"></i> ×</a>');
+	var $removeButton = $('<a href="#remove" class="' + SmalldbEditor._namespace + '-state-remove"><i class="fa fa-fw fa-trash"></i> ×</a>');
 	$removeButton.on('click', this._remove.bind(this));
 	$removeButton.attr('title', 'Remove state');
 
-	var $header = $('<th colspan="2" class="' + SmalldbEditor._namespace + '-smalldb-header" />');
+	var $header = $('<th colspan="2" class="' + SmalldbEditor._namespace + '-state-header" />');
 	$header.append($id.text(this.id));
-	$header.append($type);
 	$header.append($removeButton);
 
 	return $header;
-};
-
-/**
- * Adds input variable
- *
- * @param {string} variable
- */
-State.prototype.addInput = function(variable) {
-	var selector = 'a.' + SmalldbEditor._namespace + '-smalldb-input[data-variable="' + variable + '"]';
-	if ($(selector, this.$inputs).length) {
-		return; // already exists
-	}
-
-	var $input = $('<a href="#settings" class="' + SmalldbEditor._namespace + '-smalldb-input" />');
-	$input.attr('data-variable', variable);
-	$input.text(variable);
-	$input.on('click', this._toggleInputEditor.bind(this));
-	$input.addClass(SmalldbEditor._namespace + '-invar-' + (variable === '*' ? '_asterisk_' : variable));
-	if ((!this.values || !this.values[variable]) && !this.connections[variable]) {
-		$input.addClass('default');
-	}
-	this.$inputs.append($input);
-};
-
-/**
- * Adds output variable
- *
- * @param {string} variable
- */
-State.prototype.addOutput = function (variable) {
-	var $output = $('<div class="' + SmalldbEditor._namespace + '-smalldb-output" />');
-
-	if (!(variable in this.defaults.outputs) && !('*' in this.defaults.outputs)) {
-		$output.addClass('missing');
-	}
-
-	$output.text(variable);
-	$output.addClass(SmalldbEditor._namespace + '-outvar-' + (variable === '*' ? '_asterisk_' : variable));
-	this.$outputs.append($output);
 };
 
 /**
@@ -552,12 +509,12 @@ State.prototype.addOutput = function (variable) {
  * used as on click handler for input variables
  *
  * @param {MouseEvent} e - Event
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 State.prototype._toggleInputEditor = function(e) {
 	if (!this._moved) {
-		var selector = '.' + SmalldbEditor._namespace + '-smalldb-input';
+		var selector = '.' + SmalldbEditor._namespace + '-state-input';
 		var editor = new Editor(this, this.editor, $(e.target).closest(selector).data('variable'));
 		editor.render();
 	}
@@ -619,7 +576,7 @@ State.prototype.getNewAggregationFunc = function() {
  * Changes current state id
  * used as on click handler
  *
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 State.prototype._changeId = function() {
@@ -637,48 +594,10 @@ State.prototype._changeId = function() {
 };
 
 /**
- * Changes current state type
- * used as on click handler
- *
- * @returns {boolean}
- * @private
- */
-State.prototype._changeType = function() {
-	// todo selectbox?
-	var old = this.type;
-	var type = null;
-	while (type === null) {
-		type = window.prompt(_('New state ID:'), old);
-
-		if (type === null) {
-			break;
-		} else if (!type.match(/^[a-zA-Z][a-zA-Z0-9_/]*$/)) {
-			alert(_('Only letters, numbers and underscore are allowed in state type and the first character must be a letter.'));
-			old = type;
-			type = null;
-		} else if (!(type in this.palette.states)) {
-			alert(_('This state type does not exist.'));
-			old = type;
-			type = null;
-		}
-	}
-
-	if (type === null) {
-		return;
-	} else {
-		this.type = type;
-		this.redraw();
-		this.editor.onChange();
-	}
-
-	return false;
-};
-
-/**
  * Removes current state
  * used as on click handler
  *
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 State.prototype._remove = function() {
@@ -743,10 +662,10 @@ State.prototype.renderConnections = function() {
  *
  * @param {string} id - input variable name
  * @param {Array} source - source state id and variable
- * @param {number} x2 - target base x position
- * @param {number} y2 - target base y position
+ * @param {Number} x2 - target base x position
+ * @param {Number} y2 - target base y position
  * @param {string} [color] - css color string starting with #
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 State.prototype._renderConnection = function(id, source, x2, y2, color) {

@@ -13,7 +13,7 @@ var Point = function(x, y) {
 
 /**
  * @param {Point} p
- * @returns {boolean}
+ * @returns {Boolean}
  */
 Point.prototype.equals = function(p) {
 	return this.x === p.x && this.y === p.y;
@@ -29,20 +29,29 @@ Point.prototype.plus = function(p) {
 
 /**
  * @param {Point} p
- * @returns {Point}
+ * @returns {Point} resulting vector
  */
 Point.prototype.minus = function(p) {
 	return new Point(this.x - p.x, this.y - p.y);
 };
 
 /**
- * Calculates the cross product of the two points.
+ * Calculates the dot product of the two points.
  *
  * @param {Point} p
- * @returns {Number} cross product
+ * @returns {Number} dot product
  */
 Point.prototype.dot = function(p) {
 	return this.x * p.y - this.y * p.x;
+};
+
+/**
+ * Computes norm of vector
+ *
+ * @returns {Number}
+ */
+Point.prototype.norm = function() {
+	return Math.sqrt(this.x * this.x + this.y * this.y);
 };
 
 /**
@@ -57,19 +66,21 @@ Point.prototype.dist = function(p) {
 	return Math.sqrt(dx + dy);
 };
 
+Point.prototype.toString = function() {
+	return '[' + parseInt(this.x) + ';' + parseInt(this.y) + ']';
+};
+
 /**
- * Calculates the angle ABC (in radians)
+ * Calculates the angle between two points using atan2 (in radians)
  *
  * @param {Point} a
  * @param {Point} b
- * @param {Point} c
+ * @returns {Number} angle in radians, normalized to interval [0;2pi)
  * @static
  */
-Point.angle = function(a, b, c) {
-	var ab = Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
-	var bc = Math.sqrt(Math.pow(b.x - c.x,2) + Math.pow(b.y - c.y, 2));
-	var ac = Math.sqrt(Math.pow(c.x - a.x,2) + Math.pow(c.y - a.y, 2));
-	return Math.acos((bc * bc + ab * ab - ac * ac) / (2 * bc * ab));
+Point.angle = function(a, b) {
+	var v = b.minus(a);
+	return (2 * Math.PI - Math.atan2(v.y, v.x)) % (2 * Math.PI);
 };
 
 /**

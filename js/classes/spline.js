@@ -108,6 +108,9 @@ Spline.prototype._drawCurvedPath = function(cps) {
 			var k = 2 * (i - 1);
 			ctx.bezierCurveTo(cps[k - 1].x, cps[k - 1].y, cps[k].x, cps[k].y, this.points[i].x, this.points[i].y);
 		}
+		if (!k) { // 3 points only -> no middle part with bezier
+			k = cps.length - 2;
+		}
 		ctx.quadraticCurveTo(cps[k + 1].x, cps[k + 1].y, this.points[i].x, this.points[i].y);
 		ctx.stroke();
 	}
