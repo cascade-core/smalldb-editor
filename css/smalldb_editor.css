@@ -35,29 +35,6 @@
 	transform-origin: top left;
 }
 
-.smalldb-editor-palette {
-	display: none;
-	position: absolute;
-	top: 24px;
-	left: 0;
-	bottom: 0;
-	width: auto;
-	max-width: 300px;
-	background: #fff;
-	overflow: hidden;
-	overflow-y: scroll;
-	z-index: 100;
-	border: 1px solid #aaa;
-	border-left: 0;
-	padding-top: 28px;
-}
-
-.smalldb-editor-toolbar:hover + .smalldb-editor-palette,
-.smalldb-editor-palette:hover {
-	display: block;
-	border-bottom: 0;
-}
-
 .smalldb-editor-toolbar {
 	position: absolute;
 	top: 0;
@@ -73,8 +50,7 @@
 
 .smalldb-editor-state,
 .smalldb-editor-toolbar,
-.smalldb-editor-variable-editor-title,
-.smalldb-editor-palette {
+.smalldb-editor-variable-editor-title {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -94,6 +70,7 @@
 }
 
 .smalldb-editor-state {
+	font-size: 9px;
 	border: 1px solid #333;
 	line-height: 20px;
 	border-radius: 50%;
@@ -109,28 +86,17 @@
 	background: #efe;
 }
 
-.smalldb-editor-state.smalldb-editor-active .smalldb-editor-state-header {
-	background: #bfb;
+.smalldb-editor-state.smalldb-editor-active {
+	background: #bfb !important;
 }
 
 .smalldb-editor-clone {
 	z-index: 150;
 }
 
-.smalldb-editor-palette .smalldb-editor-state {
-	position: relative;
-	margin: 10px;
-}
-
 .smalldb-editor-state:hover {
 	background: rgba(255, 255, 255, 1);
 	z-index: 20;
-}
-
-.smalldb-editor-state th,
-.smalldb-editor-state td {
-	font-size: 9px;
-	vertical-align: top;
 }
 
 .smalldb-editor-state-header a {
@@ -169,12 +135,6 @@
 .smalldb-editor-state-edit {
 	left: 22px;
 	right: auto;
-}
-
-.smalldb-editor-palette .smalldb-editor-state:hover .smalldb-editor-state-doc,
-.smalldb-editor-palette .smalldb-editor-state:hover .smalldb-editor-state-edit,
-.smalldb-editor-palette .smalldb-editor-state:hover .smalldb-editor-state-remove {
-	display: none;
 }
 
 .smalldb-editor-state:hover .smalldb-editor-state-doc,
@@ -232,16 +192,6 @@
 	height: auto !important;
 	z-index: 1000;
 	box-shadow: 0 2px 10px rgba(0, 0, 0, .2);
-}
-
-.smalldb-editor-fullscreen .smalldb-editor-palette {
-	display: block;
-	width: 150px;
-}
-
-.smalldb-editor-fullscreen .smalldb-editor-palette:hover {
-	width: auto;
-	max-width: 300px;
 }
 
 .smalldb-editor-variable-editor {

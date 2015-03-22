@@ -49,8 +49,9 @@ Action.prototype.usesEndNode = function() {
  * Renders transitions to canvas
  *
  * @param {Array} states
+ * @param {Object} index - how many same connections did we rendered, stored by key "{source}-{target}"
  */
-Action.prototype.renderTransitions = function(states) {
+Action.prototype.renderTransitions = function(states, index) {
 	for (var id in this.transitions) {
 		var targets = this.transitions[id].getTargets();
 		for (var t in targets) {
@@ -65,13 +66,20 @@ Action.prototype.renderTransitions = function(states) {
 				this.canvas.drawCycleConnection(label, from, new Point(to.x - w, to.y));
 			} else {
 				var bidirectional = this.states[targets[t]].isConnected(id);
+				bidirectional = this.states[targets[t]].isConnected(id);
 				if (bidirectional) {
 					var from = states[id].center();
 					from.id = id;
 					var to = states[targets[t]].center();
 					to.id = targets[t];
 				}
-				this.canvas.drawConnection(label, from, to, '#000', bidirectional);
+				var key = from.toString() + '-' + to.toString();
+				if (!index[key]) {
+					index[key] = 1;
+				} else {
+					index[key]++;
+				}
+				this.canvas.drawConnection(label, from, to, index[key], '#000', bidirectional);
 			}
 		}
 	}

@@ -136,7 +136,7 @@ Canvas.prototype._onMouseDown = function(e) {
 		return;
 	}
 
-	var state = $(e.target).closest('table.' + SmalldbEditor._namespace + '-state')[0];
+	var state = $(e.target).closest('div.' + SmalldbEditor._namespace + '-state')[0];
 	if (!state) {
 		var zoom = this.getZoom();
 		var speed = this.options.canvasSpeed / zoom;
@@ -247,11 +247,13 @@ Canvas.prototype._onMouseUp = function(e) {
  *
  * @param {Point} from
  * @param {Point} to
+ * @param {Number} [index=1] when multiple connections are drawn
  * @param {String} [color='#000'] defaults to black
  * @param {Boolean} [bidirectional] defaults false, when true, both points need to contain id property with state id
  * @private
  */
-Canvas.prototype.drawConnection = function(label, from, to, color, bidirectional) {
+Canvas.prototype.drawConnection = function(label, from, to, index, color, bidirectional) {
+	index = index || 1;
 	// line style
 	color = color || '#000';
 	this.context.save();
@@ -268,7 +270,7 @@ Canvas.prototype.drawConnection = function(label, from, to, color, bidirectional
 		var v = from.minus(to); // vector to get direction
 		var angle = Point.angle(from, to); // to get direction of deviation
 		var dist = v.norm(); // distance between start & end
-		var offset = Math.min(dist / 8, 20); // perpendicular offset to straight connection
+		var offset = index * Math.min(dist / 8, 20); // perpendicular offset to straight connection
 		var alfa = Math.atan(2 * offset / dist); // angle inside rotated ellipsis
 		var beta = Math.asin(Math.abs(from.y - to.y) / dist); // angle of ellipsis rotation
 		var gamma = alfa + beta; // total angle between control point and horizontal axis
@@ -610,8 +612,9 @@ Canvas.prototype._writeText = function(text, x, y) {
 Canvas.prototype.redraw = function() {
 	this.context.clearRect(0, 0, this.width, this.height);
 	this._drawBackground();
+	var index = {};
 	for (var id in this.editor.actions) {
-		this.editor.actions[id].renderTransitions(this.editor.states);
+		this.editor.actions[id].renderTransitions(this.editor.states, index);
 	}
 };
 

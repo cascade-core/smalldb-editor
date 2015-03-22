@@ -192,8 +192,9 @@ SmalldbEditor.prototype.render = function() {
 	}
 
 	// then render all transitions
+	var index = {};
 	for (var id in this.actions) {
-		this.actions[id].renderTransitions(this.states);
+		this.actions[id].renderTransitions(this.states, index);
 	}
 
 	// scroll to top left corner of diagram bounding box

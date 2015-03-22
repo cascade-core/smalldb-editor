@@ -20,26 +20,6 @@ var State = function(id, data, editor) {
 };
 
 /**
- * Normalizes connections to internal format, where aggregation
- * function is stored as pair ["", "func"] instead of [":func"]
- *
- * @param {Object} connections
- * @returns {Object}
- * @private
- */
-State.prototype._processConnections = function(connections) {
-	if (connections) {
-		for (var id in connections) {
-			if (connections[id].length > 1 && connections[id][0][0] === ':') {
-				connections[id][0] = connections[id][0].substr(1);
-				connections[id].unshift('');
-			}
-		}
-	}
-	return connections;
-};
-
-/**
  * Renders state to canvas
  */
 State.prototype.render = function() {
@@ -171,7 +151,7 @@ State.prototype.isConnected = function(target) {
  */
 State.prototype._onDragStart = function(e) {
 	var $target = $(e.target);
-	if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(SmalldbEditor._namespace + '-state-output')) {
+	if ((e.metaKey || e.ctrlKey)) {
 		$target.addClass('selecting');
 		$('body').on({
 			'mousemove.state-editor': $.proxy(function(e) {
@@ -179,18 +159,6 @@ State.prototype._onDragStart = function(e) {
 			}, this),
 			'mouseup.state-editor': $.proxy(function(e) {
 				this._onDragEndFromOutput.call(this, e, $target);
-			}, this)
-		});
-	} else if ((e.metaKey || e.ctrlKey) && $(e.target).hasClass(SmalldbEditor._namespace + '-state-input')) {
-		$target.addClass('selecting');
-		$('body').on({
-			'mousemove.state-editor': $.proxy(function(e) {
-				this._onDragOverFromInput.call(this, e, $target);
-				return false;
-			}, this),
-			'mouseup.state-editor': $.proxy(function(e) {
-				this._onDragEndFromInput.call(this, e, $target);
-				return false;
 			}, this)
 		});
 	} else {
@@ -269,74 +237,6 @@ State.prototype._onDragEndFromOutput = function(e, $target) {
 
 	// clean up
 	$('.' + SmalldbEditor._namespace + '-state-output.selecting').removeClass('selecting');
-	$('.' + SmalldbEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
-	this.canvas.redraw();
-	$('body').off('mousemove.state-editor mouseup.state-editor');
-};
-
-/**
- * Drag over handler - used on mousemove event
- * renders connection from output of source state to current mouse position
- *
- * @param {MouseEvent} e - Event
- * @param {jQuery} $target - target state input variable element
- * @private
- */
-State.prototype._onDragOverFromInput = function(e, $target) {
-	// compute current mouse position
-	var x = e.pageX
-		  + this.canvas.$container[0].scrollLeft
-		  - this.canvas.$container.offset().left;
-	var y = e.pageY
-		  + this.canvas.$container[0].scrollTop
-		  - this.canvas.$container.offset().top;
-	var zoom = this.canvas.getZoom();
-	x /= zoom;
-	y /= zoom;
-	var x2 = this.position().left - 3;
-	var y2 = this.position().top
-		   + 7 // center of row
-		   + $target.position().top / zoom; // add position of variable
-
-	// highlight target
-	$('.' + SmalldbEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-input')) {
-		$(e.target).addClass('hover-invalid');
-	}
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-output')) {
-		$(e.target).addClass('hover-valid');
-		var id = $(e.target).closest('.' + SmalldbEditor._namespace + '-state')
-							.find('.' + SmalldbEditor._namespace + '-state-id').text();
-		var state = this.editor.states[id];
-		x = state.position().left + 1
-		  + state.$container.outerWidth();
-		y = state.position().top + 7
-		  + $(e.target).position().top / zoom; 	// add position of variable
-	}
-
-	this.canvas.redraw();
-	this.canvas.drawConnection(new Point(x, y), new Point(x2, y2), '#c60');
-};
-
-/**
- * Drag end handler - used on mouseup event
- * creates connection from output of source state
- *
- * @param {MouseEvent} e - Event
- * @param {jQuery} $target - target state input variable element
- * @private
- */
-State.prototype._onDragEndFromInput = function(e, $target) {
-	// create connection
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-output')) {
-		var id = $(e.target).closest('.' + SmalldbEditor._namespace + '-state')
-							.find('.' + SmalldbEditor._namespace + '-state-id').text();
-		var target = $(e.target).text();
-		this.editor.states[this.id].addConnection([id, target], $target.data('variable'));
-	}
-
-	// clean up
-	$('.' + SmalldbEditor._namespace + '-state-input.selecting').removeClass('selecting');
 	$('.' + SmalldbEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
 	this.canvas.redraw();
 	$('body').off('mousemove.state-editor mouseup.state-editor');
@@ -469,18 +369,16 @@ State.prototype.deactivate = function() {
  * @private
  */
 State.prototype._create = function() {
-	// create table container
-	this.$container = $('<table class="' + SmalldbEditor._namespace + '-state">');
+	// create container
+	this.$container = $('<div class="' + SmalldbEditor._namespace + '-state">');
 
 	// make it draggable
 	this.$container.on('click', this._onClick.bind(this));
 	this.$container.on('mousedown', this._onDragStart.bind(this));
 
-	// header with state id and state type
+	// header with state id and remove button
 	var $header = this._createHeader();
-
-	this.$container.append($('<tr />').append($header));
-	this.$container.append($('<tr />').append(this.$inputs).append(this.$outputs));
+	this.$container.append($header);
 };
 
 /**
@@ -497,7 +395,7 @@ State.prototype._createHeader = function() {
 	$removeButton.on('click', this._remove.bind(this));
 	$removeButton.attr('title', 'Remove state');
 
-	var $header = $('<th colspan="2" class="' + SmalldbEditor._namespace + '-state-header" />');
+	var $header = $('<div class="' + SmalldbEditor._namespace + '-state-header" />');
 	$header.append($id.text(this.id));
 	$header.append($removeButton);
 
