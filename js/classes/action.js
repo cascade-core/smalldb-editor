@@ -68,7 +68,6 @@ Action.prototype.renderTransitions = function(states, index) {
 				this.canvas.drawCycleConnection(label, from, new Point(to.x - w, to.y));
 			} else {
 				var bidirectional = this.states[targets[t]].isConnected(id);
-				bidirectional = this.states[targets[t]].isConnected(id);
 				if (bidirectional) {
 					var from = states[id].center();
 					from.id = id;
