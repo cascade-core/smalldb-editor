@@ -439,7 +439,7 @@ Toolbar.prototype._paste = function() {
 			var b = states[id];
 			var exists = id in this.editor.states;
 			if (exists) {
-				id = this.editor.states[id].getNewId();
+				id = this.editor.states[id].getNewLabel();
 				if (!id) {
 					continue;
 				}

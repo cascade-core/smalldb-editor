@@ -70,15 +70,22 @@
 }
 
 .smalldb-editor-state {
-	font-size: 9px;
+	font-size: 10px;
 	border: 1px solid #333;
 	line-height: 20px;
 	border-radius: 50%;
 	z-index: 10;
 	position: absolute;
-	padding: 3px;
+	padding: 6px;
 	margin: 0;
 	background: rgba(255, 255, 230, 0.7);
+	text-align: center;
+}
+
+.smalldb-editor-state.smalldb-editor-id-__start__,
+.smalldb-editor-state.smalldb-editor-id-__end__ {
+	width: 25px;
+	height: 25px;
 }
 
 .smalldb-editor-state.smalldb-editor-active,
@@ -86,6 +93,7 @@
 	background: #efe;
 }
 
+.smalldb-editor-state.hover-valid,
 .smalldb-editor-state.smalldb-editor-active {
 	background: #bfb !important;
 }
@@ -99,14 +107,14 @@
 	z-index: 20;
 }
 
-.smalldb-editor-state-header a {
+.smalldb-editor-state a {
 	color: #666;
 }
 
 .smalldb-editor-state-remove {
 	position: absolute;
 	top: -15px;
-	right: 0px;
+	right: -6px;
 	z-index: 1;
 	background: rgba(238, 238, 238, 0.7);
 	border: 1px solid #333;
@@ -121,31 +129,15 @@
 	text-align: center;
 	overflow: hidden;
 	vertical-align: top;
+	font-weight: normal;
 }
 
 .smalldb-editor-state-remove:hover {
 	background: #fcc;
 }
 
-.smalldb-editor-state-doc {
-	left: 0;
-	right: auto;
-}
-
-.smalldb-editor-state-edit {
-	left: 22px;
-	right: auto;
-}
-
-.smalldb-editor-state:hover .smalldb-editor-state-doc,
-.smalldb-editor-state:hover .smalldb-editor-state-edit,
 .smalldb-editor-state:hover .smalldb-editor-state-remove {
 	display: block;
-}
-
-.smalldb-editor-state-id {
-	font-weight: bold;
-	text-align: center;
 }
 
 .smalldb-editor * {

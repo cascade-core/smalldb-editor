@@ -3,7 +3,7 @@
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
- * @param {string} id - state identification
+ * @param {String} id - state identification
  * @param {Object} data - state properties
  * @param {SmalldbEditor} editor - reference to plugin instance
  * @class
@@ -11,6 +11,7 @@
 var State = function(id, data, editor) {
 	this.id = id;
 	this.data = data;
+	this.data.color = data.color || '#eee';
 	this.editor = editor;
 	this.canvas = editor.canvas;
 
@@ -154,12 +155,8 @@ State.prototype._onDragStart = function(e) {
 	if ((e.metaKey || e.ctrlKey)) {
 		$target.addClass('selecting');
 		$('body').on({
-			'mousemove.state-editor': $.proxy(function(e) {
-				this._onDragOverFromOutput.call(this, e, $target);
-			}, this),
-			'mouseup.state-editor': $.proxy(function(e) {
-				this._onDragEndFromOutput.call(this, e, $target);
-			}, this)
+			'mousemove.state-editor': this._onDragOverConnect.bind(this),
+			'mouseup.state-editor': this._onDragEndConnect.bind(this)
 		});
 	} else {
 		var zoom = this.canvas.getZoom();
@@ -179,14 +176,12 @@ State.prototype._onDragStart = function(e) {
 
 /**
  * Drag over handler - used on mousemove event
- * renders connection from output of source state to current mouse position
+ * renders connection from this state to current mouse position
  *
  * @param {MouseEvent} e - Event
- * @param {jQuery} $target
  * @private
  */
-State.prototype._onDragOverFromOutput = function(e, $target) {
-	var source = [this.id, $target.text()];
+State.prototype._onDragOverConnect = function(e) {
 	// compute current mouse position
 	var zoom = this.canvas.getZoom();
 	var x = e.pageX
@@ -194,27 +189,22 @@ State.prototype._onDragOverFromOutput = function(e, $target) {
 		  - this.canvas.$container.offset().left;
 	var y = e.pageY
 		  + this.canvas.$container[0].scrollTop
-		  - this.canvas.$container.offset().top
-		  - $target.parent().position().top - 10;
+		  - this.canvas.$container.offset().top;
 	x /= zoom;
 	y /= zoom;
+	var target = new Point(x, y);
+	var bidirectional = false;
 
 	// highlight target
 	$('.' + SmalldbEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-output')) {
-		$(e.target).addClass('hover-invalid');
-	}
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-input')) {
+	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state')) {
 		$(e.target).addClass('hover-valid');
-		var id = $(e.target).closest('.' + SmalldbEditor._namespace + '-state')
-			   .find('.' + SmalldbEditor._namespace + '-state-id').text();
+		var id = $(e.target).data(SmalldbEditor._namespace + '-id');
 		var state = this.editor.states[id];
-		x = state.position().left - 3;
-		y = state.position().top - 29
-		  + $(e.target).position().top / zoom; // add position of variable
+		target = state.getBorderPoint(this.center());
 	}
 	this.canvas.redraw();
-	this._renderConnection(null, source, x, y, '#c60');
+	this._renderConnection(target, '#c60', bidirectional);
 };
 
 /**
@@ -222,11 +212,10 @@ State.prototype._onDragOverFromOutput = function(e, $target) {
  * creates connection from output of source state to target
  *
  * @param {MouseEvent} e - Event
- * @param {jQuery} $target - source state output variable element
  * @private
  */
-State.prototype._onDragEndFromOutput = function(e, $target) {
-	var source = [this.id, $target.text()];
+State.prototype._onDragEndConnect = function(e) {
+	var source = this.id;
 	// create connection
 	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-input')) {
 		var id = $(e.target).closest('.' + SmalldbEditor._namespace + '-state')
@@ -236,7 +225,7 @@ State.prototype._onDragEndFromOutput = function(e, $target) {
 	}
 
 	// clean up
-	$('.' + SmalldbEditor._namespace + '-state-output.selecting').removeClass('selecting');
+	$('.' + SmalldbEditor._namespace + '-state.selecting').removeClass('selecting');
 	$('.' + SmalldbEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
 	this.canvas.redraw();
 	$('body').off('mousemove.state-editor mouseup.state-editor');
@@ -366,40 +355,31 @@ State.prototype.deactivate = function() {
 
 /**
  * Creates HTML container for current state
+ *
  * @private
  */
 State.prototype._create = function() {
 	// create container
 	this.$container = $('<div class="' + SmalldbEditor._namespace + '-state">');
+	this.$container.addClass(SmalldbEditor._namespace + '-id-' + this.id);
+	if (this.data.color) {
+		this.$container.css('background', this.data.color);
+	}
 
 	// make it draggable
 	this.$container.on('click', this._onClick.bind(this));
 	this.$container.on('mousedown', this._onDragStart.bind(this));
 
-	// header with state id and remove button
-	var $header = this._createHeader();
-	this.$container.append($header);
-};
-
-/**
- * Creates HTML header element of this state
- *
- * @returns {jQuery}
- * @private
- */
-State.prototype._createHeader = function() {
-	var $id = $('<div class="' + SmalldbEditor._namespace + '-state-id">');
-	$id.on('dblclick', this._changeId.bind(this));
+	// state id and remove button
+	this.$container.text(this.data.label);
+	this.$container.data(SmalldbEditor._namespace + '-id', this.id);
+	this.$container.attr('title', this.id);
+	this.$container.on('dblclick', this._changeLabel.bind(this));
 
 	var $removeButton = $('<a href="#remove" class="' + SmalldbEditor._namespace + '-state-remove"><i class="fa fa-fw fa-trash"></i> ×</a>');
 	$removeButton.on('click', this._remove.bind(this));
 	$removeButton.attr('title', 'Remove state');
-
-	var $header = $('<div class="' + SmalldbEditor._namespace + '-state-header" />');
-	$header.append($id.text(this.id));
-	$header.append($removeButton);
-
-	return $header;
+	this.$container.append($removeButton);
 };
 
 /**
@@ -423,67 +403,27 @@ State.prototype._toggleInputEditor = function(e) {
 /**
  * Gets new state id from user via window.prompt()
  *
- * @returns {?string}
+ * @returns {?String}
  */
-State.prototype.getNewId = function() {
-	var old = this.id;
-	var id = null;
-	while (id === null) {
-		id = window.prompt(_('New state ID:'), old);
-
-		if (id === null) {
-			return id;
-		} else if (!id.match(/^[a-zA-Z][a-zA-Z0-9_]*$/)) {
-			alert(_('Only letters, numbers and underscore are allowed in state ID and the first character must be a letter.'));
-			old = id;
-			id = null;
-		} else if (id in this.editor.states) {
-			alert(_('This state ID is already taken by another state.'));
-			old = id;
-			id = null;
-		}
-	}
-
-	return id;
+State.prototype.getNewLabel = function() {
+	var old = this.data.label;
+	return window.prompt(_('New state label:'), old);
 };
 
 /**
- * Gets new aggregation function name
- *
- * @returns {?string}
- */
-State.prototype.getNewAggregationFunc = function() {
-	var old = 'and';
-	var id = null;
-	while (id === null) {
-		id = window.prompt(_('Aggregation function:'), old);
-
-		if (id === null) {
-			return id;
-		} else if (!id.match(/^[a-zA-Z][a-zA-Z0-9_]*$/)) {
-			alert(_('Only letters, numbers and underscore are allowed in aggregation function name and the first character must be a letter.'));
-			old = id;
-			id = null;
-		}
-	}
-
-	return id;
-};
-
-/**
- * Changes current state id
+ * Changes current state label
  * used as on click handler
  *
  * @returns {Boolean}
  * @private
  */
-State.prototype._changeId = function() {
-	var id = this.getNewId();
+State.prototype._changeLabel = function() {
+	var label = this.getNewLabel();
 
-	if (id === null) {
-		return;
+	if (label === null) {
+		return label;
 	} else {
-		this.id = id;
+		this.data.label = label;
 		this.redraw();
 		this.editor.onChange();
 	}
@@ -531,83 +471,24 @@ State.prototype.getBoundingBox = function() {
 };
 
 /**
- * Renders connections to this state
- */
-State.prototype.renderConnections = function() {
-	var x2 = this.position().left - 3;
-	var y2 = this.position().top;
-	for (var id in this.connections) {
-		var sources = this.connections[id];
-
-		// aggregation (:and, :or, ...)
-		var query = '.' + SmalldbEditor._namespace + '-invar-' + (id === '*' ? '_asterisk_' : id);
-		var $input = $(query, this.$container);
-		$input.find('span').remove();
-		var i = 0;
-		if (sources[0] === '') {
-			$input.append('<span> (:' + sources[1] + ')</span>');
-			i += 2;
-		}
-
-		for (; i < sources.length; i = i + 2) {
-			this._renderConnection(id, sources.slice(i, i + 2), x2, y2);
-		}
-	}
-};
-
-/**
  * Renders single connection
  *
- * @param {string} id - input variable name
- * @param {Array} source - source state id and variable
- * @param {Number} x2 - target base x position
- * @param {Number} y2 - target base y position
- * @param {string} [color] - css color string starting with #
+ * @param {Point} target - target position
+ * @param {String} [color='#000'] - css color string starting with #
  * @returns {Boolean}
  * @private
  */
-State.prototype._renderConnection = function(id, source, x2, y2, color) {
-	var query = '.' + SmalldbEditor._namespace + '-invar-' + (id === '*' ? '_asterisk_' : id);
-	var $input = $(query, this.$container);
-	var state = this.editor.states[source[0]];
-	var zoom = this.canvas.getZoom();
-	if (state) {
-		if ($input.length) {
-			var yy2 = y2 // from top of state container
-					+ 7	 // center of row
-					+ $input.position().top / zoom; // add position of variable
-		} else {
-			var yy2 = y2 + 36; // state header height + center of row
-		}
-		query = '.' + SmalldbEditor._namespace + '-outvar-' + (source[1] === '*' ? '_asterisk_' : source[1]);
-		var $output = $(query, state.$container);
-		var missing = $output.hasClass('missing');
-
-		if (state.$container.find(query).length === 0) {
-			state.addOutput(source[1]);
-			this.canvas.redraw();
-			return false;
-		}
-
-		var offset = state.position();
-		var x1 = offset.left // from left of state container
-				+ 1			 // offset
-				+ state.$container.outerWidth(); // add container width
-		var y1 = offset.top // from top of state container
-				+ 7			// center of row
-				+ state.$container.find(query).position().top / zoom; // add position of variable
-		var color = color || (missing ? '#f00' : '#000');
-		this.canvas.drawConnection(new Point(x1, y1), new Point(x2, yy2), color);
-	} else {
-		// state outside of this scope or not exists
-		this.$container.find(query).addClass('missing').attr('title', _('Source of this connection may be invalid'));
-	}
+State.prototype._renderConnection = function(target, color) {
+	var from = this.getBorderPoint(target);
+	var color = color || '#000';
+	this.canvas.drawConnection('', from, target, {}, color);
 };
 
 /**
  * Serializes current state to JSON object
  *
  * @returns {Object}
+ * @todo
  */
 State.prototype.serialize = function() {
 	var B = {

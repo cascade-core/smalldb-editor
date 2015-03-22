@@ -90,7 +90,8 @@ Canvas.prototype._create = function() {
 		mousedown: this._onMouseDown.bind(this),
 		mouseup: this._onMouseUp.bind(this),
 		mousemove: this._onMouseMove.bind(this),
-		scroll: this._onScroll.bind(this)
+		scroll: this._onScroll.bind(this),
+		dblclick: this._onDblClick.bind(this)
 	});
 	// disable text selection, forces default cursor when selecting
 	this.$container[0].onselectstart = function() {
@@ -180,6 +181,31 @@ Canvas.prototype._onMouseMove = function(e) {
 		$c.scrollLeft((this.canvas.width - speed * e.pageX) - this._cursor.x);
 		$c.scrollTop((this.canvas.height - speed * e.pageY) - this._cursor.y);
 	}
+};
+
+/**
+ * On double click handler, used to create new state
+ *
+ * @param {ScrollEvent} e - Event
+ * @private
+ */
+Canvas.prototype._onDblClick = function(e) {
+	// save center of viewport
+	var label = window.prompt(_('New state label:'));
+	var id = label.replace(/[^a-z0-9_]+/g, '-').replace(/^-|-$/g, '');
+	var $c = this.$container;
+	this._cursor = {
+		x: (e.pageX - $c.offset().left + $c.scrollLeft()) - this.options.canvasExtraWidth,
+		y: (e.pageY - $c.offset().top + $c.scrollTop()) - this.options.canvasExtraHeight
+	};
+	var state = new State(id, { label: label }, this.editor);
+	state.x = this._cursor.x;
+	state.y = this._cursor.y;
+	state.render();
+	state.updatePosition(state.$container.outerWidth() / 2, state.$container.outerHeight() / 2); // shift position of state to center
+	this.editor.states[id] = state;
+	this.editor.onChange();
+	this.redraw();
 };
 
 /**
@@ -612,9 +638,9 @@ Canvas.prototype._writeText = function(text, x, y) {
 Canvas.prototype.redraw = function() {
 	this.context.clearRect(0, 0, this.width, this.height);
 	this._drawBackground();
-	var index = {};
+	this.editor.index = {};
 	for (var id in this.editor.actions) {
-		this.editor.actions[id].renderTransitions(this.editor.states, index);
+		this.editor.actions[id].renderTransitions(this.editor.states, this.editor.index);
 	}
 };
 

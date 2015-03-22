@@ -11,6 +11,8 @@ var Transition = function(action, data) {
 	this.action = action;
 	data = data || {};
 	this.data = data;
+	this.label = data.label || action.id;
+	this.color = data.color || '#000';
 };
 
 /**

@@ -90,28 +90,28 @@ SmalldbEditor.prototype.placeStates = function() {
 	var components = tarjan.run();
 
 	// compute max width of each component
-	var max = 0, step = 150;
+	var max = 0, stepX = 100, stepY = 200;
 	for (var i in components) {
 		var scc = components[i];
-		var width = scc.length * step;
+		var width = scc.length * stepX;
 		max = Math.max(max, width);
 	}
 
-	var a, b = 10, c = -1;
+	var dx, dy = 10, sign = -1;
 	// components are sorted in reverse topological order
 	for (var i = components.length - 1; i >= 0; i--) {
 		var scc = components[i];
-		var width = scc.length * step;
-		a = 10 + (max - width) / 2;
+		var width = scc.length * stepX;
+		dx = 10 + (max - width) / 2;
 		for (var j = scc.length - 1; j >= 0; j--) {
 			var state = this.states[scc[j].name];
-			state.x = a;
-			state.y = b;
-			a += step;
-			b += c * 50;
-			c *= -1;
+			state.x = dx;
+			state.y = dy;
+			dx += stepX;
+			dy += sign * stepX;
+			sign *= -1;
 		}
-		b += step;
+		dy += stepY;
 	}
 };
 
@@ -157,13 +157,13 @@ SmalldbEditor.prototype.processData = function() {
 	}
 
 	// states
-	this.states.__start__ = new State('start', {}, this);
+	this.states.__start__ = new State('__start__', { label: '', color: '#000' }, this);
 	if (this.data.states) {
 		for (var id in this.data.states) {
 			this.states[id] = new State(id, this.data.states[id], this);
 		}
 	}
-	this.states.__end__ = new State('end', {}, this);
+	this.states.__end__ = new State('__end__', { label: '', color: '#000' }, this);
 
 	// actions
 	var endFound = false;
@@ -192,9 +192,9 @@ SmalldbEditor.prototype.render = function() {
 	}
 
 	// then render all transitions
-	var index = {};
+	this.index = {};
 	for (var id in this.actions) {
-		this.actions[id].renderTransitions(this.states, index);
+		this.actions[id].renderTransitions(this.states, this.index);
 	}
 
 	// scroll to top left corner of diagram bounding box
