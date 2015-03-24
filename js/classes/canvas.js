@@ -544,9 +544,11 @@ Canvas.prototype._findPointsToFollow = function(box, inters, from, to) {
  * @param {Point} from
  * @param {Point} to
  * @param {String} [color='#000'] defaults to black
+ * @param {Number} [index=1] when multiple connections are drawn
  * @private
  */
-Canvas.prototype.drawCycleConnection = function(label, from, to, color) {
+Canvas.prototype.drawCycleConnection = function(label, from, to, index, color) {
+	index = index || 1;
 	// line style
 	color = color || '#000';
 	this.context.save();
@@ -557,20 +559,20 @@ Canvas.prototype.drawCycleConnection = function(label, from, to, color) {
 
 	// control points
 	var diffX = (to.x - from.x) / 2;
-	var cp1X = from.x + 60;
-	var cp1Y = from.y - 40;
-	var cp2X = to.x - 60;
-	var cp2Y = to.y - 40;
+	var cp1X = from.x + 50 + 25 * (index - 1);
+	var cp1Y = from.y - 30 * index;
+	var cp2X = to.x - 50 - 25 * (index - 1);
+	var cp2Y = to.y - 30 * index;
 
 	// draw curved line
 	this.context.moveTo(from.x, from.y);
 	this.context.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, to.x - 5, to.y);
 	this.context.stroke();
 	this.context.closePath();
-	this._writeText(label, from.x + diffX, from.y - 35);
+	this._writeText(label, from.x + diffX, from.y - 25 * index);
 
 	// draw arrow in the end point
-	this._drawArrow(to.x, to.y, 0);
+	this._drawArrow(to.x, to.y, -0.1);
 };
 
 /**

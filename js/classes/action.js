@@ -63,9 +63,13 @@ Action.prototype.renderTransitions = function(states, index) {
 			}
 			var from = states[id].getBorderPoint(states[targets[t]].center());
 			var to = states[targets[t]].getBorderPoint(states[id].center());
+			var key = from.toString() + '-' + to.toString();
+			if (!index[key]) {
+				index[key] = 1;
+			}
 			if (id === targets[t]) {
 				var w = states[id].$container.outerWidth();
-				this.canvas.drawCycleConnection(label, from, new Point(to.x - w, to.y));
+				this.canvas.drawCycleConnection(label, from, new Point(to.x - w, to.y), index[key]++);
 			} else {
 				var bidirectional = this.states[targets[t]].isConnected(id);
 				if (bidirectional) {
@@ -74,13 +78,7 @@ Action.prototype.renderTransitions = function(states, index) {
 					var to = states[targets[t]].center();
 					to.id = targets[t];
 				}
-				var key = from.toString() + '-' + to.toString();
-				if (!index[key]) {
-					index[key] = 1;
-				} else {
-					index[key]++;
-				}
-				this.canvas.drawConnection(label, from, to, index[key], color, bidirectional);
+				this.canvas.drawConnection(label, from, to, index[key]++, color, bidirectional);
 			}
 		}
 	}
