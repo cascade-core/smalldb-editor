@@ -71,7 +71,7 @@ SmalldbEditor.prototype.placeStates = function() {
 		indexed[id] = node;
 	}
 
-	// create edges
+	// create edges and compute rank for each state (total number of connected edges)
 	for (var id in this.actions) {
 		var action = this.actions[id];
 		for (var t in action.transitions) {
@@ -80,6 +80,8 @@ SmalldbEditor.prototype.placeStates = function() {
 			for (var target in targets) {
 				var to = indexed[targets[target]];
 				from.connections.push(to);
+				from.rank++;
+				to.rank++;
 			}
 		}
 	}
@@ -103,6 +105,7 @@ SmalldbEditor.prototype.placeStates = function() {
 		var scc = components[i];
 		var width = scc.length * stepX;
 		dx = 10 + (max - width) / 2;
+		scc = this._sortComponent(scc);
 		for (var j = scc.length - 1; j >= 0; j--) {
 			var state = this.states[scc[j].name];
 			state.x = dx;
@@ -113,6 +116,19 @@ SmalldbEditor.prototype.placeStates = function() {
 		}
 		dy += stepY;
 	}
+};
+
+/**
+ * Sorts strongly connected component by its rank
+ *
+ * @param {Array} component
+ * @returns {Array}
+ * @private
+ */
+SmalldbEditor.prototype._sortComponent = function(component) {
+	return component.sort(function(a, b) {
+		return a.rank - b.rank;
+	});
 };
 
 /**

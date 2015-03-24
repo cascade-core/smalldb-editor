@@ -5,6 +5,7 @@ var Graph = function(nodes) {
 var Node = function(name) {
 	this.name = name;
 	this.connections = [];
+	this.rank = 0;
 	this.index = -1;
 	this.lowlink = -1;
 };

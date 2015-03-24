@@ -17,7 +17,8 @@ var State = function(id, data, editor) {
 
 	this.x = data.x;
 	this.y = data.y;
-	this.connections = [];
+	this.connections = []; // outgoing connections
+	this.rank = 0; // total number of connected edges
 };
 
 /**
