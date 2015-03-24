@@ -92,8 +92,8 @@ Spline.prototype._drawCurvedPath = function(cps) {
 			ctx.closePath();
 			ctx.stroke();
 		}
+		ctx.strokeStyle = 'black';
 	}
-	ctx.strokeStyle = 'black';
 
 	if (len === 2) {
 		ctx.beginPath();

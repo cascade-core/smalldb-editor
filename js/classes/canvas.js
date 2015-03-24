@@ -282,6 +282,7 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 	index = index || 1;
 	// line style
 	color = color || '#000';
+	console.log(color);
 	this.context.save();
 	this.context.beginPath();
 	this.context.fillStyle = color;
@@ -307,7 +308,7 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 		var dy = hypotenuse * Math.sin(gamma) * signY;
 		var extra = new Point(from.x + dx, from.y + dy);
 		points.push(extra);
-		this._writeText(label, extra.x + 15, extra.y + 15);
+		this._writeText(label, extra.x + 15, extra.y + 15, color);
 
 		// adjust start and end position to
 		var states = this.editor.states;
@@ -349,7 +350,7 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 	// draw action label
 	if (!bidirectional) {
 		var diff = to.minus(from);
-		this._writeText(label, from.x + diff.x * 2 / 5, from.y + diff.y * 2 / 5)
+		this._writeText(label, from.x + diff.x * 2 / 5, from.y + diff.y * 2 / 5, color)
 	}
 
 	// draw arrow in the end point
@@ -569,7 +570,7 @@ Canvas.prototype.drawCycleConnection = function(label, from, to, index, color) {
 	this.context.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, to.x - 5, to.y);
 	this.context.stroke();
 	this.context.closePath();
-	this._writeText(label, from.x + diffX, from.y - 25 * index);
+	this._writeText(label, from.x + diffX, from.y - 25 * index, color);
 
 	// draw arrow in the end point
 	this._drawArrow(to.x, to.y, -0.1);
@@ -623,11 +624,13 @@ Canvas.prototype._drawArrow = function(x, y, angle) {
  * @param {string} text
  * @param {Number} x
  * @param {Number} y
+ * @param {String} [color='#000']
  * @private
  */
-Canvas.prototype._writeText = function(text, x, y) {
+Canvas.prototype._writeText = function(text, x, y, color) {
+	color = color || '#000';
 	this.context.save();
-	this.context.fillStyle = "#690299";
+	this.context.fillStyle = color;
 	this.context.font = "11px Arial";
 	this.context.textAlign = 'right';
 	this.context.fillText(text, x, y);

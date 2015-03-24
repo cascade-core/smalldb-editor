@@ -12,14 +12,25 @@ var Action = function(id, data, editor) {
 	this.editor = editor;
 	this.canvas = editor.canvas;
 	this.states = editor.states;
+	var c = Math.floor(Math.random() * (Action.colors.length - 1));
+	this.color = Action.colors[c];
+	Action.colors.splice(c, 1);
 	this._processData(data);
 };
+
+/**
+ * @type {string[]} automatic colors
+ */
+Action.colors = ['#362d64', '#366669', '#682032', '#4122d3', '#632349', '#456086', '#146076', '#302259', '#664557', '#162525',
+				'#525846', '#524162', '#162264', '#4266d2', '#134066', '#582830', '#228431', '#172092', '#382828', '#347d7d'];
 
 Action.prototype._processData = function(data) {
 	this.transitions = {};
 	if ('transitions' in data) {
 		for (var id in data.transitions) {
 			var key = id === '' ? '__start__' : id;
+			// todo optional, prefer transition value over action value
+			data.transitions[id].color = this.color;
 			var trans = new Transition(this, data.transitions[id]);
 			this.transitions[key] = trans;
 			this.states[key].addConnection(trans.getTargets());
@@ -69,7 +80,7 @@ Action.prototype.renderTransitions = function(states, index) {
 			}
 			if (id === targets[t]) {
 				var w = states[id].$container.outerWidth();
-				this.canvas.drawCycleConnection(label, from, new Point(to.x - w, to.y), index[key]++);
+				this.canvas.drawCycleConnection(label, from, new Point(to.x - w, to.y), index[key]++, color);
 			} else {
 				var bidirectional = this.states[targets[t]].isConnected(id);
 				if (bidirectional) {
