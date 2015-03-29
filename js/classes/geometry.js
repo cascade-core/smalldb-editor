@@ -106,6 +106,18 @@ Line.prototype.length = function() {
 };
 
 /**
+ * Computes middle point on this line
+ *
+ * @returns {Point}
+ */
+Line.prototype.middle = function() {
+	var ret = this.from.plus(this.to);
+	ret.x /= 2;
+	ret.y /= 2;
+	return ret;
+};
+
+/**
  * Computes shortest distance from this line segment to given point
  *
  * @param {Point} p

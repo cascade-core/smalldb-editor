@@ -40,9 +40,40 @@ Transition.prototype.setPath = function(path, cycle, bidirectional) {
  */
 Transition.prototype.contains = function(point) {
 	var points = 'points' in this.path ? this.path.points : this.path;
-	var offset = 5; // px to both sides from line
+
+	// check whether points lies in transition bounding box
+	if (0) {
+		return false;
+	}
+
+	// divide spline into straight line segments
+	var lines = []; // lines to check
 	if (points.length === 2) { // straight line
-		if (new Line(points[0], points[1]).dist(point) < offset) {
+		lines.push(new Line(points[0], points[1]));
+	} else if ('cps' in this.path) { // cubic bezier line - 3 points with 2 control points - divide curve into 4 segments
+		var cps = this.path.cps;
+
+		// segment 1
+		var l1 = new Line(points[0], cps[0]);
+		l1.to = l1.middle();
+		lines.push(l1);
+
+		// segment 2
+		var l2 = new Line(l1.to, points[1]);
+		lines.push(l2);
+
+		// segment 3 & 4
+		var l4 = new Line(cps[1], points[2]);
+		l4.from = l4.middle();
+		var l3 = new Line(l2.to, l4.from);
+		lines.push(l3);
+		lines.push(l4);
+	}
+
+	// check each segment line
+	var offset = this.editor.options.edgeClickOffset; // px to both sides from line
+	for (var l in lines) {
+		if (lines[l].dist(point) < offset) {
 			return true;
 		}
 	}

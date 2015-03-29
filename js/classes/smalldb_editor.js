@@ -15,6 +15,7 @@ var SmalldbEditor = function(el, options) {
 	this.defaults = {
 		historyLimit: 1000, // count of remembered changes,
 		splineTension: 0.3, // used to render connections, more means higher elasticity of connections
+		edgeClickOffset: 5, // px to both sides from line
 		canvasOffset: 75, // px start rendering states from top left corner of diagram - canvasOffset
 		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
 		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
