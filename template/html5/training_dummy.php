@@ -30,6 +30,7 @@ function TPL_html5__smalldb_editor__training_dummy($t, $id, $d, $so)
 		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/state.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/action.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/transition.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/editor.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/canvas.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/storage.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/toolbar.js\"></script>\n",

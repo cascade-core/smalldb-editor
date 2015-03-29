@@ -27,7 +27,7 @@ var State = function(id, data, editor) {
 State.prototype.render = function() {
 	// create DOM if not exists
 	if (!this.$container) {
-		this._create();
+		this.create();
 		this.canvas.$containerInner.append(this.$container);
 	}
 
@@ -122,13 +122,11 @@ State.prototype.redraw = function() {
 /**
  * Adds connection to this state
  *
- * @param {Array} targets - array of target state ids
+ * @param {Array} target - target state id
  */
-State.prototype.addConnection = function(targets) {
-	for (var t in targets) {
-		if (this.connections.indexOf(targets[t]) === -1) {
-			this.connections.push(targets[t]);
-		}
+State.prototype.addConnection = function(target) {
+	if (this.connections.indexOf(target) === -1) {
+		this.connections.push(target);
 	}
 	this.redraw();
 	this.editor.onChange();
@@ -342,6 +340,8 @@ State.prototype.activate = function() {
 	var className = SmalldbEditor._namespace + '-active';
 	this.$container.addClass(className);
 	this.editor.toolbar.updateDisabledClasses();
+	this.editor.editor.dontClose = true; // prevent setting default view when clicking on state or edge
+	this.editor.editor.create('state', this);
 };
 
 /**
@@ -359,7 +359,7 @@ State.prototype.deactivate = function() {
  *
  * @private
  */
-State.prototype._create = function() {
+State.prototype.create = function() {
 	// create container
 	this.$container = $('<div class="' + SmalldbEditor._namespace + '-state">');
 	this.$container.addClass(SmalldbEditor._namespace + '-id-' + this.id);

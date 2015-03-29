@@ -75,14 +75,12 @@ SmalldbEditor.prototype.placeStates = function() {
 	for (var id in this.actions) {
 		var action = this.actions[id];
 		for (var t in action.transitions) {
-			var targets = action.transitions[t].getTargets();
-			var from = indexed[t];
-			for (var target in targets) {
-				var to = indexed[targets[target]];
-				from.connections.push(to);
-				from.rank++;
-				to.rank++;
-			}
+			var s = t.split('-')[0];
+			var from = indexed[s];
+			var to = indexed[action.transitions[t].target];
+			from.connections.push(to);
+			from.rank++;
+			to.rank++;
 		}
 	}
 
@@ -147,11 +145,13 @@ SmalldbEditor.prototype._init = function() {
 	this.session.set('zoom', 1.0); // reset zoom
 	this.canvas = new Canvas(this); // create canvas
 	this.toolbar = new Toolbar(this); // create toolbar
+	this.editor = new Editor(this); // create editor panel
 	this.toolbar.render(this.$container);
 	this.processData(); // load and process data from textarea
 	this.placeStates(); // find position for each state
 	this.box = this.getBoundingBox();
 	this.canvas.render(this.box);
+	this.editor.render();
 	this.render();
 	this.canvas.$container.scroll(); // force scroll event to save center of viewport
 };

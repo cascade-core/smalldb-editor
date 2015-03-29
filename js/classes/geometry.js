@@ -42,7 +42,7 @@ Point.prototype.minus = function(p) {
  * @returns {Number} dot product
  */
 Point.prototype.dot = function(p) {
-	return this.x * p.y - this.y * p.x;
+	return this.x * p.x + this.y * p.y;
 };
 
 /**
@@ -51,7 +51,7 @@ Point.prototype.dot = function(p) {
  * @returns {Number}
  */
 Point.prototype.norm = function() {
-	return Math.sqrt(this.x * this.x + this.y * this.y);
+	return Math.sqrt(this.dot(this));
 };
 
 /**
@@ -103,6 +103,37 @@ var Line = function(from, to) {
  */
 Line.prototype.length = function() {
 	return this.from.dist(this.to);
+};
+
+/**
+ * Computes shortest distance from this line segment to given point
+ *
+ * @param {Point} p
+ * @returns {Number}
+ */
+Line.prototype.dist = function(p) {
+	var u = p.minus(this.from);
+	var w = this.to.minus(this.from);
+
+	var dot = u.dot(w);
+	var lenSqr = w.dot(w);
+	var param = -1;
+	if (lenSqr !== 0) { // in case of 0 length line
+		param = dot / lenSqr;
+	}
+
+	if (param < 0) {
+		var other = this.from;
+	} else if (param > 1) {
+		var other = this.to;
+	} else {
+		var other = new Point(
+			this.from.x + param * w.x,
+			this.from.y + param * w.y
+		);
+	}
+
+	return p.dist(other);
 };
 
 /**

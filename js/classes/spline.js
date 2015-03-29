@@ -51,49 +51,27 @@ Spline.prototype._controlPoints = function(p1, p2, p3) {
  * Renders curve to canvas
  */
 Spline.prototype.render = function() {
-	var cps = []; // control points
+	this.cps = []; // control points
 	for (var i = 0; i < this.points.length - 2; i++) {
-		cps = cps.concat(this._controlPoints(this.points[i], this.points[i + 1], this.points[i + 2]));
+		this.cps = this.cps.concat(this._controlPoints(this.points[i], this.points[i + 1], this.points[i + 2]));
 	}
-	this._drawCurvedPath(cps);
+	this._drawCurvedPath();
 };
 
 /**
  * Internal rendering method
  *
- * @param {Array} cps - Control points
  * @private
  */
-Spline.prototype._drawCurvedPath = function(cps) {
+Spline.prototype._drawCurvedPath = function() {
 	var len = this.points.length;
 	var ctx = this.context;
+	var cps = this.cps;
 	if (len < 2) {
 		return;
 	}
 
-	// render points
-	if (this.showPoints) {
-		for (var i in this.points) {
-			ctx.beginPath();
-			ctx.arc(this.points[i].x, this.points[i].y, 5, 0, 2 * Math.PI);
-			ctx.closePath();
-			ctx.stroke();
-		}
-	}
-	if (this.showControlPoints) {
-		for (var i in cps) {
-			ctx.beginPath();
-			ctx.strokeStyle = 'red';
-			ctx.arc(cps[i].x, cps[i].y, 5, 0, 2 * Math.PI);
-			if (i > 0 && i % 2 === 1) {
-				ctx.moveTo(cps[i - 1].x, cps[i - 1].y);
-				ctx.lineTo(cps[i].x, cps[i].y);
-			}
-			ctx.closePath();
-			ctx.stroke();
-		}
-		ctx.strokeStyle = 'black';
-	}
+	this._debug();
 
 	if (len === 2) {
 		ctx.beginPath();
@@ -115,3 +93,36 @@ Spline.prototype._drawCurvedPath = function(cps) {
 		ctx.stroke();
 	}
 };
+
+/**
+ * Renders points and control points for debugging
+
+ * @private
+ */
+Spline.prototype._debug = function() {
+	// render points
+	var color = this.context.strokeStyle;
+	if (this.showPoints) {
+		for (var i in this.points) {
+			this.context.beginPath();
+			this.context.arc(this.points[i].x, this.points[i].y, 5, 0, 2 * Math.PI);
+			this.context.closePath();
+			this.context.stroke();
+		}
+	}
+	if (this.showControlPoints) {
+		for (var i in this.cps) {
+			this.context.beginPath();
+			this.context.strokeStyle = 'red';
+			this.context.arc(this.cps[i].x, this.cps[i].y, 5, 0, 2 * Math.PI);
+			if (i > 0 && i % 2 === 1) {
+				this.context.moveTo(this.cps[i - 1].x, this.cps[i - 1].y);
+				this.context.lineTo(this.cps[i].x, this.cps[i].y);
+			}
+			this.context.closePath();
+			this.context.stroke();
+		}
+		this.context.strokeStyle = color;
+	}
+
+}
