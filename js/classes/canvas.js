@@ -359,9 +359,10 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
  * @param {Point} to
  * @param {String} [color='#000'] defaults to black
  * @param {Number} [index=1] when multiple connections are drawn
+ * @param {Boolean} [highlight] defaults false, when true, renders thicker line
  * @private
  */
-Canvas.prototype.drawCycleConnection = function(label, from, to, index, color) {
+Canvas.prototype.drawCycleConnection = function(label, from, to, index, color, highlight) {
 	index = index || 1;
 	// line style
 	color = color || '#000';
@@ -369,40 +370,31 @@ Canvas.prototype.drawCycleConnection = function(label, from, to, index, color) {
 	this.context.beginPath();
 	this.context.fillStyle = color;
 	this.context.strokeStyle = color;
-	this.context.lineWidth = 1.4;
+	this.context.lineWidth = highlight ? 2.8 : 1.4;
+
+	// line points with starting point
+	var points = [from];
+	var line = new Line(from, to);
+	var len = line.length();
+	var mid = line.middle();
 
 	// control points
-	var diffX = (to.x - from.x) / 2;
-	var cp1X = from.x + 50 + 25 * (index - 1);
-	var cp1Y = from.y - 30 * index;
-	var cp2X = to.x - 50 - 25 * (index - 1);
-	var cp2Y = to.y - 30 * index;
+	points.push(new Point(mid.x + 0.65 * len + len * 0.25 * (index - 1), mid.y - 15 - 20 * (index - 1)));
+	points.push(new Point(mid.x, mid.y - 25 - 20 * (index - 1)));
+	points.push(new Point(mid.x - 0.65 * len - len * 0.25 * (index - 1), mid.y - 15 - 20 * (index - 1)));
+	points.push(to);
 
 	// draw curved line
-	this.context.moveTo(from.x, from.y);
-	this.context.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, to.x - 5, to.y);
-	this.context.stroke();
-	this.context.closePath();
-	this._writeText(label, from.x + diffX, from.y - 25 * index, color);
+	var path = new Spline(points, this.options.splineTension, this.context);
+	path.render();
 
 	// draw arrow in the end point
-	this._drawArrow(to.x, to.y, -0.1);
-};
+	var angle = Point.angle(points[points.length - 2], to);
+	this._drawArrow(to.x, to.y, angle);
 
-/**
- * Computes distance between to points in euclidean space
- *
- * @param {Number} fromX
- * @param {Number} fromY
- * @param {Number} toX
- * @param {Number} toY
- * @returns {Number}
- * @private
- */
-Canvas.prototype._dist = function(fromX, fromY, toX, toY) {
-	var diffX = (toX - fromX) * (toX - fromX);
-	var diffY = (toY - fromY) * (toY - fromY);
-	return Math.sqrt(diffX + diffY);
+	this._writeText(label, mid.x, mid.y - 30 - 20 * (index - 1), color);
+
+	return path;
 };
 
 /**
@@ -445,7 +437,7 @@ Canvas.prototype._writeText = function(text, x, y, color) {
 	this.context.save();
 	this.context.fillStyle = color;
 	this.context.font = "11px Arial";
-	this.context.textAlign = 'right';
+	this.context.textAlign = 'center';
 	this.context.fillText(text, x, y);
 	this.context.restore();
 };

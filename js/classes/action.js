@@ -33,7 +33,7 @@ Action.prototype._processData = function(data) {
 			for (var t in targets) {
 				// todo optional, prefer transition value over action value
 				data.transitions[id].color = this.color;
-				var trans = new Transition(this, data.transitions[id], targets[t]);
+				var trans = new Transition(this, data.transitions[id], targets[t], key === targets[t]);
 				this.transitions[key + '-' + t] = trans;
 				this.states[key].addConnection(targets[t]);
 			}
