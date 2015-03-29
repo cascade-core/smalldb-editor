@@ -324,7 +324,7 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 		var dy = hypotenuse * Math.sin(gamma) * signY;
 		var extra = new Point(from.x + dx, from.y + dy);
 		points.push(extra);
-		this._writeText(label, extra.x + 15, extra.y + 15, color);
+		this._writeText(label, extra.x, extra.y - 5, color);
 
 		// adjust start and end position to
 		var states = this.editor.states;
@@ -341,8 +341,8 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 
 	// draw action label
 	if (!bidirectional) {
-		var diff = to.minus(from);
-		this._writeText(label, from.x + diff.x * 2 / 5, from.y + diff.y * 2 / 5, color)
+		var mid = new Line(from, to).middle();
+		this._writeText(label, mid.x + 5, mid.y - 5, color)
 	}
 
 	// draw arrow in the end point
