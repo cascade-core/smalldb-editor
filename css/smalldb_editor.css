@@ -243,6 +243,14 @@
 	font-size: 10px;
 }
 
+.smalldb-editor-editor-panel-row select:focus {
+	font-size: 9px;
+	box-shadow: #000 0 0;
+	padding-left: 1px;
+	margin-bottom: -1px;
+	margin-left: 1px;
+}
+
 .smalldb-editor-editor-panel-color {
 	width: 10px;
 	height: 10px;

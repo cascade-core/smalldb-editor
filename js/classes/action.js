@@ -9,6 +9,8 @@
 var Action = function(id, data, editor) {
 	this.id = id;
 	this.data = data;
+	this.label = data.label;
+	this.color = data.color;
 	this.editor = editor;
 	this.canvas = editor.canvas;
 	this.states = editor.states;
@@ -79,5 +81,15 @@ Action.prototype.renderTransitions = function(states, index) {
  * @param {Transition} transition
  */
 Action.prototype.addTransition = function(key, transition) {
+	transition.key = key;
 	this.transitions[key] = transition;
+};
+
+/**
+ * Removes transition from this action
+ *
+ * @param {Transition} transition
+ */
+Action.prototype.removeTransition = function(transition) {
+	delete this.transitions[transition.key];
 };

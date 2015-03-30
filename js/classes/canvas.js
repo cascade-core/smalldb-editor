@@ -195,7 +195,7 @@ Canvas.prototype._onDblClick = function(e) {
 	if (!label) {
 		return;
 	}
-	var id = label.replace(/[^a-z0-9_]+/g, '-').replace(/^-|-$/g, '');
+	var id = label.toLowerCase().replace(/[^a-z0-9_]+/g, '-').replace(/^-|-$/g, '');
 	this._cursor = this.clickPosition(e);
 	var state = new State(id, { label: label }, this.editor);
 	state.x = this._cursor.x;

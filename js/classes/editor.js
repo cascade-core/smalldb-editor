@@ -122,13 +122,60 @@ Editor.prototype._createEdgeView = function() {
 	// todo
 	var $name = $('<div class="' + this._namespace + '-row">');
 	$name.append($('<label>').text(_('Name')));
-	//$name.append($('<input type="text">').val(this.item.action.id));
-	$name.append($('<select><option value="__noaction__">No action</option></select>').val('__noaction__'));
+	var $select = $('<select></select>');
+	for (var a in this.editor.actions) {
+		var text = this.editor.actions[a].id;
+		if (text === '__noaction__') {
+			if (this.item.action.id === '__noaction__') {
+				text = _('* Select action');
+			} else {
+				continue;
+			}
+		}
+		$select.append($('<option>').text(text).val(a));
+	}
+	if (this.item.action.id === '__noaction__') {
+		$select.find('option:first').after($('<option>').text(_('* Change action name')).val('__rename__'));
+		$select.find('option:first').after($('<option>').text(_('* Create new action')).val('__create__'));
+	} else {
+		$select.prepend($('<option>').text(_('* Change action name')).val('__rename__'));
+		$select.prepend($('<option>').text(_('* Create new action')).val('__create__'));
+	}
+	$name.append($select.val(this.item.action.id));
 	this.$container.append($name);
+	var act = this.item.action;
+	var that = this;
+	$select.on('change.' + this._namespace, function() {
+		var val = $(this).val();
+		if (val === '__rename__') {
+			// todo not working, add unique constraint
+			var name = window.prompt(_('New action name:'), act.id);
+			if (act.id === name) {
+				act.label = name;
+			}
+			if (that.item.label === name) {
+				that.item.label = name;
+			}
+			act.id = name;
+			that.editor.onChange();
+		} else if (val === '__create__') {
+			var name = window.prompt(_('Create new action:'));
+			var a = new Action(name, { label: name }, that.editor);
+			that.item.action.removeTransition(that.item);
+			that.item.action = a;
+			a.addTransition(name, that.item);
+			that.item.color = a.color;
+			that.item.label = a.label;
+			that.editor.actions[name] = a;
+			that.canvas.redraw();
+			that.editor.onChange();
+		}
+	});
+	$select.focus();
 
 	var $label = $('<div class="' + this._namespace + '-row">');
 	$label.append($('<label>').text(_('Label')));
-	$label.append($('<input type="text">').val(this.item.action.data.label));
+	$label.append($('<input type="text">').val(this.item.action.label));
 	this.$container.append($label);
 
 	var $color = $('<div class="' + this._namespace + '-row">');
@@ -142,11 +189,13 @@ Editor.prototype._createEdgeView = function() {
 	$title.text(_('Edge options'));
 	this.$container.append($title);
 
+	// todo select
 	var $source = $('<div class="' + this._namespace + '-row">');
-	$source.append($('<label>').text(_('Name')));
+	$source.append($('<label>').text(_('Source')));
 	$source.append($('<input type="text">').val(this.item.source.split('-')[0]));
 	this.$container.append($source);
 
+	// todo select
 	var $target = $('<div class="' + this._namespace + '-row">');
 	$target.append($('<label>').text(_('Target')));
 	$target.append($('<input type="text">').val(this.item.target));
@@ -177,7 +226,7 @@ Editor.prototype._createStateView = function() {
 
 	var $name = $('<div class="' + this._namespace + '-row">');
 	$name.append($('<label>').text(_('Name')));
-	$name.append($('<input type="text">').val(this.item.data.state));
+	$name.append($('<input type="text">').val(this.item.id));
 	this.$container.append($name);
 
 	var $label = $('<div class="' + this._namespace + '-row">');
