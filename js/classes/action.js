@@ -15,11 +15,14 @@ var Action = function(id, data, editor) {
 	var c = Math.floor(Math.random() * Action.colors.length);
 	this.color = Action.colors[c];
 	Action.colors.splice(c, 1);
+	if (id === '__noaction__') {
+		this.color = '#d00';
+	}
 	this._processData(data);
 };
 
 /**
- * @type {string[]} automatic colors
+ * @type {String[]} automatic colors
  */
 Action.colors = ['#009900', '#003D00', '#6B8F00', '#522900', '#754719', '#A32900', '#7A003D', '#D11975', '#3D0099', '#000000',
 				'#1B0A33', '#0000CC', '#003333', '#0C3A3A', '#008080', '#00B200', '#991F00', '#A31947', '#003366', '#444444'];
@@ -33,7 +36,7 @@ Action.prototype._processData = function(data) {
 			for (var t in targets) {
 				// todo optional, prefer transition value over action value
 				data.transitions[id].color = this.color;
-				var trans = new Transition(this, data.transitions[id], targets[t], key === targets[t]);
+				var trans = new Transition(this, data.transitions[id], key + '-' + t, targets[t], key === targets[t]);
 				this.transitions[key + '-' + t] = trans;
 				this.states[key].addConnection(targets[t]);
 			}
@@ -65,6 +68,16 @@ Action.prototype.usesEndNode = function() {
 Action.prototype.renderTransitions = function(states, index) {
 	for (var id in this.transitions) {
 		var trans = this.transitions[id];
-		trans.render(states, index, id);
+		trans.render(states, index);
 	}
+};
+
+/**
+ * Assigns transition to this action
+ *
+ * @param {String} key
+ * @param {Transition} transition
+ */
+Action.prototype.addTransition = function(key, transition) {
+	this.transitions[key] = transition;
 };

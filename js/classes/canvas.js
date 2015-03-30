@@ -196,13 +196,13 @@ Canvas.prototype._onDblClick = function(e) {
 		return;
 	}
 	var id = label.replace(/[^a-z0-9_]+/g, '-').replace(/^-|-$/g, '');
-	console.log(this);
 	this._cursor = this.clickPosition(e);
 	var state = new State(id, { label: label }, this.editor);
 	state.x = this._cursor.x;
 	state.y = this._cursor.y;
 	state.render();
-	state.updatePosition(state.$container.outerWidth() / 2, state.$container.outerHeight() / 2); // shift position of state to center
+	// shift position of state to center
+	state.updatePosition(state.$container.outerWidth() / 2, state.$container.outerHeight() / 2);
 	this.editor.states[id] = state;
 	this.editor.onChange();
 	this.redraw();
@@ -335,9 +335,20 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 
 	points.push(to);
 
+	if (label === '') {
+		if (!this.context.setLineDash) {
+			this.context.setLineDash = function() { };
+		}
+		this.context.setLineDash([10]);
+	}
+
 	// draw curved line
 	var path = new Spline(points, this.options.splineTension, this.context);
 	path.render();
+
+	if (label === '') {
+		this.context.setLineDash([0]);
+	}
 
 	// draw action label
 	if (!bidirectional) {

@@ -203,7 +203,7 @@ State.prototype._onDragOverConnect = function(e) {
 		target = state.getBorderPoint(this.center());
 	}
 	this.canvas.redraw();
-	this._renderConnection(target, '#c60', bidirectional);
+	this._renderConnection(target, '#c60');
 };
 
 /**
@@ -216,11 +216,18 @@ State.prototype._onDragOverConnect = function(e) {
 State.prototype._onDragEndConnect = function(e) {
 	var source = this.id;
 	// create connection
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state-input')) {
-		var id = $(e.target).closest('.' + SmalldbEditor._namespace + '-state')
-							.find('.' + SmalldbEditor._namespace + '-state-id').text();
-		var target = $(e.target).data('variable');
-		this.editor.states[id].addConnection(source, target);
+	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state')) {
+		var target = $(e.target).data(SmalldbEditor._namespace + '-id');
+		var action = this.editor.actions.__noaction__;
+		var trans = new Transition(action, {}, source, target);
+		trans.label = '';
+		trans.activate();
+		trans.render(this.editor.states, this.editor.index);
+		// key - append random hash to allow multiple transitions from same source
+		var key = source + '-' + Math.random().toString(36).slice(10);
+		action.addTransition(key, trans);
+		this.addConnection(target);
+		this.canvas.redraw();
 	}
 
 	// clean up

@@ -5,20 +5,22 @@
  *
  * @param {Action} action
  * @param {Object} data
+ * @param {String} source
  * @param {String} target
- * @param {Boolean} cycle
+ * @param {Boolean} [cycle] - defaults to false
  * @class
  */
-var Transition = function(action, data, target, cycle) {
+var Transition = function(action, data, source, target, cycle) {
 	data = data || {};
 	this.editor = action.editor;
 	this.canvas = this.editor.canvas;
 	this.action = action;
 	this.data = data;
+	this.source = source;
 	this.target = target;
-	this.cycle = cycle;
+	this.cycle = cycle || false;
 	this.label = data.label || action.id;
-	this.color = data.color || '#000';
+	this.color = data.color || action.color || '#000';
 };
 
 /**
@@ -57,7 +59,7 @@ Transition.prototype.contains = function(point) {
 };
 
 /**
- * Divides bezier curve to segments
+ * Divides bezier curve to segments, uses first 3 points + 2 control points
  *
  * @param {Array} points
  * @param {Array} cps
@@ -92,14 +94,18 @@ Transition.prototype.activate = function() {
 	this._active = true;
 	this.editor.editor.create('edge', this);
 	this.canvas.redraw();
+	// bind keydown event to catch delete key
+	// todo
 };
 
 /**
- * Deactivates current state
+ * Deactivates current transition
  */
 Transition.prototype.deactivate = function() {
 	this._active = false;
 	this.canvas.redraw();
+	// unbind keydown event
+	// todo
 };
 
 /**
@@ -116,10 +122,9 @@ Transition.prototype.isActive = function() {
  *
  * @param {Array} states
  * @param {Object} index - how many same connections did we rendered, stored by key "{source.id}-{target.id}"
- * @param {String} id - source id
  */
-Transition.prototype.render = function(states, index, id) {
-	var s = id.split('-')[0];
+Transition.prototype.render = function(states, index) {
+	var s = this.source.split('-')[0];
 	if (this.target === '') {
 		this.target = '__end__';
 	}

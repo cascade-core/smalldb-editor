@@ -119,6 +119,13 @@ Editor.prototype._createEdgeView = function() {
 	$title.text(_('Action options'));
 	this.$container.append($title);
 
+	// todo
+	var $name = $('<div class="' + this._namespace + '-row">');
+	$name.append($('<label>').text(_('Name')));
+	//$name.append($('<input type="text">').val(this.item.action.id));
+	$name.append($('<select><option value="__noaction__">No action</option></select>').val('__noaction__'));
+	this.$container.append($name);
+
 	var $label = $('<div class="' + this._namespace + '-row">');
 	$label.append($('<label>').text(_('Label')));
 	$label.append($('<input type="text">').val(this.item.action.data.label));
@@ -134,6 +141,16 @@ Editor.prototype._createEdgeView = function() {
 	$title = $('<div class="' + this._namespace + '-title">');
 	$title.text(_('Edge options'));
 	this.$container.append($title);
+
+	var $source = $('<div class="' + this._namespace + '-row">');
+	$source.append($('<label>').text(_('Name')));
+	$source.append($('<input type="text">').val(this.item.source.split('-')[0]));
+	this.$container.append($source);
+
+	var $target = $('<div class="' + this._namespace + '-row">');
+	$target.append($('<label>').text(_('Target')));
+	$target.append($('<input type="text">').val(this.item.target));
+	this.$container.append($target);
 
 	var $label = $('<div class="' + this._namespace + '-row">');
 	$label.append($('<label>').text(_('Label')));
