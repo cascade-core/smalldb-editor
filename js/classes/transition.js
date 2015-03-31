@@ -30,6 +30,10 @@ var Transition = function(action, data, source, target, cycle) {
  * @returns {Boolean}
  */
 Transition.prototype.contains = function(point) {
+	if (!this.path) {
+		return false;
+	}
+
 	var points = 'points' in this.path ? this.path.points : this.path;
 
 	if (!this.cycle && 0) { // todo

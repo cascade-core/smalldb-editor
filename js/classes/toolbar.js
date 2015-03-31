@@ -140,6 +140,38 @@ Toolbar.prototype.render = function($container) {
 	$(document).on('click', 'a.' + className, this._zoomReset.bind(this));
 	this.$toolbar.append(this.$zoomReset);
 
+	this.$toolbar.append($divider.clone());
+
+	// toggle cycles button
+	this.$cycles = $('<a>');
+	className = SmalldbEditor._namespace + '-cycles';
+	this.$cycles.html('<i class="fa fa-fw fa-dot-circle-o"></i> C');
+	this.$cycles.attr('title', 'Toggle cycles visibility [Ctrl + Shift + C]');
+	this.$cycles.attr('href', '#toggle-cycles');
+	this.$cycles.addClass(className);
+	$(document).on('click', 'a.' + className, this._toggleCycles.bind(this));
+	this.$toolbar.append(this.$cycles);
+
+	// automatic layout button
+	this.$layout = $('<a>');
+	className = SmalldbEditor._namespace + '-layout';
+	this.$layout.html('<i class="fa fa-fw fa-code-fork"></i> L');
+	this.$layout.attr('title', 'Set automatic layout [Ctrl + L]');
+	this.$layout.attr('href', '#layout');
+	this.$layout.addClass(className);
+	$(document).on('click', 'a.' + className, this._automaticLayout.bind(this));
+	this.$toolbar.append(this.$layout);
+
+	// automatic edge colors button
+	this.$colors = $('<a>');
+	className = SmalldbEditor._namespace + '-colors';
+	this.$colors.html('<i class="fa fa-fw fa-flask"></i> C');
+	this.$colors.attr('title', 'Set automatic action colors [Ctrl + O]');
+	this.$colors.attr('href', '#action-colors');
+	this.$colors.addClass(className);
+	$(document).on('click', 'a.' + className, this._automaticEdgeColors.bind(this));
+	this.$toolbar.append(this.$colors);
+
 	$(document).off('keydown.toolbar').on('keydown.toolbar', this._keydown.bind(this));
 
 	// disable selection
@@ -167,21 +199,51 @@ Toolbar.prototype.disableSelection = function(e) {
 };
 
 /**
- * Reloads palette data via ajax
+ * Toggles cycles visibility
  *
  * @private
  */
-Toolbar.prototype._reloadPalette = function() {
-	if (this.$reload.hasClass('disabled')) {
-		return false;
+Toolbar.prototype._toggleCycles = function() {
+	var $i = this.$cycles.find('i');
+	$i.toggleClass('fa-dot-circle-o');
+	$i.toggleClass('fa-circle-o');
+	this.canvas.renderCycles = $i.hasClass('fa-dot-circle-o');
+	this.canvas.redraw();
+	return false;
+};
+
+/**
+ * Assigns action colors automatically
+ *
+ * @private
+ */
+Toolbar.prototype._automaticEdgeColors = function() {
+	var colors = JSON.parse(JSON.stringify(Action.colors)); // copy to tmp array
+	for (var a in this.editor.actions) {
+		if (a === '__noaction__') {
+			continue;
+		}
+		var c = Math.floor(Math.random() * colors.length);
+		var act = this.editor.actions[a];
+		act.color = colors[c];
+		for (var t in act.transitions) {
+			act.transitions[t].color = act.color;
+		}
+		colors.splice(c, 1);
 	}
-	this.$reload.addClass('disabled');
-	this.$reload.find('i.fa').addClass('fa-spin');
-	var self = this;
-	this.palette.reload(function() {
-		self.$reload.find('i.fa').removeClass('fa-spin');
-		self.$reload.removeClass('disabled');
-	});
+	this.editor.onChange();
+	this.canvas.redraw();
+	return false;
+};
+
+/**
+ * Assigns state positions automatically
+ *
+ * @private
+ */
+Toolbar.prototype._automaticLayout = function() {
+	this.editor.placeStates(true);
+	this.editor.onChange();
 	return false;
 };
 
@@ -231,7 +293,7 @@ Toolbar.prototype._keydown = function(e) {
 		return false;
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 82) { // ctrl + shift + r => reload palette data
 		this.$reload.addClass('hover');
-		this._reloadPalette();
+		//this._reloadPalette();
 		return false;
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 80) { // ctrl + shift + p => parent state properties
 		this.$parent.addClass('hover');

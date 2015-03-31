@@ -27,6 +27,19 @@ Editor.prototype.render = function() {
 };
 
 /**
+ * Refresh editor
+ */
+Editor.prototype.refresh = function() {
+	if (this.item instanceof Transition) {
+		this.create('edge', this.item);
+	} else if (this.item instanceof State) {
+		this.create('state', this.item);
+	} else {
+		this.create();
+	}
+};
+
+/**
  * Binds close handler to close button and ESC key
  *
  * @returns {void}
@@ -239,6 +252,12 @@ Editor.prototype._createStateView = function() {
 	$color.append($('<input type="text">').val(this.item.data.color));
 	$color.append($('<div>').addClass(this._namespace + '-color').css('background', this.item.data.color));
 	this.$container.append($color);
+
+	var $position = $('<div class="' + this._namespace + '-row">');
+	$position.append($('<label>').text(_('Position')));
+	$position.append($('<input type="text" class="small">').val(this.item.x).attr('title', _('X position')));
+	$position.append($('<input type="text" class="small">').val(this.item.y).attr('title', _('Y position')));
+	this.$container.append($position);
 };
 
 /**

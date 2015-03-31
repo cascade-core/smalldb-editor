@@ -9,6 +9,7 @@
 var Canvas = function(editor) {
 	this.editor = editor;
 	this.options = this.editor.options;
+	this.renderCycles = true;
 };
 
 /**
@@ -374,6 +375,10 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
  * @private
  */
 Canvas.prototype.drawCycleConnection = function(label, from, to, index, color, highlight) {
+	if (!this.renderCycles) {
+		return;
+	}
+
 	index = index || 1;
 	// line style
 	color = color || '#000';

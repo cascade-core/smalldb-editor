@@ -243,6 +243,15 @@
 	font-size: 10px;
 }
 
+.smalldb-editor-editor-panel-row input.small {
+	width: 73px;
+	margin-right: 4px;
+}
+
+.smalldb-editor-editor-panel-row input.small ~ .smalldb-editor-editor-panel-row input.small {
+	margin-right: 0;
+}
+
 .smalldb-editor-editor-panel-row select:focus {
 	font-size: 9px;
 	box-shadow: #000 0 0;

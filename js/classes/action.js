@@ -10,16 +10,10 @@ var Action = function(id, data, editor) {
 	this.id = id;
 	this.data = data;
 	this.label = data.label;
-	this.color = data.color;
+	this.color = id === '__noaction__' ? '#d00' : data.color;
 	this.editor = editor;
 	this.canvas = editor.canvas;
 	this.states = editor.states;
-	var c = Math.floor(Math.random() * Action.colors.length);
-	this.color = Action.colors[c];
-	Action.colors.splice(c, 1);
-	if (id === '__noaction__') {
-		this.color = '#d00';
-	}
 	this._processData(data);
 };
 

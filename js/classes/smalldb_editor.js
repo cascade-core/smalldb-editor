@@ -62,8 +62,12 @@ SmalldbEditor.prototype._createContainer = function() {
 /**
  * Places states to some position on canvas
  * uses tarjan's algorithm and renders states based on topological order
+ *
+ * @param {Boolean} [force] - override current coordinates? default to false
  */
-SmalldbEditor.prototype.placeStates = function() {
+SmalldbEditor.prototype.placeStates = function(force) {
+	force = force || false;
+
 	// create nodes
 	var nodes = [], indexed = {};
 	for (var id in this.states) {
@@ -80,8 +84,10 @@ SmalldbEditor.prototype.placeStates = function() {
 			var from = indexed[s];
 			var to = indexed[action.transitions[t].target];
 			from.connections.push(to);
-			from.rank++;
-			to.rank++;
+			if (!from.equals(to)) { // ignore cycles
+				from.rank++;
+				to.rank++;
+			}
 		}
 	}
 
@@ -107,8 +113,11 @@ SmalldbEditor.prototype.placeStates = function() {
 		scc = this._sortComponent(scc);
 		for (var j = scc.length - 1; j >= 0; j--) {
 			var state = this.states[scc[j].name];
-			state.x = dx;
-			state.y = dy;
+			if (force || (!state.x && !state.y)) {
+				state.x = dx;
+				state.y = dy;
+				state.redraw();
+			}
 			dx += stepX;
 			dy += sign * stepX;
 			sign *= -1;
@@ -119,13 +128,19 @@ SmalldbEditor.prototype.placeStates = function() {
 
 /**
  * Sorts strongly connected component by its rank
+ * preserve first item (stored in the end of array)
  *
  * @param {Array} component
  * @returns {Array}
  * @private
  */
 SmalldbEditor.prototype._sortComponent = function(component) {
+	// preserve first item
+	component[component.length - 1].first = true;
 	return component.sort(function(a, b) {
+		if (a.first || b.first) {
+			return b.first ? -1 : 1;
+		}
 		return a.rank - b.rank;
 	});
 };
@@ -307,6 +322,9 @@ SmalldbEditor.prototype.onChange = function() {
 
 	// set data to textarea
 	this.$el.val(newData);
+
+	// refresh editor panel
+	this.editor.refresh();
 };
 
 /**
