@@ -223,9 +223,7 @@ State.prototype._onDragEndConnect = function(e) {
 		trans.label = '';
 		trans.activate();
 		trans.render(this.editor.states, this.editor.index);
-		// key - append random hash to allow multiple transitions from same source
-		var key = source + '-' + Math.random().toString(36).slice(10);
-		action.addTransition(key, trans);
+		action.addTransition(source, trans);
 		this.addConnection(target);
 		this.canvas.redraw();
 	}

@@ -44,16 +44,6 @@ Toolbar.prototype.render = function($container) {
 	$(document).on('click', 'a.' + className, this._toggleFullScreen.bind(this));
 	this.$toolbar.append(this.$fullscreen);
 
-	// parent state properties button
-	this.$parent = $('<a>');
-	className = SmalldbEditor._namespace + '-parent-properties-toggle';
-	this.$parent.html('<i class="fa fa-fw fa-cogs"></i> P');
-	this.$parent.attr('title', 'Edit parent state properties [Ctrl + Shift + P]');
-	this.$parent.attr('href', '#parent-properties');
-	this.$parent.addClass(className);
-	$(document).on('click', 'a.' + className, this._toggleParentProperties.bind(this));
-	this.$toolbar.append(this.$parent);
-
 	this.$toolbar.append($divider.clone());
 
 	// undo button

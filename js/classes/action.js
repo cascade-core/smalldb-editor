@@ -30,8 +30,6 @@ Action.prototype._processData = function(data) {
 			var key = id === '' ? '__start__' : id;
 			var targets = data.transitions[id].targets || [];
 			for (var t in targets) {
-				// todo optional, prefer transition value over action value
-				data.transitions[id].color = this.color;
 				var trans = new Transition(this, data.transitions[id], key + '-' + t, targets[t], key === targets[t]);
 				this.transitions[key + '-' + t] = trans;
 				this.states[key].addConnection(targets[t]);
@@ -71,10 +69,12 @@ Action.prototype.renderTransitions = function(states, index) {
 /**
  * Assigns transition to this action
  *
- * @param {String} key
+ * @param {String} source
  * @param {Transition} transition
  */
-Action.prototype.addTransition = function(key, transition) {
+Action.prototype.addTransition = function(source, transition) {
+	// key - append random hash to allow multiple transitions from same source
+	var key = source + '-' + Math.random().toString(36).slice(10);
 	transition.key = key;
 	this.transitions[key] = transition;
 };

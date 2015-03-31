@@ -118,11 +118,22 @@ Editor.prototype._createSummaryView = function() {
 	var $title = $('<div class="' + this._namespace + '-title">');
 	$title.text(_('Summary'));
 	this.$container.append($title);
+
+	// basic summary
+	var $statesCount = $('<div class="' + this._namespace + '-row">');
+	$statesCount.text(_('Total states count: '));
+	$statesCount.append($('<strong>').text(this.countObject(this.editor.states)));
+	this.$container.append($statesCount);
+
+	var $actionsCount = $('<div class="' + this._namespace + '-row">');
+	$actionsCount.text(_('Total actions count: '));
+	$actionsCount.append($('<strong>').text(this.countObject(this.editor.actions)));
+	this.$container.append($actionsCount);
 };
 
 /**
  * Creates action & edge options view
- * called by create()
+ * called by create('edge')
  *
  * @private
  */
@@ -132,7 +143,28 @@ Editor.prototype._createEdgeView = function() {
 	$title.text(_('Action options'));
 	this.$container.append($title);
 
-	// todo
+	this._createChangeActionSelect();
+	this._addTextInputRow('label', 'Label', this.item.action.label);
+	this._addColorInputRow('color', 'Color', this.item.action.color);
+
+	// edge options
+	$title = $('<div class="' + this._namespace + '-title">');
+	$title.text(_('Edge options'));
+	this.$container.append($title);
+
+	// rows
+	this._addTextInputRow('source', 'Source', this.item.source.split('-')[0]); // todo select
+	this._addTextInputRow('target', 'Target', this.item.target); // todo select
+	this._addTextInputRow('label', 'Label', this.item.label);
+	this._addColorInputRow('color', 'Color', this.item.color);
+};
+
+/**
+ * Creates change action select
+ *
+ * @private
+ */
+Editor.prototype._createChangeActionSelect = function() {
 	var $name = $('<div class="' + this._namespace + '-row">');
 	$name.append($('<label>').text(_('Name')));
 	var $select = $('<select></select>');
@@ -148,111 +180,70 @@ Editor.prototype._createEdgeView = function() {
 		$select.append($('<option>').text(text).val(a));
 	}
 	if (this.item.action.id === '__noaction__') {
-		$select.find('option:first').after($('<option>').text(_('* Change action name')).val('__rename__'));
 		$select.find('option:first').after($('<option>').text(_('* Create new action')).val('__create__'));
 	} else {
-		$select.prepend($('<option>').text(_('* Change action name')).val('__rename__'));
+		$select.prepend($('<option>').text(_('* Rename action "%s"', [this.item.action.id])).val('__rename__'));
 		$select.prepend($('<option>').text(_('* Create new action')).val('__create__'));
 	}
 	$name.append($select.val(this.item.action.id));
 	this.$container.append($name);
-	var act = this.item.action;
-	var that = this;
-	$select.on('change.' + this._namespace, function() {
-		var val = $(this).val();
-		if (val === '__rename__') {
-			// todo not working, add unique constraint
-			var name = window.prompt(_('New action name:'), act.id);
-			if (act.id === name) {
-				act.label = name;
-			}
-			if (that.item.label === name) {
-				that.item.label = name;
-			}
-			act.id = name;
-			that.editor.onChange();
-		} else if (val === '__create__') {
-			var name = window.prompt(_('Create new action:'));
-			var a = new Action(name, { label: name }, that.editor);
-			that.item.action.removeTransition(that.item);
-			that.item.action = a;
-			a.addTransition(name, that.item);
-			that.item.color = a.color;
-			that.item.label = a.label;
-			that.editor.actions[name] = a;
-			that.canvas.redraw();
-			that.editor.onChange();
-		}
-	});
+	$select.on('change.' + this._namespace, this._changeAction.bind(this));
 	$select.focus();
+};
 
-	var $label = $('<div class="' + this._namespace + '-row">');
-	$label.append($('<label>').text(_('Label')));
-	$label.append($('<input type="text">').val(this.item.action.label));
-	this.$container.append($label);
+/**
+ * Change action handler
+ *
+ * @param {Event} e
+ * @private
+ */
+Editor.prototype._changeAction = function(e) {
+	var act = this.item.action;
+	var val = $(e.target).val();
+	if (val === '__rename__') {
+		var name = this.getNewName(_('Rename action "%s":', [act.id]), act.id, this.editor.actions);
+		if (act.id.toLowerCase() === act.label.toLowerCase) {
+			// action name corresponds with transition label, change both
+			act.label = name;
+		}
+		if (this.item.label === name) {
+			this.item.label = name;
+		}
+		act.id = name;
+	} else if (val === '__create__') {
+		var name = this.getNewName(_('Create new action:'), '', this.editor.actions);
+		var a = new Action(name, { label: name }, this.editor);
+		act.removeTransition(this.item);
+		this.item.action = a;
+		a.addTransition(name, this.item);
+		this.item.color = a.color;
+		this.item.label = a.label;
+		this.editor.actions[name] = a;
+		this.canvas.redraw();
+	} else { // change to existing action
 
-	var $color = $('<div class="' + this._namespace + '-row">');
-	$color.append($('<label>').text(_('Color')));
-	$color.append($('<input type="text">').val(this.item.action.color));
-	$color.append($('<div>').addClass(this._namespace + '-color').css('background', this.item.action.color));
-	this.$container.append($color);
-
-	// edge options
-	$title = $('<div class="' + this._namespace + '-title">');
-	$title.text(_('Edge options'));
-	this.$container.append($title);
-
-	// todo select
-	var $source = $('<div class="' + this._namespace + '-row">');
-	$source.append($('<label>').text(_('Source')));
-	$source.append($('<input type="text">').val(this.item.source.split('-')[0]));
-	this.$container.append($source);
-
-	// todo select
-	var $target = $('<div class="' + this._namespace + '-row">');
-	$target.append($('<label>').text(_('Target')));
-	$target.append($('<input type="text">').val(this.item.target));
-	this.$container.append($target);
-
-	var $label = $('<div class="' + this._namespace + '-row">');
-	$label.append($('<label>').text(_('Label')));
-	$label.append($('<input type="text">').val(this.item.label));
-	this.$container.append($label);
-
-	var $color = $('<div class="' + this._namespace + '-row">');
-	$color.append($('<label>').text(_('Color')));
-	$color.append($('<input type="text">').val(this.item.color));
-	$color.append($('<div>').addClass(this._namespace + '-color').css('background', this.item.color));
-	this.$container.append($color);
+	}
+	this.editor.onChange();
 };
 
 /**
  * Creates state options view
- * called by create()
+ * called by create('state')
  *
  * @private
  */
 Editor.prototype._createStateView = function() {
+	// title
 	var $title = $('<div class="' + this._namespace + '-title">');
 	$title.text(_('State options'));
 	this.$container.append($title);
 
-	var $name = $('<div class="' + this._namespace + '-row">');
-	$name.append($('<label>').text(_('Name')));
-	$name.append($('<input type="text">').val(this.item.id));
-	this.$container.append($name);
+	// rows
+	this._addTextInputRow('name', 'Name', this.item.id);
+	this._addTextInputRow('label', 'Label', this.item.data.label);
+	this._addColorInputRow('color', 'Color', this.item.data.color);
 
-	var $label = $('<div class="' + this._namespace + '-row">');
-	$label.append($('<label>').text(_('Label')));
-	$label.append($('<input type="text">').val(this.item.data.label));
-	this.$container.append($label);
-
-	var $color = $('<div class="' + this._namespace + '-row">');
-	$color.append($('<label>').text(_('Color')));
-	$color.append($('<input type="text">').val(this.item.data.color));
-	$color.append($('<div>').addClass(this._namespace + '-color').css('background', this.item.data.color));
-	this.$container.append($color);
-
+	// x / y position
 	var $position = $('<div class="' + this._namespace + '-row">');
 	$position.append($('<label>').text(_('Position')));
 	$position.append($('<input type="text" class="small">').val(this.item.x).attr('title', _('X position')));
@@ -260,11 +251,25 @@ Editor.prototype._createStateView = function() {
 	this.$container.append($position);
 };
 
+Editor.prototype._addColorInputRow = function(name, label, value) {
+	var $row = this._addTextInputRow(name, label, value);
+	$row.append($('<div>').addClass(this._namespace + '-' + name).css('background', value));
+};
+
+Editor.prototype._addTextInputRow = function(name, label, value) {
+	var id = this._namespace + '-' + name;
+	var $row = $('<div class="' + this._namespace + '-row">');
+	$row.append($('<label>').attr('for', id).text(_(label)));
+	$row.append($('<input type="text">').attr('id', id).val(value));
+	this.$container.append($row);
+	return $row;
+};
+
 /**
  * Checks whether string is valid JSON string
  *
- * @param {string} str
- * @returns {boolean}
+ * @param {String} str
+ * @returns {Boolean}
  * @private
  */
 Editor.prototype._isValidJson = function(str) {
@@ -280,7 +285,7 @@ Editor.prototype._isValidJson = function(str) {
  * Keydown handler that allows adding tab keys and sending form with CTRL + enter
  *
  * @param {KeyboardEvent} e - Event
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 Editor.prototype._keydown = function(e) {
@@ -303,7 +308,7 @@ Editor.prototype._keydown = function(e) {
  * Allows sending tabs to textarea
  *
  * @param {KeyboardEvent} e - Event
- * @returns {boolean}
+ * @returns {Boolean}
  * @private
  */
 Editor.prototype._fixTabs = function(e) {
@@ -340,4 +345,50 @@ Editor.prototype._fixTabs = function(e) {
 		re.move("character", start);
 	}
 	return false;
+};
+
+/**
+ * Gets new state name
+ *
+ * @param {String} text - already translated text to prompt
+ * @param {String} [value]
+ * @param {String[]} [taken] - already taken names
+ * @returns {?String}
+ */
+Editor.prototype.getNewName = function(text, value, taken) {
+	var old = value;
+	var name = null;
+	while (name === null) {
+		name = window.prompt(text, old);
+
+		if (name === null) {
+			return name;
+		} else if (!name.match(/^[a-zA-Z][a-zA-Z0-9_]*$/)) {
+			alert(_('Only letters, numbers and underscore are allowed and the first character must be a letter.'));
+			old = name;
+			name = null;
+		} else if (taken && name in taken) {
+			alert(_('This name is already taken.'));
+			old = name;
+			name = null;
+		}
+	}
+
+	return name;
+};
+
+/**
+ * Returns count of items defined in object
+ *
+ * @param {Object} obj
+ * @return {Number}
+ */
+Editor.prototype.countObject = function(obj) {
+	var size = 0, key;
+	for (key in obj) {
+		if (obj.hasOwnProperty(key)) {
+			size++;
+		}
+	}
+	return size;
 };

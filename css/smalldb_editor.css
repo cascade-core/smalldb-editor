@@ -217,7 +217,7 @@
 	padding: 5px 0;
 	border-bottom: 1px solid #999;
 	margin: 0 -10px 10px;
-	background: #efe;
+	background: #eee;
 }
 
 .smalldb-editor-editor-panel-title ~ .smalldb-editor-editor-panel-title {
@@ -253,7 +253,6 @@
 }
 
 .smalldb-editor-editor-panel-row select:focus {
-	font-size: 9px;
 	box-shadow: #000 0 0;
 	padding-left: 1px;
 	margin-bottom: -1px;
