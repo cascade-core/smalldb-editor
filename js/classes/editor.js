@@ -86,9 +86,11 @@ Editor.prototype._bind = function() {
  *
  * @param {String} [view] - mode of editor, defaults to 'summary', other options are 'edge' and 'state'
  * @param {State|Transition} [item] - item to edit (State or Transition instance)
+ * @param {Boolean} [multiple] - allow selection of multiple states, defaults to false (removes selection first)
  */
-Editor.prototype.create = function(view, item) {
+Editor.prototype.create = function(view, item, multiple) {
 	view = view || 'summary';
+	this.multiple = multiple || false;
 
 	// create / wipe editor container
 	if (this.$container) {
@@ -98,7 +100,7 @@ Editor.prototype.create = function(view, item) {
 	}
 
 	// deactivate previous item
-	if (this.item && this.item !== item) {
+	if (!this.multiple && this.item && this.item !== item) {
 		this.item.deactivate();
 		delete this.item;
 	}

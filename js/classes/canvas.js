@@ -268,12 +268,12 @@ Canvas.prototype._onMouseUp = function(e) {
 			if (currX - this._cursor.x < 0) { // right to left selection => allow selecting just part of state
 				if (currX < stateXW && this._cursor.x > stateX &&
 					((currY > stateY && this._cursor.y < stateYH) || (this._cursor.y > stateY && currY < stateYH))) {
-					s.activate();
+					s.activate(true);
 				}
 			} else { // left to right selection => select only whole state
 				if (currX > stateXW && this._cursor.x < stateX &&
 					((currY > stateYH && this._cursor.y < stateY) || this._cursor.y > stateYH && currY < stateY)) {
-					s.activate();
+					s.activate(true);
 				}
 			}
 		}
@@ -460,6 +460,7 @@ Canvas.prototype._writeText = function(text, x, y, color, postpone) {
 	}
 	color = color || '#000';
 	this.context.save();
+	this.context.lineWidth = 1.4;
 	this.context.shadowColor = '#ccc';
 	this.context.shadowOffsetX = 0;
 	this.context.shadowOffsetY = 0;

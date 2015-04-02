@@ -198,7 +198,7 @@ State.prototype._onDragOverConnect = function(e) {
 	x /= zoom;
 	y /= zoom;
 	var target = new Point(x, y);
-	var bidirectional = false;
+	this.canvas.redraw();
 
 	// highlight target
 	$('.' + SmalldbEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
@@ -208,11 +208,9 @@ State.prototype._onDragOverConnect = function(e) {
 		var state = this.editor.states[id];
 		target = state.getBorderPoint(this.center());
 		target.id = id;
-		this.canvas.redraw();
 		var trans = new Transition(this.editor.actions.__noaction__, { label: '' }, this.id, target.id, this.id === id);
 		trans.render(this.editor.states, this.editor.index);
 	} else {
-		this.canvas.redraw();
 		this._renderConnection(target, '#c60');
 	}
 };
@@ -352,14 +350,16 @@ State.prototype.toggle = function() {
 
 /**
  * Activates current state
+ *
+ * @param {Boolean} [multiple] - allow selection of multiple states, defaults to false (removes selection first)
  */
-State.prototype.activate = function() {
+State.prototype.activate = function(multiple) {
 	this._active = true;
 	var className = SmalldbEditor._namespace + '-active';
 	this.$container.addClass(className);
 	this.editor.toolbar.updateDisabledClasses();
 	this.editor.editor.dontClose = true; // prevent setting default view when clicking on state or edge
-	this.editor.editor.create('state', this);
+	this.editor.editor.create('state', this, multiple);
 };
 
 /**
