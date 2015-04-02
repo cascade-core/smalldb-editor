@@ -21,6 +21,7 @@ function TPL_html5__smalldb_editor__training_dummy($t, $id, $d, $so)
 {
 	echo "\t<!-- Smalldb Editor plugin -->\n",
 		"\t<link rel=\"stylesheet\" href=\"//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css\" type=\"text/css\">\n",
+		"\t<link rel=\"stylesheet\" href=\"/plugin/smalldb_editor/css/smalldb_reset.css\" type=\"text/css\">\n",
 		"\t<link rel=\"stylesheet\" href=\"/plugin/smalldb_editor/css/smalldb_editor.css\" type=\"text/css\">\n",
 		"\t<script type=\"text/javascript\" src=\"https://code.jquery.com/jquery-2.1.1.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/jquery/gettext.js\"></script>\n",

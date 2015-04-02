@@ -176,7 +176,7 @@ SmalldbEditor.prototype._init = function() {
  * Parses textarea data and initializes machine properties, actions and states
  */
 SmalldbEditor.prototype.processData = function() {
-	this.data = JSON.parse(this.$el.val());
+	this.data = JSON.parse(this.$el[0].innerHTML);
 	this.states = {};
 	this.actions = {};
 

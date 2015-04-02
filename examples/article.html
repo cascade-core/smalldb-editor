@@ -1,0 +1,369 @@
+<html>
+<head>
+	<!-- Smalldb Editor plugin -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" type="text/css">
+	<link rel="stylesheet" href="../css/smalldb_reset.css" type="text/css">
+	<link rel="stylesheet" href="../css/smalldb_editor.css" type="text/css">
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.js"></script>
+	<script type="text/javascript" src="../js/jquery/gettext.js"></script>
+	<script type="text/javascript" src="../js/classes/geometry.js"></script>
+	<script type="text/javascript" src="../js/classes/spline.js"></script>
+	<script type="text/javascript" src="../js/classes/tarjan.js"></script>
+	<script type="text/javascript" src="../js/classes/state.js"></script>
+	<script type="text/javascript" src="../js/classes/action.js"></script>
+	<script type="text/javascript" src="../js/classes/transition.js"></script>
+	<script type="text/javascript" src="../js/classes/editor.js"></script>
+	<script type="text/javascript" src="../js/classes/canvas.js"></script>
+	<script type="text/javascript" src="../js/classes/storage.js"></script>
+	<script type="text/javascript" src="../js/classes/toolbar.js"></script>
+	<script type="text/javascript" src="../js/classes/smalldb_editor.js"></script>
+	<script type="text/javascript" src="../js/smalldb_editor.js"></script>
+	<script type="text/javascript" src="../js/init.js"></script>
+
+    <style>
+        body, div, td, th, p, h1, h2, h3, h4, h5, h6, li, dd, dt, a, label { font-family: "DejaVu Sans", "Verdana", sans-serif; font-size: 10pt; }
+        a { text-decoration: underline; color: #228; }
+        a:visited { color: #336; }
+        h1, h2, h3, h4, h5, h6 {
+            color: #258;
+            font-weight: normal;
+            text-shadow: 1px 1px 1px #aaa;
+        }
+
+        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a,
+        h1 a:visited, h2 a:visited, h3 a:visited, h4 a:visited, h5 a:visited, h6 a:visited {
+            color: #258;
+            text-decoration: none;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            font-weight: normal;
+            text-decoration: none;
+            font-variant: small-caps;
+            margin: 0em;
+            padding: 0em;
+        }
+
+        h2 {
+            font-size: 1.6em;
+            margin: 1.4em 0em 1em 0em;
+        }
+
+        h3 {
+            font-size: 1.3em;
+            margin: 1.7em 0em 1em 0em;
+        }
+
+        h4 {
+            font-size: 1.1em;
+            margin: 1.9em 0em 1em 0em;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Smalldb Editor Examples</h1>
+
+<h2>Article machine</h2>
+
+<textarea id=".main.main.admin.main.training_dummy" class="smalldb_editor" cols="25" rows="80" style="display: block; width: 99%; height: 400px;">{
+    "_": "\u003C?php printf('_%c%c}%c',34,10,10);__halt_compiler();?\u003E",
+    "states": {
+        "draft": {
+            "state": "draft",
+            "url": "",
+            "label": "Draft",
+            "color": "#EEEEEE"
+        },
+        "published": {
+            "state": "published",
+            "url": "",
+            "label": "Published",
+            "color": "#99FF33"
+        },
+        "rejected": {
+            "state": "rejected",
+            "url": "",
+            "label": "Rejected",
+            "color": "#FF6633"
+        },
+        "submitted": {
+            "state": "submitted",
+            "url": "",
+            "label": "Submitted",
+            "color": "#EEEEEE"
+        },
+        "waiting": {
+            "state": "waiting",
+            "url": "",
+            "label": "Waiting",
+            "color": "#EEEEEE"
+        }
+    },
+    "actions": {
+        "accept": {
+            "transitions": {
+                "submitted": {
+                    "label": "accept",
+                    "color": "#000000",
+                    "targets": [
+                        "waiting",
+                        "published"
+                    ]
+                }
+            }
+        },
+        "return": {
+            "transitions": {
+                "submitted": {
+                    "label": "return",
+                    "color": "#000000",
+                    "targets": [
+                        "draft"
+                    ]
+                }
+            }
+        },
+        "submit": {
+            "transitions": {
+                "draft": {
+                    "label": "submit",
+                    "color": "#000000",
+                    "targets": [
+                        "submitted"
+                    ]
+                }
+            }
+        },
+        "reject": {
+            "transitions": {
+                "submitted": {
+                    "label": "reject",
+                    "color": "#000000",
+                    "targets": [
+                        "rejected"
+                    ]
+                }
+            }
+        },
+        "withdraw": {
+            "transitions": {
+                "submitted": {
+                    "label": "withdraw",
+                    "color": "#000000",
+                    "targets": [
+                        "draft"
+                    ]
+                }
+            }
+        },
+        "test e2": {
+            "transitions": {
+                "draft": {
+                    "label": "test e2",
+                    "color": "#000000",
+                    "targets": [
+                        "published"
+                    ]
+                }
+            }
+        },
+        "ttt": {
+            "transitions": {
+                "draft": {
+                    "label": "ttt",
+                    "color": "#000000",
+                    "targets": [
+                        "draft"
+                    ]
+                }
+            }
+        },
+        "create": {
+            "transitions": {
+                "": {
+                    "label": "create",
+                    "color": "#000000",
+                    "targets": [
+                        "draft"
+                    ]
+                }
+            },
+            "heading": "New article",
+            "label": "Create",
+            "returns": "new_id",
+            "block": {
+                "inputs": {
+                    "item": null
+                },
+                "outputs": {
+                    "ref": "return_value"
+                }
+            }
+        },
+        "test e": {
+            "transitions": {
+                "published": {
+                    "label": "test e",
+                    "color": "#000000",
+                    "targets": [
+                        "draft"
+                    ]
+                }
+            }
+        },
+        "edit": {
+            "transitions": {
+                "submitted": {
+                    "label": "edit",
+                    "color": "#000000",
+                    "targets": [
+                        "submitted"
+                    ]
+                },
+                "draft": {
+                    "label": "edit",
+                    "color": "#000000",
+                    "targets": [
+                        "draft"
+                    ]
+                }
+            },
+            "heading": "Edit article",
+            "label": "Edit",
+            "block": {
+                "inputs": {
+                    "ref": null,
+                    "item": null
+                },
+                "outputs": []
+            }
+        },
+        "publish": {
+            "transitions": {
+                "waiting": {
+                    "label": "publish",
+                    "color": "#000000",
+                    "targets": [
+                        "published"
+                    ]
+                },
+                "draft": {
+                    "description": "",
+                    "label": "publish",
+                    "color": "#000000",
+                    "targets": [
+                        "draft"
+                    ]
+                }
+            }
+        },
+        "hide": {
+            "transitions": {
+                "published": {
+                    "label": "hide",
+                    "color": "#000000",
+                    "targets": [
+                        "submitted"
+                    ]
+                },
+                "waiting": {
+                    "label": "hide",
+                    "color": "#000000",
+                    "targets": [
+                        "submitted"
+                    ]
+                },
+                "draft": {
+                    "description": "",
+                    "label": "hide",
+                    "color": "#000000",
+                    "targets": [
+                        "draft"
+                    ]
+                }
+            }
+        },
+        "listing": {
+            "heading": "Articles"
+        },
+        "show": {
+            "heading": "{title}",
+            "heading_without_links": true
+        }
+    },
+    "class": "ExampleApplication\\UniversalStateMachine",
+    "include": [
+        "article.graphml"
+    ],
+    "name": "Article",
+    "desc": "Article",
+    "table": "article",
+    "flupdo_resource": "database",
+    "io_name": "item",
+    "url": "/article/{id}",
+    "parent_url": "/article",
+    "default_access_policy": null,
+    "state_select": "state",
+    "properties": {
+        "id": {
+            "type": "number",
+            "label": "ID",
+            "is_pk": true,
+            "link": "/article/{id}",
+            "calculated": true
+        },
+        "title": {
+            "type": "text",
+            "label": "Title",
+            "required": true,
+            "link": "/article/{id}"
+        },
+        "state": {
+            "type": "text",
+            "label": "State",
+            "calculated": true
+        },
+        "perex": {
+            "type": "textarea",
+            "label": "Perex",
+            "required": true,
+            "tabular_hidden": true,
+            "class": "perex",
+            "rows": 10
+        },
+        "body_md": {
+            "type": "markdownarea",
+            "label": "Text",
+            "required": true,
+            "tabular_hidden": true,
+            "rows": 24
+        },
+        "created": {
+            "type": "datetime",
+            "label": "Created",
+            "format": "%Y-%m-%d %H:%M",
+            "readonly": true,
+            "tabular_hidden": false,
+            "tabular_width": 84,
+            "calculated": true
+        },
+        "modified": {
+            "type": "datetime",
+            "label": "Modified",
+            "format": "%Y-%m-%d %H:%M",
+            "readonly": true,
+            "tabular_hidden": false,
+            "tabular_width": 84,
+            "calculated": true
+        }
+    },
+    "default_filters": {
+        "order_by": "created",
+        "order_asc": false
+    }
+}</textarea>
+
+</body>
+</html>

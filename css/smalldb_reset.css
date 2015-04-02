@@ -1,0 +1,47 @@
+/**
+ * Eric Meyer's Reset CSS v2.0 (http://meyerweb.com/eric/tools/css/reset/)
+ * http://cssreset.com
+ */
+.smalldb-editor html, .smalldb-editor body, .smalldb-editor div, .smalldb-editor span, .smalldb-editor applet, .smalldb-editor object, .smalldb-editor iframe,
+.smalldb-editor h1, .smalldb-editor h2, .smalldb-editor h3, .smalldb-editor h4, .smalldb-editor h5, .smalldb-editor h6, .smalldb-editor p, .smalldb-editor blockquote, .smalldb-editor pre,
+.smalldb-editor a, .smalldb-editor abbr, .smalldb-editor acronym, .smalldb-editor address, .smalldb-editor big, .smalldb-editor cite, .smalldb-editor code,
+.smalldb-editor del, .smalldb-editor dfn, .smalldb-editor em, .smalldb-editor img, .smalldb-editor ins, .smalldb-editor kbd, .smalldb-editor q, .smalldb-editor s, .smalldb-editor samp,
+.smalldb-editor small, .smalldb-editor strike, .smalldb-editor strong, .smalldb-editor sub, .smalldb-editor sup, .smalldb-editor tt, .smalldb-editor var,
+.smalldb-editor b, .smalldb-editor u, .smalldb-editor center,
+.smalldb-editor dl, .smalldb-editor dt, .smalldb-editor dd, .smalldb-editor ol, .smalldb-editor ul, .smalldb-editor li,
+.smalldb-editor fieldset, .smalldb-editor form, .smalldb-editor label, .smalldb-editor legend,
+.smalldb-editor table, .smalldb-editor caption, .smalldb-editor tbody, .smalldb-editor tfoot, .smalldb-editor thead, .smalldb-editor tr, .smalldb-editor th, .smalldb-editor td,
+.smalldb-editor article, .smalldb-editor aside, .smalldb-editor canvas, .smalldb-editor details, .smalldb-editor embed,
+.smalldb-editor figure, .smalldb-editor figcaption, .smalldb-editor footer, .smalldb-editor header, .smalldb-editor hgroup,
+.smalldb-editor menu, .smalldb-editor nav, .smalldb-editor output, .smalldb-editor ruby, .smalldb-editor section, .smalldb-editor summary,
+.smalldb-editor time, .smalldb-editor mark, .smalldb-editor audio, .smalldb-editor video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+.smalldb-editor article, .smalldb-editor aside, .smalldb-editor details, .smalldb-editor figcaption, .smalldb-editor figure,
+.smalldb-editor footer, .smalldb-editor header, .smalldb-editor hgroup, .smalldb-editor menu, .smalldb-editor nav, .smalldb-editor section {
+	display: block;
+}
+.smalldb-editor body {
+	line-height: 1;
+}
+.smalldb-editor ol, .smalldb-editor ul {
+	list-style: none;
+}
+.smalldb-editor blockquote, .smalldb-editor q {
+	quotes: none;
+}
+.smalldb-editor blockquote:before, .smalldb-editor blockquote:after,
+.smalldb-editor q:before, .smalldb-editor q:after {
+	content: '';
+	content: none;
+}
+.smalldb-editor table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
