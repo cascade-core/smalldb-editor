@@ -312,6 +312,7 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 	var points = [from];
 
 	// add extra points to distinguish bidirectional connections - creates ellipsis from connecting lines
+	var mid = new Line(from, to).middle();
 	if (bidirectional) {
 		var v = from.minus(to); // vector to get direction
 		var angle = Point.angle(from, to); // to get direction of deviation
@@ -325,14 +326,13 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 		var signY = (angle >= Math.PI || angle > 3 * Math.PI / 2) ? 1 : -1;
 		var dx = hypotenuse * Math.cos(gamma) * signX;
 		var dy = hypotenuse * Math.sin(gamma) * signY;
-		var extra = new Point(from.x + dx, from.y + dy);
-		points.push(extra);
-		this._writeText(label, extra.x, extra.y - 5, color);
+		mid = new Point(from.x + dx, from.y + dy);
+		points.push(mid);
 
 		// adjust start and end position to
 		var states = this.editor.states;
-		from = states[from.id].getBorderPoint(extra);
-		to = states[to.id].getBorderPoint(extra);
+		from = states[from.id].getBorderPoint(mid);
+		to = states[to.id].getBorderPoint(mid);
 		points[0] = from;
 	}
 
@@ -354,10 +354,7 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 	}
 
 	// draw action label
-	if (!bidirectional) {
-		var mid = new Line(from, to).middle();
-		this._writeText(label, mid.x + 5, mid.y - 5, color)
-	}
+	this._writeText(label, mid.x + 5, mid.y - 5, color)
 
 	// draw arrow in the end point
 	var angle = Point.angle(points[points.length - 2], to);
@@ -453,9 +450,15 @@ Canvas.prototype._drawArrow = function(x, y, angle) {
 Canvas.prototype._writeText = function(text, x, y, color) {
 	color = color || '#000';
 	this.context.save();
+	this.context.shadowColor = '#ccc';
+	this.context.shadowOffsetX = 0;
+	this.context.shadowOffsetY = 0;
+	this.context.shadowBlur = 2;
+	this.context.strokeStyle = '#fff';
 	this.context.fillStyle = color;
 	this.context.font = "11px Arial";
 	this.context.textAlign = 'center';
+	this.context.strokeText(text, x, y);
 	this.context.fillText(text, x, y);
 	this.context.restore();
 };
