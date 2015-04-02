@@ -313,7 +313,7 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 
 	// add extra points to distinguish bidirectional connections - creates ellipsis from connecting lines
 	var mid = new Line(from, to).middle();
-	if (bidirectional) {
+	if (index > 1 || bidirectional) {
 		var v = from.minus(to); // vector to get direction
 		var angle = Point.angle(from, to); // to get direction of deviation
 		var dist = v.norm(); // distance between start & end
@@ -328,8 +328,10 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 		var dy = hypotenuse * Math.sin(gamma) * signY;
 		mid = new Point(from.x + dx, from.y + dy);
 		points.push(mid);
+	}
 
-		// adjust start and end position to
+	if (bidirectional) {
+		// adjust start and end position
 		var states = this.editor.states;
 		from = states[from.id].getBorderPoint(mid);
 		to = states[to.id].getBorderPoint(mid);

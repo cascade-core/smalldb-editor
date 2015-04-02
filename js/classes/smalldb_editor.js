@@ -205,9 +205,6 @@ SmalldbEditor.prototype.processData = function() {
 	this.states = {};
 	this.actions = {};
 
-	// placeholder for rendering temporary transitions without proper action
-	this.actions.__noaction__ = new Action('__noaction__', { label: '' }, this);
-
 	// machine properties
 	this.properties = {};
 	for (var opt in this.data) {
@@ -234,6 +231,9 @@ SmalldbEditor.prototype.processData = function() {
 			this.actions[id] = a;
 		}
 	}
+
+	// placeholder for rendering temporary transitions without proper action
+	this.actions.__noaction__ = new Action('__noaction__', { label: '' }, this);
 
 	// remove end node when never used (only in view mode)
 	if (!endFound) {
