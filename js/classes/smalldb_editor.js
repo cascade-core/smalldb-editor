@@ -71,8 +71,12 @@ SmalldbEditor.prototype.placeStates = function(force) {
 	force = force || false;
 
 	// create nodes
-	var nodes = [], indexed = {};
+	var nodes = [], indexed = {}, end = null;
 	for (var id in this.states) {
+		if (id === '__end__' && this.states[id].notFound) {
+			end = new Node(id);
+			continue;
+		}
 		var node = new Node(id);
 		nodes.push(node);
 		indexed[id] = node;
@@ -98,15 +102,19 @@ SmalldbEditor.prototype.placeStates = function(force) {
 	var tarjan = new Tarjan(graph);
 	var components = tarjan.run();
 
+	if (end) {
+		components.unshift([end]);
+	}
+
 	// compute max width of each component
-	var max = 0, stepX = 100, stepY = 200;
+	var max = 0, stepX = 100, stepY = 100;
 	for (var i in components) {
 		var scc = components[i];
 		var width = scc.length * stepX;
 		max = Math.max(max, width);
 	}
 
-	var dx, dy = 10, sign = -1;
+	var dx, dy = 10, sign = 1;
 	// components are sorted in reverse topological order
 	for (var i = components.length - 1; i >= 0; i--) {
 		var scc = components[i];
@@ -121,10 +129,12 @@ SmalldbEditor.prototype.placeStates = function(force) {
 				state.redraw();
 			}
 			dx += stepX;
-			dy += sign * stepX;
-			sign *= -1;
+			if (scc.length > 1) {
+				dy += sign * stepY;
+				sign *= -1;
+			}
 		}
-		dy += stepY;
+		dy += stepY * (scc.length > 1 ? 2 : 1);
 	}
 };
 
@@ -222,10 +232,15 @@ SmalldbEditor.prototype.processData = function() {
 		}
 	}
 
-	// remove end node when never used
+	// remove end node when never used (only in view mode)
 	if (!endFound) {
-		this.states.__end__.remove();
-		delete this.states.__end__;
+		if (this.options.viewOnly) {
+			this.states.__end__.remove();
+			delete this.states.__end__;
+		} else {
+			// mark node as not found to force its position in the end of machine
+			this.states.__end__.notFound = true;
+		}
 	}
 };
 

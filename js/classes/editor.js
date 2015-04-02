@@ -146,8 +146,11 @@ Editor.prototype._createEdgeView = function() {
 	this.$container.append($title);
 
 	this._createChangeActionSelect();
-	this._addTextInputRow('label', 'Label', this.item.action.label);
-	this._addColorInputRow('color', 'Color', this.item.action.color);
+
+	if (this.item.action.id.indexOf('__') !== 0) { // do not display for internal states (start & end) and actions (noaction)
+		this._addTextInputRow('label', 'Label', this.item.action.label);
+		this._addColorInputRow('color', 'Color', this.item.action.color);
+	}
 
 	// edge options
 	$title = $('<div class="' + this._namespace + '-title">');
@@ -241,9 +244,11 @@ Editor.prototype._createStateView = function() {
 	this.$container.append($title);
 
 	// rows
-	this._addTextInputRow('name', 'Name', this.item.id);
-	this._addTextInputRow('label', 'Label', this.item.data.label);
-	this._addColorInputRow('color', 'Color', this.item.data.color);
+	if (this.item.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
+		this._addTextInputRow('name', 'Name', this.item.id);
+		this._addTextInputRow('label', 'Label', this.item.data.label);
+		this._addColorInputRow('color', 'Color', this.item.data.color);
+	}
 
 	// x / y position
 	var $position = $('<div class="' + this._namespace + '-row">');

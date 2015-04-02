@@ -386,10 +386,12 @@ State.prototype.create = function() {
 		});
 
 		// remove state button
-		var $removeButton = $('<a href="#remove" class="' + SmalldbEditor._namespace + '-state-remove"><i class="fa fa-fw fa-trash"></i> ×</a>');
-		$removeButton.on('click', this._remove.bind(this));
-		$removeButton.attr('title', 'Remove state');
-		this.$container.append($removeButton);
+		if (this.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
+			var $removeButton = $('<a href="#remove" class="' + SmalldbEditor._namespace + '-state-remove"><i class="fa fa-fw fa-trash"></i> ×</a>');
+			$removeButton.on('click', this._remove.bind(this));
+			$removeButton.attr('title', 'Remove state');
+			this.$container.append($removeButton);
+		}
 	}
 };
 

@@ -103,6 +103,10 @@
 	height: 25px;
 }
 
+.smalldb-editor .smalldb-editor-state.smalldb-editor-id-__end__ {
+	border: 1px solid #000;
+}
+
 .smalldb-editor .smalldb-editor-state.smalldb-editor-active,
 .smalldb-editor .smalldb-editor-state.smalldb-editor-active:hover {
 	background: #efe;
