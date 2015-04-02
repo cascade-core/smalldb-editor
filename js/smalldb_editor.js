@@ -30,7 +30,9 @@
 			if (editor && typeof options === 'string' && typeof editor[options] === 'function') {
 				editor[options]();
 			} else {
-				new SmalldbEditor(this, options);
+				var editor = new SmalldbEditor(this);
+				editor.setOptions(options);
+				editor.init();
 			}
 		});
 	};

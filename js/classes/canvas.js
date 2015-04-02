@@ -87,13 +87,15 @@ Canvas.prototype.create = function() {
 		width: this.editor.$container.width(),
 		height: this.editor.$container.height()
 	});
-	this.$container.on({
-		mousedown: this._onMouseDown.bind(this),
-		mouseup: this._onMouseUp.bind(this),
-		mousemove: this._onMouseMove.bind(this),
-		scroll: this._onScroll.bind(this),
-		dblclick: this._onDblClick.bind(this)
-	});
+	if (!this.options.viewOnly) {
+		this.$container.on({
+			mousedown: this._onMouseDown.bind(this),
+			mouseup: this._onMouseUp.bind(this),
+			mousemove: this._onMouseMove.bind(this),
+			scroll: this._onScroll.bind(this),
+			dblclick: this._onDblClick.bind(this)
+		});
+	}
 	// disable text selection, forces default cursor when selecting
 	this.$container[0].onselectstart = function() {
 		return false;

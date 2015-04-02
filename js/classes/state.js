@@ -372,20 +372,25 @@ State.prototype.create = function() {
 		this.$container.css('background', this.data.color);
 	}
 
-	// make it draggable
-	this.$container.on('click', this._onClick.bind(this));
-	this.$container.on('mousedown', this._onDragStart.bind(this));
-
 	// state id and remove button
 	this.$container.text(this.data.label);
 	this.$container.data(SmalldbEditor._namespace + '-id', this.id);
 	this.$container.attr('title', this.id);
-	this.$container.on('dblclick', this._changeLabel.bind(this));
 
-	var $removeButton = $('<a href="#remove" class="' + SmalldbEditor._namespace + '-state-remove"><i class="fa fa-fw fa-trash"></i> ×</a>');
-	$removeButton.on('click', this._remove.bind(this));
-	$removeButton.attr('title', 'Remove state');
-	this.$container.append($removeButton);
+	if (!this.editor.options.viewOnly) {
+		// make it draggable
+		this.$container.on({
+			'click': this._onClick.bind(this),
+			'mousedown': this._onDragStart.bind(this),
+			'dblclick': this._changeLabel.bind(this)
+		});
+
+		// remove state button
+		var $removeButton = $('<a href="#remove" class="' + SmalldbEditor._namespace + '-state-remove"><i class="fa fa-fw fa-trash"></i> ×</a>');
+		$removeButton.on('click', this._remove.bind(this));
+		$removeButton.attr('title', 'Remove state');
+		this.$container.append($removeButton);
+	}
 };
 
 /**

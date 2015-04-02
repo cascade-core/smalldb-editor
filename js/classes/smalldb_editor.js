@@ -4,15 +4,17 @@
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
  * @param {HTMLElement} el - textarea element
- * @param {Array} [options]
  * @class
  */
-var SmalldbEditor = function(el, options) {
+var SmalldbEditor = function(el) {
 	/** @property {jQuery} $el plugin data variable name */
     this.$el = $(el);
 
 	/** @property {string} defaults default options */
 	this.defaults = {
+		viewOnly: false, // view only mode - no interaction allowed
+		scrollLeft: 0, // px to scroll from left - used for view only mode
+		scrollTop: 0, // px to scroll from top - used for view only mode
 		historyLimit: 1000, // count of remembered changes,
 		splineTension: 0.3, // used to render connections, more means higher elasticity of connections
 		edgeClickOffset: 5, // px to both sides from line
@@ -24,27 +26,24 @@ var SmalldbEditor = function(el, options) {
 		canvasBackgroundLineColor: '#eef',
 		canvasBackgroundLineStep: 10 // px
 	};
-
-	// create namespaced storages
-	this.session = new Storage(sessionStorage, SmalldbEditor._namespace);
-	this.storage = new Storage(localStorage, SmalldbEditor._namespace);
-
-	// options stored in data attribute
-	var meta = this.$el.data(this._namespace + '-opts');
-
-	// merge all options together
-	this.options = $.extend(this.defaults, options, meta);
-
-	// reference to self
-    this.$el.data(SmalldbEditor._namespace, this);
-
-	// init state editor
-	this._createContainer();
-	this._init();
 };
 
 /** @property {string} _namespace plugin namespace */
 SmalldbEditor._namespace = 'smalldb-editor';
+
+/**
+ * Initialize options map
+ *
+ * @param {Array} options
+ * @private
+ */
+SmalldbEditor.prototype.setOptions = function(options) {
+	// options stored in data attribute
+	var meta = this.$el.data(SmalldbEditor._namespace + '-opts');
+
+	// merge all options together
+	this.options = $.extend(this.defaults, options, meta);
+};
 
 /**
  * Creates container
@@ -56,6 +55,9 @@ SmalldbEditor.prototype._createContainer = function() {
 		width: this.$el.width(),
 		height: this.$el.height()
 	});
+	if (this.options.viewOnly) {
+		this.$container.addClass(SmalldbEditor._namespace + '-view-only');
+	}
 	this.$el.after(this.$container).hide();
 };
 
@@ -150,7 +152,17 @@ SmalldbEditor.prototype._sortComponent = function(component) {
  *
  * @private
  */
-SmalldbEditor.prototype._init = function() {
+SmalldbEditor.prototype.init = function() {
+	// create html container
+	this._createContainer();
+
+	// create namespaced storages
+	this.session = new Storage(sessionStorage, SmalldbEditor._namespace);
+	this.storage = new Storage(localStorage, SmalldbEditor._namespace);
+
+	// reference to self
+	this.$el.data(SmalldbEditor._namespace, this);
+
 	// reset undo & redo history when URL changed (new state loaded)
 	if (this.session.get('url') !== location.href) {
 		this.session.set('url', location.href);
@@ -233,8 +245,14 @@ SmalldbEditor.prototype.render = function() {
 	}
 
 	// scroll to top left corner of diagram bounding box
-	var top = this.box.minY - this.options.canvasOffset + this.canvas.options.canvasExtraWidth;
-	var left = this.box.minX - this.options.canvasOffset + this.canvas.options.canvasExtraHeight;
+	var top = this.box.minY
+			- this.options.canvasOffset
+			+ this.canvas.options.canvasExtraWidth
+			- this.canvas.options.scrollTop;
+	var left = this.box.minX
+			- this.options.canvasOffset
+			+ this.canvas.options.canvasExtraHeight
+			- this.canvas.options.scrollLeft;
 	this.canvas.$container.scrollTop(top);
 	this.canvas.$container.scrollLeft(left);
 };

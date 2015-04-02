@@ -56,27 +56,29 @@ Editor.prototype._bind = function() {
 		}
 	}, this));
 
-	// canvas click - check for click on edge
-	var ns = SmalldbEditor._namespace + '-editor-panel';
-	$(document).off('click.' + ns).on('click.' + ns, $.proxy(function(e) {
-		if (this.dontClose || !$(e.target).is('canvas')) {
-			this.dontClose = false;
-			return true;
-		} else {
-			// check for click on edge
-			var pos = this.canvas.clickPosition(e, true);
-			for (var a in this.editor.actions) {
-				var act = this.editor.actions[a];
-				for (var t in act.transitions) {
-					var trans = act.transitions[t];
-					if (trans.contains(pos)) {
-						return trans.activate();
+	if (!this.editor.options.viewOnly) {
+		// canvas click - check for click on edge
+		var ns = SmalldbEditor._namespace + '-editor-panel';
+		$(document).off('click.' + ns).on('click.' + ns, $.proxy(function (e) {
+			if (this.dontClose || !$(e.target).is('canvas')) {
+				this.dontClose = false;
+				return true;
+			} else {
+				// check for click on edge
+				var pos = this.canvas.clickPosition(e, true);
+				for (var a in this.editor.actions) {
+					var act = this.editor.actions[a];
+					for (var t in act.transitions) {
+						var trans = act.transitions[t];
+						if (trans.contains(pos)) {
+							return trans.activate();
+						}
 					}
 				}
+				return this.create(); // otherwise show summary
 			}
-			return this.create(); // otherwise show summary
-		}
-	}, this));
+		}, this));
+	}
 };
 
 /**

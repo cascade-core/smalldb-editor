@@ -30,6 +30,15 @@
 	box-sizing: border-box;
 }
 
+.smalldb-editor.smalldb-editor-view-only .smalldb-editor-toolbar,
+.smalldb-editor.smalldb-editor-view-only .smalldb-editor-editor-panel {
+	display: none !important;
+}
+
+.smalldb-editor.smalldb-editor-view-only .smalldb-editor-container {
+	overflow: hidden !important;
+}
+
 .smalldb-editor .smalldb-editor-container {
 	position: relative;
 	overflow: scroll;
