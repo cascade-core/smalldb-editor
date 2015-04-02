@@ -354,7 +354,7 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 	}
 
 	// draw action label
-	this._writeText(label, mid.x + 5, mid.y - 5, color)
+	this._writeText(label, mid.x + 5, mid.y - 5, color, !this.editor.dragging);
 
 	// draw arrow in the end point
 	var angle = Point.angle(points[points.length - 2], to);
@@ -394,9 +394,9 @@ Canvas.prototype.drawCycleConnection = function(label, from, to, index, color, h
 	var mid = line.middle();
 
 	// control points
-	points.push(new Point(mid.x + 0.65 * len + len * 0.25 * (index - 1), mid.y - 15 - 20 * (index - 1)));
+	points.push(new Point(mid.x + 0.65 * len + 5 * (index - 1), mid.y - 15 - 20 * (index - 1)));
 	points.push(new Point(mid.x, mid.y - 25 - 20 * (index - 1)));
-	points.push(new Point(mid.x - 0.65 * len - len * 0.25 * (index - 1), mid.y - 15 - 20 * (index - 1)));
+	points.push(new Point(mid.x - 0.65 * len - 5 * (index - 1), mid.y - 15 - 20 * (index - 1)));
 	points.push(to);
 
 	// draw curved line
@@ -407,7 +407,7 @@ Canvas.prototype.drawCycleConnection = function(label, from, to, index, color, h
 	var angle = Point.angle(points[points.length - 2], to);
 	this._drawArrow(to.x, to.y, angle);
 
-	this._writeText(label, mid.x, mid.y - 30 - 20 * (index - 1), color);
+	this._writeText(label, mid.x, mid.y - 30 - 20 * (index - 1), color, !this.editor.dragging);
 
 	return path;
 };
@@ -445,9 +445,17 @@ Canvas.prototype._drawArrow = function(x, y, angle) {
  * @param {Number} x
  * @param {Number} y
  * @param {String} [color='#000']
+ * @param {Boolean} [postpone] render with small delay, defaults to false
  * @private
  */
-Canvas.prototype._writeText = function(text, x, y, color) {
+Canvas.prototype._writeText = function(text, x, y, color, postpone) {
+	// postpone text rendering to draw all curves first (render twice actually)
+	if (postpone) {
+		var that = this;
+		setTimeout(function() {
+			that._writeText(text, x, y, color);
+		}, 0);
+	}
 	color = color || '#000';
 	this.context.save();
 	this.context.shadowColor = '#ccc';

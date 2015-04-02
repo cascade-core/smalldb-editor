@@ -19,7 +19,7 @@ var Transition = function(action, data, source, target, cycle) {
 	this.source = source;
 	this.target = target;
 	this.cycle = cycle || false;
-	this.label = data.label || action.id;
+	this.label = 'label' in data ? data.label : action.id;
 	this.color = data.color || action.color || '#000';
 };
 

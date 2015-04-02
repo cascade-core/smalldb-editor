@@ -109,13 +109,17 @@ State.prototype.remove = function() {
 
 /**
  * Redraw this state
+ *
+ * @param {Boolean} [noCanvasRedraw] - do not redraw canvas
  */
-State.prototype.redraw = function() {
+State.prototype.redraw = function(noCanvasRedraw) {
 	if (this.$container) {
 		this.$container.remove();
 		delete this.$container;
 		this.render();
-		this.canvas.redraw();
+		if (noCanvasRedraw) {
+			this.canvas.redraw();
+		}
 	}
 };
 
@@ -157,6 +161,7 @@ State.prototype._onDragStart = function(e) {
 			'mousemove.state-editor': this._onDragOverConnect.bind(this),
 			'mouseup.state-editor': this._onDragEndConnect.bind(this)
 		});
+		this.editor.dragging = true;
 	} else {
 		var zoom = this.canvas.getZoom();
 		this._cursor = {
@@ -164,6 +169,7 @@ State.prototype._onDragStart = function(e) {
 			y: e.clientY / zoom - this.position().top
 		};
 		this._dragging = true;
+		this.editor.dragging = true;
 		this._moved = false;
 
 		$('body').on({
@@ -201,9 +207,14 @@ State.prototype._onDragOverConnect = function(e) {
 		var id = $(e.target).data(SmalldbEditor._namespace + '-id');
 		var state = this.editor.states[id];
 		target = state.getBorderPoint(this.center());
+		target.id = id;
+		this.canvas.redraw();
+		var trans = new Transition(this.editor.actions.__noaction__, { label: '' }, this.id, target.id, this.id === id);
+		trans.render(this.editor.states, this.editor.index);
+	} else {
+		this.canvas.redraw();
+		this._renderConnection(target, '#c60');
 	}
-	this.canvas.redraw();
-	this._renderConnection(target, '#c60');
 };
 
 /**
@@ -225,7 +236,6 @@ State.prototype._onDragEndConnect = function(e) {
 		trans.render(this.editor.states, this.editor.index);
 		action.addTransition(source, trans);
 		this.addConnection(target);
-		this.canvas.redraw();
 	}
 
 	// clean up
@@ -276,8 +286,11 @@ State.prototype._onDragOver = function(e) {
  * @private
  */
 State.prototype._onDragEnd = function(e) {
+	var that = this;
 	setTimeout(function() {
-		this._dragging = false;
+		that._dragging = false;
+		that.editor.dragging = false;
+		that.canvas.redraw();
 	}, 0);
 	$('body').off('mousemove.state-editor mouseup.state-editor');
 	this.editor.onChange();
@@ -396,24 +409,6 @@ State.prototype.create = function() {
 };
 
 /**
- * Toggles input variable editor
- * used as on click handler for input variables
- *
- * @param {MouseEvent} e - Event
- * @returns {Boolean}
- * @private
- */
-State.prototype._toggleInputEditor = function(e) {
-	if (!this._moved) {
-		var selector = '.' + SmalldbEditor._namespace + '-state-input';
-		var editor = new Editor(this, this.editor, $(e.target).closest(selector).data('variable'));
-		editor.render();
-	}
-
-	return false;
-};
-
-/**
  * Gets new state id from user via window.prompt()
  *
  * @returns {?String}
@@ -484,7 +479,7 @@ State.prototype.getBoundingBox = function() {
 };
 
 /**
- * Renders single connection
+ * Renders single connection to target point
  *
  * @param {Point} target - target position
  * @param {String} [color='#000'] - css color string starting with #
@@ -494,7 +489,11 @@ State.prototype.getBoundingBox = function() {
 State.prototype._renderConnection = function(target, color) {
 	var from = this.getBorderPoint(target);
 	var color = color || '#000';
-	this.canvas.drawConnection('', from, target, {}, color);
+	var key = from.toString() + '-' + from.toString();
+	if (!this.editor.index[key]) {
+		this.editor.index[key] = 1;
+	}
+	this.canvas.drawConnection('', from, target, this.editor.index[key]++, color);
 };
 
 /**

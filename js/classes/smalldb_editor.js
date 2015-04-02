@@ -126,7 +126,7 @@ SmalldbEditor.prototype.placeStates = function(force) {
 			if (force || (!state.x && !state.y)) {
 				state.x = dx;
 				state.y = dy;
-				state.redraw();
+				state.redraw(false);
 			}
 			dx += stepX;
 			if (scc.length > 1) {
@@ -135,6 +135,9 @@ SmalldbEditor.prototype.placeStates = function(force) {
 			}
 		}
 		dy += stepY * (scc.length > 1 ? 2 : 1);
+	}
+	if (force) {
+		this.canvas.redraw();
 	}
 };
 
@@ -203,7 +206,7 @@ SmalldbEditor.prototype.processData = function() {
 	this.actions = {};
 
 	// placeholder for rendering temporary transitions without proper action
-	this.actions.__noaction__ = new Action('__noaction__', {}, this);
+	this.actions.__noaction__ = new Action('__noaction__', { label: '' }, this);
 
 	// machine properties
 	this.properties = {};

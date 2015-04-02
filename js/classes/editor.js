@@ -129,7 +129,7 @@ Editor.prototype._createSummaryView = function() {
 
 	var $actionsCount = $('<div class="' + this._namespace + '-row">');
 	$actionsCount.text(_('Total actions count: '));
-	$actionsCount.append($('<strong>').text(this.countObject(this.editor.actions)));
+	$actionsCount.append($('<strong>').text(this.countObject(this.editor.actions) - 1));
 	this.$container.append($actionsCount);
 };
 
