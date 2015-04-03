@@ -211,18 +211,15 @@ Editor.prototype._createChangeActionSelect = function() {
 	$name.append($('<label>').text(_('Name')));
 	var $select = $('<select>');
 	for (var a in this.editor.actions) {
-		var text = this.editor.actions[a].id;
-		if (text === '__noaction__') {
-			if (this.item.action.id === '__noaction__') {
-				text = _('* Select action');
-			} else {
-				continue;
-			}
+		if (a === '__noaction__') {
+			continue;
 		}
+		var text = this.editor.actions[a].id;
 		$select.append($('<option>').text(text).val(a));
 	}
 	if (this.item.action.id === '__noaction__') {
-		$select.find('option:first').after($('<option>').text(_('* Create new action')).val('__create__'));
+		$select.prepend($('<option>').text(_('* Create new action')).val('__create__'));
+		$select.prepend($('<option>').text(_('* Select action')).val('__noaction__'));
 	} else {
 		$select.prepend($('<option>').text(_('* Rename action "%s"', [this.item.action.id])).val('__rename__'));
 		$select.prepend($('<option>').text(_('* Create new action')).val('__create__'));
@@ -244,7 +241,7 @@ Editor.prototype._changeAction = function(e) {
 	var val = $(e.target).val();
 	if (val === '__rename__') {
 		var name = this.getNewName(_('Rename action "%s":', [act.id]), act.id, this.editor.actions);
-		if (act.id.toLowerCase() === act.label.toLowerCase) {
+		if (act.id.toLowerCase() === act.label.toLowerCase()) {
 			// action name corresponds with transition label, change both
 			act.label = name;
 		}
@@ -263,7 +260,9 @@ Editor.prototype._changeAction = function(e) {
 		this.editor.actions[name] = a;
 		this.canvas.redraw();
 	} else { // change to existing action
-
+		this.item.action = this.editor.actions[val];
+		this.refresh();
+		this.canvas.redraw();
 	}
 	this.editor.onChange();
 };
