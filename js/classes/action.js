@@ -9,8 +9,8 @@
 var Action = function(id, data, editor) {
 	this.id = id;
 	this.data = data;
-	this.label = data.label;
-	this.color = id === '__noaction__' ? '#d00' : data.color;
+	this.label = 'label' in data ? data.label : id;
+	this.color = (id === '__noaction__' ? '#dd0000' : ('color' in data ? data.color : '#000000'));
 	this.editor = editor;
 	this.canvas = editor.canvas;
 	this.states = editor.states;
@@ -51,6 +51,30 @@ Action.prototype.usesEndNode = function() {
 		}
 	}
 	return endFound;
+};
+
+/**
+ * Serializes current action to JSON object
+ *
+ * @todo merge transitions with same source
+ * @returns {Object}
+ */
+Action.prototype.serialize = function() {
+	var A = {
+		label: this.label,
+		color: this.color,
+		transitions: {}
+	};
+	for (var id in this.transitions) {
+		var trans = this.transitions[id];
+		A.transitions[trans.source] = trans.serialize();
+	}
+	for (var t in this.data) {
+		if (['label', 'color', 'transitions'].indexOf(t) === -1) {
+			A[t] = this.data[t];
+		}
+	}
+	return A;
 };
 
 /**

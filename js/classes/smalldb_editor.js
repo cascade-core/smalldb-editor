@@ -385,13 +385,20 @@ SmalldbEditor.prototype.onChange = function() {
 SmalldbEditor.prototype.serialize = function() {
 	var states = {};
 	for (var i in this.states) {
-		var b = this.states[i];
-		states[b.id] = b.serialize();
+		var s = this.states[i];
+		states[s.id] = s.serialize();
+	}
+
+	var actions = {};
+	for (var i in this.actions) {
+		var a = this.actions[i];
+		actions[a.id] = a.serialize();
 	}
 
 	var ret = {
 		'_': this.properties._, // security
-		'states': states
+		'states': states,
+		'actions': actions
 	};
 	for (var t in this.properties) {
 		ret[t] = this.properties[t];

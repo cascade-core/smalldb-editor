@@ -20,7 +20,7 @@ var Transition = function(action, data, source, target, cycle) {
 	this.target = target;
 	this.cycle = cycle || false;
 	this.label = 'label' in data ? data.label : action.id;
-	this.color = data.color || action.color || '#000';
+	this.color = data.color || action.color || '#000000';
 };
 
 /**
@@ -122,6 +122,22 @@ Transition.prototype.isActive = function() {
 };
 
 /**
+ * Attach this transition to different action
+ *
+ * @param {Action} action
+ */
+Transition.prototype.setAction = function(action) {
+	if (this.label === '' || this.label === this.action.label) {
+		this.label = action.label;
+	}
+	if (this.color === '' || this.color === this.action.color) {
+		this.color = action.color;
+	}
+	this.action = action;
+	this.canvas.redraw();
+};
+
+/**
  * Renders transition to canvas
  *
  * @param {Array} states
@@ -152,4 +168,23 @@ Transition.prototype.render = function(states, index) {
 		}
 		this.path = this.canvas.drawConnection(this.label, from, to, index[key]++, this.color, bidirectional, this.isActive());
 	}
+};
+
+/**
+ * Serializes current transition to JSON object
+ *
+ * @returns {Object}
+ */
+Transition.prototype.serialize = function() {
+	var T = {
+		label: this.label,
+		color: this.color,
+		targets: [this.target]
+	};
+	for (var t in this.data) {
+		if (['label', 'color', 'targets'].indexOf(t) === -1) {
+			T[t] = this.data[t];
+		}
+	}
+	return T;
 };

@@ -502,43 +502,19 @@ State.prototype._renderConnection = function(target, color) {
  * Serializes current state to JSON object
  *
  * @returns {Object}
- * @todo
  */
 State.prototype.serialize = function() {
-	var B = {
-		state: this.type,
+	var S = {
+		state: this.id,
+		label: this.label,
+		color: this.color,
 		x: this.x,
 		y: this.y
 	};
-	if (this.force_exec !== null) {
-		B.force_exec = this.force_exec;
-	}
-	for (var input in this.connections) {
-		if (input !== '*' && this.connections[input] !== undefined) {
-			if (this.connections[input] instanceof Array && this.connections[input].length > 0) {
-				if (!('in_con' in B)) {
-					B.in_con = {};
-				}
-				var conn = [];
-				var i = 0;
-				if (this.connections[input][0] === '') {
-					conn.push(':' + this.connections[input][1]); // aggregation func
-					i = 2;
-				}
-				for (; i < this.connections[input].length; i++) {
-					conn.push(this.connections[input][i]);
-				}
-				B.in_con[input] = conn;
-			}
+	for (var t in this.data) {
+		if (['state', 'label', 'color', 'x', 'y'].indexOf(t) === -1) {
+			S[t] = this.data[t];
 		}
 	}
-	for (var input in this.values) {
-		if (input !== '*' && this.values[input] !== undefined) {
-			if (!('in_val' in B)) {
-				B.in_val = {};
-			}
-			B.in_val[input] = this.values[input];
-		}
-	}
-	return B;
+	return S;
 };

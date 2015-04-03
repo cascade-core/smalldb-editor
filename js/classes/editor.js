@@ -165,7 +165,12 @@ Editor.prototype._createEdgeView = function() {
 	this._createChangeActionSelect();
 
 	if (this.item.action.id.indexOf('__') !== 0) { // do not display for internal states (start & end) and actions (noaction)
-		this._addTextInputRow('label', 'Label', this.item.action.label, false, this.item.action, true);
+		// change both action and transition labes when equal
+		var cb = function(e) {
+			var val = $(e.target).val();
+
+		}.bind(this);
+		this._addTextInputRow('label', 'Label', this.item.action.label, false, this.item.action, true, cb);
 		this._addColorInputRow('color', 'Color', this.item.action.color);
 	}
 
@@ -260,9 +265,8 @@ Editor.prototype._changeAction = function(e) {
 		this.editor.actions[name] = a;
 		this.canvas.redraw();
 	} else { // change to existing action
-		this.item.action = this.editor.actions[val];
+		this.item.setAction(this.editor.actions[val]);
 		this.refresh();
-		this.canvas.redraw();
 	}
 	this.editor.onChange();
 };
