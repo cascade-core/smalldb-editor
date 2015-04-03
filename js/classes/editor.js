@@ -119,11 +119,11 @@ Editor.prototype.create = function(view, item, multiple) {
  * @private
  */
 Editor.prototype._createSummaryView = function() {
+	// basic summary
 	var $title = $('<div class="' + this._namespace + '-title">');
 	$title.text(_('Summary'));
 	this.$container.append($title);
 
-	// basic summary
 	var $statesCount = $('<div class="' + this._namespace + '-row">');
 	$statesCount.text(_('Total states count: '));
 	$statesCount.append($('<strong>').text(this.countObject(this.editor.states)));
@@ -131,8 +131,23 @@ Editor.prototype._createSummaryView = function() {
 
 	var $actionsCount = $('<div class="' + this._namespace + '-row">');
 	$actionsCount.text(_('Total actions count: '));
-	$actionsCount.append($('<strong>').text(this.countObject(this.editor.actions) - 1));
+	$actionsCount.append($('<strong>').text(this.countObject(this.editor.actions) - 1)); // do not count __noaction__
 	this.$container.append($actionsCount);
+
+	// machine properties
+	$title = $('<div class="' + this._namespace + '-title">');
+	$title.text(_('Machine properties'));
+	this.$container.append($title);
+
+	for (var key in this.editor.properties) {
+		if (['_', 'actions', 'states'].indexOf(key) === -1) {
+			var value = this.editor.properties[key];
+			var json = typeof(value) === 'object';
+			value = json ? JSON.stringify(value) : value;
+			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
+			this._addTextInputRow(key, _(label), value, json);
+		}
+	}
 };
 
 /**
@@ -150,8 +165,18 @@ Editor.prototype._createEdgeView = function() {
 	this._createChangeActionSelect();
 
 	if (this.item.action.id.indexOf('__') !== 0) { // do not display for internal states (start & end) and actions (noaction)
-		this._addTextInputRow('label', 'Label', this.item.action.label);
+		this._addTextInputRow('label', 'Label', this.item.action.label, false, this.item.action, true);
 		this._addColorInputRow('color', 'Color', this.item.action.color);
+	}
+
+	for (var key in this.item.action.data) {
+		if (['transitions', 'label'].indexOf(key) === -1) {
+			var value = this.item.action.data[key];
+			var json = typeof(value) === 'object';
+			value = json ? JSON.stringify(value) : value;
+			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
+			this._addTextInputRow(key, _(label), value, json, this.item.action);
+		}
 	}
 
 	// edge options
@@ -162,8 +187,18 @@ Editor.prototype._createEdgeView = function() {
 	// rows
 	this._addTextInputRow('source', 'Source', this.item.source.split('-')[0]); // todo select
 	this._addTextInputRow('target', 'Target', this.item.target); // todo select
-	this._addTextInputRow('label', 'Label', this.item.label);
+	this._addTextInputRow('label', 'Label', this.item.label, false, this.item, true);
 	this._addColorInputRow('color', 'Color', this.item.color);
+
+	for (var key in this.item.data) {
+		if (['label', 'color', 'targets'].indexOf(key) === -1) {
+			var value = this.item.data[key];
+			var json = typeof(value) === 'object';
+			value = json ? JSON.stringify(value) : value;
+			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
+			this._addTextInputRow(key, _(label), value);
+		}
+	}
 };
 
 /**
@@ -174,7 +209,7 @@ Editor.prototype._createEdgeView = function() {
 Editor.prototype._createChangeActionSelect = function() {
 	var $name = $('<div class="' + this._namespace + '-row">');
 	$name.append($('<label>').text(_('Name')));
-	var $select = $('<select></select>');
+	var $select = $('<select>');
 	for (var a in this.editor.actions) {
 		var text = this.editor.actions[a].id;
 		if (text === '__noaction__') {
@@ -248,8 +283,8 @@ Editor.prototype._createStateView = function() {
 	// rows
 	if (this.item.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
 		this._addTextInputRow('name', 'Name', this.item.id);
-		this._addTextInputRow('label', 'Label', this.item.data.label);
-		this._addColorInputRow('color', 'Color', this.item.data.color);
+		this._addTextInputRow('label', 'Label', this.item.label, false, this.item, true);
+		this._addColorInputRow('color', 'Color', this.item.color, false, this.item, true);
 	}
 
 	// x / y position
@@ -258,20 +293,59 @@ Editor.prototype._createStateView = function() {
 	$position.append($('<input type="text" class="small">').val(this.item.x).attr('title', _('X position')));
 	$position.append($('<input type="text" class="small">').val(this.item.y).attr('title', _('Y position')));
 	this.$container.append($position);
+
+	// dynamic variables
+	for (var key in this.item.data) {
+		if (['label', 'color', 'state'].indexOf(key) === -1) {
+			var value = this.item.data[key];
+			var json = typeof(value) === 'object';
+			value = json ? JSON.stringify(value) : value;
+			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
+			this._addTextInputRow(key, _(label), value, json);
+		}
+	}
 };
 
-Editor.prototype._addColorInputRow = function(name, label, value) {
-	var $row = this._addTextInputRow(name, label, value);
+Editor.prototype._addColorInputRow = function(key, label, value) {
+	var $row = this._addTextInputRow(key, label, value, false, this.item, true);
 	$row.append($('<div>').addClass(this._namespace + '-' + name).css('background', value));
 };
 
-Editor.prototype._addTextInputRow = function(name, label, value) {
-	var id = this._namespace + '-' + name;
+Editor.prototype._addTextInputRow = function(key, label, value, json, object, live) {
+	object = object || this.item || this.editor.properties;
+	var id = this._namespace + '-' + key;
 	var $row = $('<div class="' + this._namespace + '-row">');
 	$row.append($('<label>').attr('for', id).text(_(label)));
-	$row.append($('<input type="text">').attr('id', id).val(value));
+	var $input = $('<input type="text">').attr('id', id).val(value);
+	$input.on(live ? 'keyup' : 'change', this._createSaveCallback(object, key, json, live));
+	$row.append($input);
 	this.$container.append($row);
 	return $row;
+};
+
+/**
+ * Creates on change handler that instantly saves current value to given object
+ *
+ * @param {Object} object
+ * @param {String} key
+ * @param {Boolean} json
+ * @param {Boolean} [live] - defaults to false
+ * @return {Function}
+ * @private
+ */
+Editor.prototype._createSaveCallback = function(object, key, json, live) {
+	return function(e) {
+		var value = $(e.target).val();
+		value = json ? JSON.parse(value) : value;
+		object[key] = value;
+		if (!live) {
+			return false;
+		}
+		if ('redraw' in object) {
+			object.redraw();
+		}
+		this.canvas.redraw();
+	}.bind(this);
 };
 
 /**

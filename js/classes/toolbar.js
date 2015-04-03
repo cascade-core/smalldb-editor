@@ -5,7 +5,6 @@
  *
  * @param {SmalldbEditor} editor - reference to plugin instance
  * @class
- * @todo color and layout btns
  */
 var Toolbar = function(editor) {
 	this.editor = editor;

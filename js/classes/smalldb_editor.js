@@ -205,7 +205,7 @@ SmalldbEditor.prototype.processData = function() {
 	this.states = {};
 	this.actions = {};
 
-	// machine properties
+	// known machine properties
 	this.properties = {};
 	for (var opt in this.data) {
 		if ($.inArray(opt, ['states', 'actions']) === -1) {
@@ -352,15 +352,15 @@ SmalldbEditor.prototype.onChange = function() {
 		}
 		this.session.set('undo', undo, true);
 		this.session.reset('redo');
+
+		this.toolbar.updateDisabledClasses();
+
+		// set data to textarea
+		this.$el.val(newData);
+
+		// refresh editor panel
+		this.editor.refresh();
 	}
-
-	this.toolbar.updateDisabledClasses();
-
-	// set data to textarea
-	this.$el.val(newData);
-
-	// refresh editor panel
-	this.editor.refresh();
 };
 
 /**

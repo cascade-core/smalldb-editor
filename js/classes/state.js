@@ -10,8 +10,8 @@
  */
 var State = function(id, data, editor) {
 	this.id = id;
-	this.data = data;
-	this.data.color = data.color || '#eee';
+	this.label = 'label' in data ? data.label : id;
+	this.color = data.color || '#eee';
 	this.editor = editor;
 	this.canvas = editor.canvas;
 
@@ -117,7 +117,7 @@ State.prototype.redraw = function(noCanvasRedraw) {
 		this.$container.remove();
 		delete this.$container;
 		this.render();
-		if (noCanvasRedraw) {
+		if (!noCanvasRedraw) {
 			this.canvas.redraw();
 		}
 	}
@@ -381,14 +381,21 @@ State.prototype.create = function() {
 	// create container
 	this.$container = $('<div class="' + SmalldbEditor._namespace + '-state">');
 	this.$container.addClass(SmalldbEditor._namespace + '-id-' + this.id);
-	if (this.data.color) {
-		this.$container.css('background', this.data.color);
+	if (this.color) {
+		this.$container.css('background', this.color);
 	}
 
 	// state id and remove button
-	this.$container.text(this.data.label);
+	this.$container.text(this.label);
 	this.$container.data(SmalldbEditor._namespace + '-id', this.id);
-	this.$container.attr('title', this.id);
+	var title = this.id;
+	if (this.id === '__start__') {
+		title = _('Initial state');
+	}
+	if (this.id === '__end__') {
+		title = _('Final state');
+	}
+	this.$container.attr('title', title);
 
 	if (!this.editor.options.viewOnly) {
 		// make it draggable
@@ -414,7 +421,7 @@ State.prototype.create = function() {
  * @returns {?String}
  */
 State.prototype.getNewLabel = function() {
-	var old = this.data.label;
+	var old = this.label;
 	return window.prompt(_('New state label:'), old);
 };
 
@@ -431,7 +438,7 @@ State.prototype._changeLabel = function() {
 	if (label === null) {
 		return label;
 	} else {
-		this.data.label = label;
+		this.label = label;
 		this.redraw();
 		this.editor.onChange();
 	}
@@ -448,13 +455,8 @@ State.prototype._changeLabel = function() {
  */
 State.prototype._remove = function() {
 	if (confirm(_('Do you wish to remove state "%s"?', [this.id]))) {
-		for (var i in this.connections) {
-			delete this.connections[i];
-		}
-		this.$container.remove();
-		delete this.editor.states[this.id];
+		this.remove();
 		this.canvas.redraw();
-		this.editor.onChange();
 	}
 
 	return false;
