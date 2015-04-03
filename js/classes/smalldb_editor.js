@@ -65,6 +65,7 @@ SmalldbEditor.prototype._createContainer = function() {
  * Places states to some position on canvas
  * uses tarjan's algorithm and renders states based on topological order
  *
+ * todo end state transitions
  * @param {Boolean} [force] - override current coordinates? default to false
  */
 SmalldbEditor.prototype.placeStates = function(force) {
@@ -82,17 +83,16 @@ SmalldbEditor.prototype.placeStates = function(force) {
 		indexed[id] = node;
 	}
 
-	// create edges and compute rank for each state (total number of connected edges)
+	// create node connections
 	for (var id in this.actions) {
 		var action = this.actions[id];
 		for (var t in action.transitions) {
 			var s = t.split('-')[0];
 			var from = indexed[s];
 			var to = indexed[action.transitions[t].target];
-			from.connections.push(to);
-			if (!from.equals(to)) { // ignore cycles
-				from.rank++;
-				to.rank++;
+			// ignore multi-edges and cycles
+			if (from.connections.indexOf(to) === -1 && !from.equals(to)) {
+				from.connections.push(to);
 			}
 		}
 	}
@@ -150,6 +150,20 @@ SmalldbEditor.prototype.placeStates = function(force) {
  * @private
  */
 SmalldbEditor.prototype._sortComponent = function(component) {
+	// compute rank for each node - number of undirected connections
+	// for each node inside SCC (ignore outside connections)
+	for (var n in component) {
+		var node = component[n];
+		for (var t in node.connections) {
+			var target = node.connections[t];
+			var bidirectional = target.connections.indexOf(node) > -1;
+			if (node.lowlink === target.lowlink) {
+				node.rank += bidirectional ? 1 : 2;
+				target.rank += bidirectional ? 1 : 2;
+			}
+		}
+	}
+
 	// preserve first item
 	component[component.length - 1].first = true;
 	return component.sort(function(a, b) {
