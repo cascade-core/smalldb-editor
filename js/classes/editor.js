@@ -28,8 +28,10 @@ Editor.prototype.render = function() {
 
 /**
  * Refresh editor
+ *
+ * @param {Boolean} [valuesOnly] - reload whole editor or update values only, defaults to false
  */
-Editor.prototype.refresh = function() {
+Editor.prototype.refresh = function(valuesOnly) {
 	if (this.item instanceof Transition) {
 		this.create('edge', this.item);
 	} else if (this.item instanceof State) {
@@ -142,10 +144,8 @@ Editor.prototype._createSummaryView = function() {
 	for (var key in this.editor.properties) {
 		if (['_', 'actions', 'states'].indexOf(key) === -1) {
 			var value = this.editor.properties[key];
-			var json = typeof(value) === 'object';
-			value = json ? JSON.stringify(value) : value;
 			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
-			this._addTextInputRow(key, _(label), value, json);
+			this._addTextInputRow(key, label, value);
 		}
 	}
 };
@@ -165,22 +165,34 @@ Editor.prototype._createEdgeView = function() {
 	this._createChangeActionSelect();
 
 	if (this.item.action.id.indexOf('__') !== 0) { // do not display for internal states (start & end) and actions (noaction)
-		// change both action and transition labes when equal
-		var cb = function(e) {
+		// change both action and transition labes when equal (for all attached transitions)
+		this._addTextInputRow('action-label', 'Label', this.item.action.label, this.item.action, true, function(e) {
 			var val = $(e.target).val();
-
-		}.bind(this);
-		this._addTextInputRow('label', 'Label', this.item.action.label, false, this.item.action, true, cb);
-		this._addColorInputRow('color', 'Color', this.item.action.color);
+			var tr = this.item.action.transitions;
+			for (var t in tr) {
+				if (this.item.action.label === tr[t].label) {
+					tr[t].label = val;
+				}
+			}
+			$('#smalldb-editor-editor-panel-label').val(val);
+		});
+		this._addColorInputRow('action-color', 'Color', this.item.action.color, this.item.action, true, function(e) {
+			var val = $(e.target).val();
+			var tr = this.item.action.transitions;
+			for (var t in tr) {
+				if (this.item.action.color === tr[t].color) {
+					tr[t].color = val;
+				}
+			}
+			$('#smalldb-editor-editor-panel-color').val(val);
+		});
 	}
 
 	for (var key in this.item.action.data) {
 		if (['transitions', 'label'].indexOf(key) === -1) {
 			var value = this.item.action.data[key];
-			var json = typeof(value) === 'object';
-			value = json ? JSON.stringify(value) : value;
 			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
-			this._addTextInputRow(key, _(label), value, json, this.item.action);
+			this._addTextInputRow(key, label, value, this.item.action, this.item.action, true, cb);
 		}
 	}
 
@@ -192,16 +204,14 @@ Editor.prototype._createEdgeView = function() {
 	// rows
 	this._addTextInputRow('source', 'Source', this.item.source.split('-')[0]); // todo select
 	this._addTextInputRow('target', 'Target', this.item.target); // todo select
-	this._addTextInputRow('label', 'Label', this.item.label, false, this.item, true);
+	this._addTextInputRow('label', 'Label', this.item.label, this.item, true);
 	this._addColorInputRow('color', 'Color', this.item.color);
 
 	for (var key in this.item.data) {
 		if (['label', 'color', 'targets'].indexOf(key) === -1) {
 			var value = this.item.data[key];
-			var json = typeof(value) === 'object';
-			value = json ? JSON.stringify(value) : value;
 			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
-			this._addTextInputRow(key, _(label), value);
+			this._addTextInputRow(key, label, value, this.item);
 		}
 	}
 };
@@ -286,8 +296,8 @@ Editor.prototype._createStateView = function() {
 	// rows
 	if (this.item.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
 		this._addTextInputRow('name', 'Name', this.item.id);
-		this._addTextInputRow('label', 'Label', this.item.label, false, this.item, true);
-		this._addColorInputRow('color', 'Color', this.item.color, false, this.item, true);
+		this._addTextInputRow('label', 'Label', this.item.label, this.item, true);
+		this._addColorInputRow('color', 'Color', this.item.color);
 	}
 
 	// x / y position
@@ -301,25 +311,28 @@ Editor.prototype._createStateView = function() {
 	for (var key in this.item.data) {
 		if (['label', 'color', 'state'].indexOf(key) === -1) {
 			var value = this.item.data[key];
-			var json = typeof(value) === 'object';
-			value = json ? JSON.stringify(value) : value;
 			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
-			this._addTextInputRow(key, _(label), value, json);
+			this._addTextInputRow(key, label, value);
 		}
 	}
 };
 
 Editor.prototype._addColorInputRow = function(key, label, value) {
-	var $row = this._addTextInputRow(key, label, value, false, this.item, true);
+	var $row = this._addTextInputRow(key, label, value, this.item, true);
 	$row.append($('<div>').addClass(this._namespace + '-' + name).css('background', value));
 };
 
-Editor.prototype._addTextInputRow = function(key, label, value, json, object, live) {
+Editor.prototype._addTextInputRow = function(key, label, value, object, live, cb) {
+	var json = typeof(value) === 'object';
+	value = json ? JSON.stringify(value) : value;
 	object = object || this.item || this.editor.properties;
 	var id = this._namespace + '-' + key;
 	var $row = $('<div class="' + this._namespace + '-row">');
 	$row.append($('<label>').attr('for', id).text(_(label)));
 	var $input = $('<input type="text">').attr('id', id).val(value);
+	if (cb) {
+		$input.on(live ? 'keyup' : 'change', cb.bind(this));
+	}
 	$input.on(live ? 'keyup' : 'change', this._createSaveCallback(object, key, json, live));
 	$row.append($input);
 	this.$container.append($row);

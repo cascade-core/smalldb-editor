@@ -249,16 +249,15 @@ Toolbar.prototype._keydown = function(e) {
 		$('.' + SmalldbEditor._namespace + '-toolbar a.hover').removeClass('hover');
 	}, 150);
 
-	// ignore key binding when variable editor opened
-	var editorClass = SmalldbEditor._namespace + '-variable-editor';
-	if (this.editor.$container.find('.' + editorClass).length) {
+	// ignore key binding when inside input / select / textarea
+	if ($(e.target).is('input, select, textarea')) {
 		return true;
 	}
 
 	var code = e.keyCode ? e.keyCode : e.which;
 	if ((e.metaKey || e.ctrlKey) && code === 65) { // ctrl + a => select all states
 		for (var id in this.editor.states) {
-			this.editor.states[id].activate();
+			this.editor.states[id].activate(true);
 		}
 		return false;
 	} else if ((e.metaKey || e.ctrlKey) && code === 67) { // ctrl + c => copy
