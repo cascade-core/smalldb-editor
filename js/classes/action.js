@@ -31,7 +31,7 @@ Action.prototype._processData = function(data) {
 			var targets = data.transitions[id].targets || [];
 			for (var t in targets) {
 				var trans = new Transition(this, data.transitions[id], key + '-' + t, targets[t], key === targets[t]);
-				this.transitions[key + '-' + t] = trans;
+				this.addTransition(key, trans);
 				this.states[key].addConnection(targets[t]);
 			}
 		}

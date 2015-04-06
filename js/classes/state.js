@@ -137,6 +137,20 @@ State.prototype.addConnection = function(target) {
 };
 
 /**
+ * Removes connection from this state
+ *
+ * @param {Array} target - target state id
+ */
+State.prototype.removeConnection = function(target) {
+	var index = this.connections.indexOf(target);
+	if (index !== -1) {
+		delete this.connections[index];
+		this.redraw();
+		this.editor.onChange();
+	}
+};
+
+/**
  * Is there a connection from this state to given target state?
  *
  * @param {State} target
@@ -208,7 +222,7 @@ State.prototype._onDragOverConnect = function(e) {
 		var state = this.editor.states[id];
 		target = state.getBorderPoint(this.center());
 		target.id = id;
-		var trans = new Transition(this.editor.actions.__noaction__, { label: '' }, this.id, target.id, this.id === id);
+		var trans = new Transition(this.editor.actions.__noaction__, { label: '', color: '#c60', dashed: true }, this.id, target.id, this.id === id);
 		trans.render(this.editor.states, this.editor.index);
 	} else {
 		this._renderConnection(target, '#c60');
@@ -367,9 +381,11 @@ State.prototype.activate = function(multiple) {
  */
 State.prototype.deactivate = function() {
 	this._active = false;
-	var className = SmalldbEditor._namespace + '-active';
-	this.$container.removeClass(className);
-	this.editor.toolbar.updateDisabledClasses();
+	if (this.$container) {
+		var className = SmalldbEditor._namespace + '-active';
+		this.$container.removeClass(className);
+		this.editor.toolbar.updateDisabledClasses();
+	}
 };
 
 /**
@@ -454,7 +470,7 @@ State.prototype._changeLabel = function() {
  * @private
  */
 State.prototype._remove = function() {
-	if (confirm(_('Do you wish to remove state "%s"?', [this.id]))) {
+	if (window.confirm(_('Do you wish to remove state "%s"?', [this.id]))) {
 		this.remove();
 		this.canvas.redraw();
 	}

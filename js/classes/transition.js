@@ -113,6 +113,14 @@ Transition.prototype.deactivate = function() {
 };
 
 /**
+ * Removes this transition
+ */
+Transition.prototype.remove = function() {
+	this.action.removeTransition(this);
+	this.canvas.redraw();
+};
+
+/**
  * Is current transition selected?
  *
  * @returns {Boolean}
@@ -133,7 +141,9 @@ Transition.prototype.setAction = function(action) {
 	if (this.color === '' || this.color === this.action.color) {
 		this.color = action.color;
 	}
+	this.action.removeTransition(this);
 	this.action = action;
+	this.action.addTransition(this.source, this);
 	this.canvas.redraw();
 };
 

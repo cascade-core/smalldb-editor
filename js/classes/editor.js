@@ -166,25 +166,29 @@ Editor.prototype._createEdgeView = function() {
 
 	if (this.item.action.id.indexOf('__') !== 0) { // do not display for internal states (start & end) and actions (noaction)
 		// change both action and transition labes when equal (for all attached transitions)
-		this._addTextInputRow('action-label', 'Label', this.item.action.label, this.item.action, true, function(e) {
+		this._addTextInputRow('label', 'Label', this.item.action.label, this.item.action, true, function(e) {
 			var val = $(e.target).val();
 			var tr = this.item.action.transitions;
 			for (var t in tr) {
 				if (this.item.action.label === tr[t].label) {
 					tr[t].label = val;
+					if (this.item === tr[t]) {
+						$('#smalldb-editor-editor-panel-label-' + this.item.key).val(val);
+					}
 				}
 			}
-			$('#smalldb-editor-editor-panel-label').val(val);
 		});
-		this._addColorInputRow('action-color', 'Color', this.item.action.color, this.item.action, true, function(e) {
+		this._addColorInputRow('color', 'Color', this.item.action.color, this.item.action, function(e) {
 			var val = $(e.target).val();
 			var tr = this.item.action.transitions;
 			for (var t in tr) {
 				if (this.item.action.color === tr[t].color) {
 					tr[t].color = val;
+					if (this.item === tr[t]) {
+						$('#smalldb-editor-editor-panel-color-' + this.item.key).val(val);
+					}
 				}
 			}
-			$('#smalldb-editor-editor-panel-color').val(val);
 		});
 	}
 
@@ -192,7 +196,7 @@ Editor.prototype._createEdgeView = function() {
 		if (['transitions', 'label'].indexOf(key) === -1) {
 			var value = this.item.action.data[key];
 			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
-			this._addTextInputRow(key, label, value, this.item.action, this.item.action, true, cb);
+			this._addTextInputRow(key, label, value, this.item.action, true, cb);
 		}
 	}
 
@@ -213,6 +217,30 @@ Editor.prototype._createEdgeView = function() {
 			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
 			this._addTextInputRow(key, label, value, this.item);
 		}
+	}
+
+	// remove button
+	var $remove = $('<a href="#remove">');
+	$remove.text(_('Remove transition'));
+	$remove.addClass(this._namespace + '-remove');
+	$remove.on('click', this._removeTransition.bind(this));
+	this.$container.append($('<div class="' + this._namespace + '-row">').append($remove));
+};
+
+/**
+ * Removes active transition
+ *
+ * @param {MouseEvent} e
+ * @private
+ */
+Editor.prototype._removeTransition = function(e) {
+	if (this.item.label) {
+		var text = _('Do you wish to remove transition "%s"?', [this.item.label]);
+	} else {
+		var text = _('Do you wish to remove this transition?');
+	}
+	if (window.confirm(text)) {
+		this.item.remove();
 	}
 };
 
@@ -297,7 +325,7 @@ Editor.prototype._createStateView = function() {
 	if (this.item.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
 		this._addTextInputRow('name', 'Name', this.item.id);
 		this._addTextInputRow('label', 'Label', this.item.label, this.item, true);
-		this._addColorInputRow('color', 'Color', this.item.color);
+		this._addColorInputRow('color', 'Color', this.item.color, this.item);
 	}
 
 	// x / y position
@@ -315,10 +343,17 @@ Editor.prototype._createStateView = function() {
 			this._addTextInputRow(key, label, value);
 		}
 	}
+
+	// remove button
+	var $remove = $('<a href="#remove">');
+	$remove.text(_('Remove state'));
+	$remove.addClass(this._namespace + '-remove');
+	$remove.on('click', this.item._remove.bind(this.item));
+	this.$container.append($('<div class="' + this._namespace + '-row">').append($remove));
 };
 
-Editor.prototype._addColorInputRow = function(key, label, value) {
-	var $row = this._addTextInputRow(key, label, value, this.item, true);
+Editor.prototype._addColorInputRow = function(key, label, value, object, cb) {
+	var $row = this._addTextInputRow(key, label, value, object, true, cb);
 	$row.append($('<div>').addClass(this._namespace + '-' + name).css('background', value));
 };
 
@@ -326,7 +361,8 @@ Editor.prototype._addTextInputRow = function(key, label, value, object, live, cb
 	var json = typeof(value) === 'object';
 	value = json ? JSON.stringify(value) : value;
 	object = object || this.item || this.editor.properties;
-	var id = this._namespace + '-' + key;
+	// create unique id - append transition key suffix when available
+	var id = this._namespace + '-' + key + (object instanceof Transition ? '-' + this.item.key : '');
 	var $row = $('<div class="' + this._namespace + '-row">');
 	$row.append($('<label>').attr('for', id).text(_(label)));
 	var $input = $('<input type="text">').attr('id', id).val(value);

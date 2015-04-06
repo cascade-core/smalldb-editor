@@ -204,6 +204,7 @@ Canvas.prototype._onDblClick = function(e) {
 	state.x = this._cursor.x;
 	state.y = this._cursor.y;
 	state.render();
+	state.activate();
 	// shift position of state to center
 	state.updatePosition(state.$container.outerWidth() / 2, state.$container.outerHeight() / 2);
 	this.editor.states[id] = state;
@@ -401,9 +402,20 @@ Canvas.prototype.drawCycleConnection = function(label, from, to, index, color, h
 	points.push(new Point(mid.x - 0.65 * len - 5 * (index - 1), mid.y - 15 - 20 * (index - 1)));
 	points.push(to);
 
+	if (label === '') {
+		if (!this.context.setLineDash) {
+			this.context.setLineDash = function() { };
+		}
+		this.context.setLineDash([10]);
+	}
+
 	// draw curved line
 	var path = new Spline(points, this.options.splineTension, this.context);
 	path.render();
+
+	if (label === '') {
+		this.context.setLineDash([0]);
+	}
 
 	// draw arrow in the end point
 	var angle = Point.angle(points[points.length - 2], to);
