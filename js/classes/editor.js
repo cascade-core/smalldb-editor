@@ -196,11 +196,12 @@ Editor.prototype._createEdgeView = function() {
 			}
 		});
 
+		// rest of action's properties
 		for (var key in this.item.action.data) {
 			if (['transitions', 'label'].indexOf(key) === -1) {
 				var value = this.item.action.data[key];
 				var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
-				this._addTextInputRow(key, label, value, this.item.action, true);
+				this._addTextInputRow(key, label, value, this.item.action);
 			}
 		}
 
@@ -223,6 +224,7 @@ Editor.prototype._createEdgeView = function() {
 	this._addTextInputRow('label', 'Label', this.item.label, this.item, true);
 	this._addColorInputRow('color', 'Color', this.item.color, this.item);
 
+	// rest of transition's properties
 	for (var key in this.item.data) {
 		if (['label', 'color', 'targets'].indexOf(key) === -1) {
 			var value = this.item.data[key];
@@ -257,7 +259,6 @@ Editor.prototype._addNewProperty = function(object) {
 		var name = window.prompt('Property name:');
 		if (name) {
 			var key = name.toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_|_$/g, '');
-			console.log(object);
 			object[key] = "";
 			this.refresh();
 			$('#' + this._namespace + '-' + key).focus();
@@ -435,7 +436,17 @@ Editor.prototype._addTextInputRow = function(key, label, value, object, live, cb
 Editor.prototype._createSaveCallback = function(object, key, json, live) {
 	return function(e) {
 		var value = $(e.target).val();
-		value = json ? JSON.parse(value) : value;
+		try {
+			value = json ? JSON.parse(value) : value;
+		} catch (e) {
+			alert(_('Provided string in property \'%s\' is not valid JSON!', [key]));
+			var id = '#' + this._namespace + '-' + key;
+			// wait to blur event occur, than focus again invalid input
+			setTimeout(function() {
+				$(id).focus();
+			}, 0);
+			return false;
+		}
 		object[key] = value;
 		if ('properties' in object) {
 			object.properties[key] = value;
