@@ -132,9 +132,10 @@ State.prototype.redraw = function(noCanvasRedraw) {
 State.prototype.addConnection = function(target) {
 	if (this.connections.indexOf(target) === -1) {
 		this.connections.push(target);
+		this.editor.states.__end__.notFound = false;
+		this.redraw();
+		this.editor.onChange();
 	}
-	this.redraw();
-	this.editor.onChange();
 };
 
 /**

@@ -65,19 +65,14 @@ SmalldbEditor.prototype._createContainer = function() {
  * Places states to some position on canvas
  * uses tarjan's algorithm and renders states based on topological order
  *
- * todo end state transitions
  * @param {Boolean} [force] - override current coordinates? default to false
  */
 SmalldbEditor.prototype.placeStates = function(force) {
 	force = force || false;
 
 	// create nodes
-	var nodes = [], indexed = {}, end = null;
+	var nodes = [], indexed = {};
 	for (var id in this.states) {
-		if (id === '__end__' && this.states[id].notFound) {
-			end = new Node(id);
-			continue;
-		}
 		var node = new Node(id);
 		nodes.push(node);
 		indexed[id] = node;
@@ -102,8 +97,10 @@ SmalldbEditor.prototype.placeStates = function(force) {
 	var tarjan = new Tarjan(graph);
 	var components = tarjan.run();
 
-	if (end) {
-		components.unshift([end]);
+	if (this.states.__end__.notFound) {
+		// end is not used, move it from first place to end (list is reversed)
+		var end = components.pop();
+		components.unshift(end);
 	}
 
 	// compute max width of each component
