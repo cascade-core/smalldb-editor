@@ -14,7 +14,7 @@ var Canvas = function(editor) {
 
 /**
  * Renders canvas and its container, computes width and height based on diagram bounding box
-
+ *
  * @param {Object} box
  */
 Canvas.prototype.render = function(box) {
@@ -301,13 +301,6 @@ Canvas.prototype._onMouseUp = function(e) {
  */
 Canvas.prototype.drawConnection = function(label, from, to, index, color, bidirectional, highlight) {
 	index = index || 1;
-	// line style
-	color = color || '#000';
-	this.context.save();
-	this.context.beginPath();
-	this.context.fillStyle = color;
-	this.context.strokeStyle = color;
-	this.context.lineWidth = highlight ? 2.8 : 1.4;
 
 	// line points with starting point
 	var points = [from];
@@ -341,27 +334,10 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 
 	points.push(to);
 
-	if (label === '') {
-		if (!this.context.setLineDash) {
-			this.context.setLineDash = function() { };
-		}
-		this.context.setLineDash([10]);
-	}
-
-	// draw curved line
-	var path = new Spline(points, this.options.splineTension, this.context);
-	path.render();
-
-	if (label === '') {
-		this.context.setLineDash([0]);
-	}
+	var path = this._drawPath(points, color, highlight, label === '');
 
 	// draw action label
 	this._writeText(label, mid.x + 5, mid.y - 5, color, !this.editor.dragging);
-
-	// draw arrow in the end point
-	var angle = Point.angle(points[points.length - 2], to);
-	this._drawArrow(to.x, to.y, angle);
 
 	return path;
 };
@@ -382,13 +358,6 @@ Canvas.prototype.drawCycleConnection = function(label, from, to, index, color, h
 	}
 
 	index = index || 1;
-	// line style
-	color = color || '#000';
-	this.context.save();
-	this.context.beginPath();
-	this.context.fillStyle = color;
-	this.context.strokeStyle = color;
-	this.context.lineWidth = highlight ? 2.8 : 1.4;
 
 	// line points with starting point
 	var points = [from];
@@ -402,7 +371,30 @@ Canvas.prototype.drawCycleConnection = function(label, from, to, index, color, h
 	points.push(new Point(mid.x - 0.65 * len - 5 * (index - 1), mid.y - 15 - 20 * (index - 1)));
 	points.push(to);
 
-	if (label === '') {
+	var path = this._drawPath(points, color, highlight, label === '');
+	this._writeText(label, mid.x, mid.y - 30 - 20 * (index - 1), color, !this.editor.dragging);
+
+	return path;
+};
+
+/**
+ * Draws given path
+ *
+ * @param {Point[]} points
+ * @param {String} [color='#000'] defaults to black
+ * @param {Boolean} [highlight] defaults false, when true, renders thicker line
+ * @private
+ */
+Canvas.prototype._drawPath = function(points, color, highlight, dashed) {
+	// line style
+	color = color || '#000';
+	this.context.save();
+	this.context.beginPath();
+	this.context.fillStyle = color;
+	this.context.strokeStyle = color;
+	this.context.lineWidth = highlight ? 2.8 : 1.4;
+
+	if (dashed) {
 		if (!this.context.setLineDash) {
 			this.context.setLineDash = function() { };
 		}
@@ -413,15 +405,14 @@ Canvas.prototype.drawCycleConnection = function(label, from, to, index, color, h
 	var path = new Spline(points, this.options.splineTension, this.context);
 	path.render();
 
-	if (label === '') {
+	if (dashed) {
 		this.context.setLineDash([0]);
 	}
 
 	// draw arrow in the end point
+	var to = points[points.length - 1];
 	var angle = Point.angle(points[points.length - 2], to);
 	this._drawArrow(to.x, to.y, angle);
-
-	this._writeText(label, mid.x, mid.y - 30 - 20 * (index - 1), color, !this.editor.dragging);
 
 	return path;
 };
@@ -455,7 +446,7 @@ Canvas.prototype._drawArrow = function(x, y, angle) {
 /**
  * Writes text to canvas
  *
- * @param {string} text
+ * @param {String} text
  * @param {Number} x
  * @param {Number} y
  * @param {String} [color='#000']
@@ -463,7 +454,7 @@ Canvas.prototype._drawArrow = function(x, y, angle) {
  * @private
  */
 Canvas.prototype._writeText = function(text, x, y, color, postpone) {
-	// postpone text rendering to draw all curves first (render twice actually)
+	// postpone text rendering to draw all curves first (render twice actually to prevent blinking)
 	if (postpone) {
 		var that = this;
 		setTimeout(function() {

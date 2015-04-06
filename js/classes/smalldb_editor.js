@@ -126,7 +126,7 @@ SmalldbEditor.prototype.placeStates = function(force) {
 			if (force || (!state.x && !state.y)) {
 				state.x = dx;
 				state.y = dy;
-				state.redraw(false);
+				state.redraw(true);
 			}
 			dx += stepX;
 			if (scc.length > 1) {
