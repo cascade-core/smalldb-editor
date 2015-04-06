@@ -425,7 +425,7 @@ State.prototype.create = function() {
 		// remove state button
 		if (this.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
 			var $removeButton = $('<a href="#remove" class="' + SmalldbEditor._namespace + '-state-remove"><i class="fa fa-fw fa-trash"></i> &times;</a>');
-			$removeButton.on('click', this._remove.bind(this));
+			$removeButton.on('click', this.removeHandler.bind(this));
 			$removeButton.attr('title', 'Remove state');
 			this.$container.append($removeButton);
 		}
@@ -470,7 +470,7 @@ State.prototype._changeLabel = function() {
  * @returns {Boolean}
  * @private
  */
-State.prototype._remove = function() {
+State.prototype.removeHandler = function() {
 	if (window.confirm(_('Do you wish to remove state "%s"?', [this.id]))) {
 		this.remove();
 		this.editor.editor.create();

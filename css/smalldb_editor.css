@@ -159,7 +159,6 @@
 	text-align: center;
 	overflow: hidden;
 	vertical-align: top;
-	line-height: 20px;
 	font-weight: normal;
 	margin-top: 3px;
 	line-height: 15px;
@@ -194,6 +193,27 @@
 	color: #fff;
 	border: 1px solid red;
 	background: darkred;
+}
+
+.smalldb-editor .smalldb-editor-editor-panel-remove-prop {
+	font-size: 11px;
+	position: absolute;
+	top: 2px;
+	right: 7px;
+	text-decoration: none;
+	line-height: 14px;
+	background: #fff;
+	display: none;
+	z-index: 10;
+	overflow: hidden;
+}
+
+.smalldb-editor-editor-panel-row:hover .smalldb-editor-editor-panel-remove-prop {
+	display: block;
+}
+
+.smalldb-editor-editor-panel-row .smalldb-editor-editor-panel-remove-prop:hover {
+	color: darkred;
 }
 
 .smalldb-editor .smalldb-editor-toolbar a {

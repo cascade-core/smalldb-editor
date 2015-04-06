@@ -11,6 +11,7 @@ var Editor = function(editor) {
 	this.canvas = editor.canvas;
 	this.dontClose = false; // prevent setting default view when clicking on state or edge
 	this._namespace = SmalldbEditor._namespace + '-editor-panel';
+	this._reservedWords = ['id', 'name', 'label', 'source', 'target', 'color'];
 };
 
 /**
@@ -256,7 +257,15 @@ Editor.prototype._createEdgeView = function() {
  */
 Editor.prototype._addNewProperty = function(object) {
 	return function() {
-		var name = window.prompt('Property name:');
+		var name = '';
+		do {
+			name = window.prompt('Property name:', name);
+			if (!name || this._reservedWords.indexOf(name) === -1) {
+				break
+			} else {
+				alert(_('\'%s\' is a reserved word, please choose another one!', [name]));
+			}
+		} while (true);
 		if (name) {
 			var key = name.toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_|_$/g, '');
 			object[key] = "";
@@ -396,7 +405,7 @@ Editor.prototype._createStateView = function() {
 	var $remove = $('<a href="#remove">');
 	$remove.text(_('Remove state'));
 	$remove.addClass(this._namespace + '-remove');
-	$remove.on('click', this.item._remove.bind(this.item));
+	$remove.on('click', this.item.removeHandler.bind(this.item));
 	this.$container.append($('<div class="' + this._namespace + '-row">').append($remove));
 };
 
@@ -405,6 +414,43 @@ Editor.prototype._addColorInputRow = function(key, label, value, object, cb) {
 	$row.append($('<div>').addClass(this._namespace + '-' + name).css('background', value));
 };
 
+/**
+ * Creates hadler for property removal
+ *
+ * @param {String} key
+ * @param {Object} object
+ * @return {Function(this:Editor)}
+ * @private
+ */
+Editor.prototype._removeProperty = function(key, object) {
+	return function() {
+		if (window.confirm(_('Do you realy want to remove property \'%s\'?', [key]))) {
+			delete object[key];
+			if ('properties' in object) {
+				delete object.properties[key];
+			}
+			if ('data' in object) {
+				delete object.data[key];
+			}
+			this.editor.onChange();
+			this.refresh();
+		}
+		return false;
+	}.bind(this);
+};
+
+/**
+ * Creates
+ *
+ * @param key
+ * @param label
+ * @param value
+ * @param object
+ * @param live
+ * @param cb
+ * @return {*|jQuery|HTMLElement}
+ * @private
+ */
 Editor.prototype._addTextInputRow = function(key, label, value, object, live, cb) {
 	var json = typeof(value) === 'object';
 	value = json ? JSON.stringify(value) : value;
@@ -419,6 +465,16 @@ Editor.prototype._addTextInputRow = function(key, label, value, object, live, cb
 	}
 	$input.on(live ? 'keyup' : 'change', this._createSaveCallback(object, key, json, live));
 	$row.append($input);
+
+	if (this._reservedWords.indexOf(key) === -1) {
+		var $remove = $('<a href="#remove-prop">');
+		$remove.addClass(this._namespace + '-remove-prop');
+		$remove.html(_('&times;'));
+		$remove.attr('title', _('Remove property \'%s\'', [key]));
+		$remove.on('click', this._removeProperty(key, object));
+		$row.append($remove);
+	}
+
 	this.$container.append($row);
 	return $row;
 };
@@ -440,7 +496,7 @@ Editor.prototype._createSaveCallback = function(object, key, json, live) {
 			value = json ? JSON.parse(value) : value;
 		} catch (e) {
 			alert(_('Provided string in property \'%s\' is not valid JSON!', [key]));
-			var id = '#' + this._namespace + '-' + key;
+			var id = '#' + this._namespace + '-' + key + (object instanceof Transition ? '-' + this.item.key : '');
 			// wait to blur event occur, than focus again invalid input
 			setTimeout(function() {
 				$(id).focus();
@@ -460,6 +516,7 @@ Editor.prototype._createSaveCallback = function(object, key, json, live) {
 		if ('redraw' in object) {
 			object.redraw();
 		}
+		this.editor.onChange();
 		this.canvas.redraw();
 	}.bind(this);
 };
