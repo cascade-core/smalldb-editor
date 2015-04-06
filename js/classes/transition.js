@@ -117,6 +117,7 @@ Transition.prototype.deactivate = function() {
  */
 Transition.prototype.remove = function() {
 	this.action.removeTransition(this);
+	this.editor.states[this.source.split('-')[0]].removeConnection(this.target);
 	this.canvas.redraw();
 };
 

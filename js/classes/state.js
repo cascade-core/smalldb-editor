@@ -12,6 +12,7 @@ var State = function(id, data, editor) {
 	this.id = id;
 	this.label = 'label' in data ? data.label : id;
 	this.color = data.color || '#eee';
+	this.data = data || {};
 	this.editor = editor;
 	this.canvas = editor.canvas;
 
@@ -472,6 +473,7 @@ State.prototype._changeLabel = function() {
 State.prototype._remove = function() {
 	if (window.confirm(_('Do you wish to remove state "%s"?', [this.id]))) {
 		this.remove();
+		this.editor.editor.create();
 		this.canvas.redraw();
 	}
 

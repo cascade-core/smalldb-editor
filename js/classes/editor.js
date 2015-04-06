@@ -28,10 +28,8 @@ Editor.prototype.render = function() {
 
 /**
  * Refresh editor
- *
- * @param {Boolean} [valuesOnly] - reload whole editor or update values only, defaults to false
  */
-Editor.prototype.refresh = function(valuesOnly) {
+Editor.prototype.refresh = function() {
 	if (this.item instanceof Transition) {
 		this.create('edge', this.item);
 	} else if (this.item instanceof State) {
@@ -148,6 +146,13 @@ Editor.prototype._createSummaryView = function() {
 			this._addTextInputRow(key, label, value);
 		}
 	}
+
+	// add new machine property button
+	var $addProp = $('<a href="#add-property">');
+	$addProp.text(_('Add new property'));
+	$addProp.addClass(this._namespace + '-add-prop');
+	$addProp.on('click', this._addNewProperty(this.editor.properties));
+	this.$container.append($('<div class="' + this._namespace + '-row">').append($addProp));
 };
 
 /**
@@ -190,14 +195,21 @@ Editor.prototype._createEdgeView = function() {
 				}
 			}
 		});
-	}
 
-	for (var key in this.item.action.data) {
-		if (['transitions', 'label'].indexOf(key) === -1) {
-			var value = this.item.action.data[key];
-			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
-			this._addTextInputRow(key, label, value, this.item.action, true, cb);
+		for (var key in this.item.action.data) {
+			if (['transitions', 'label'].indexOf(key) === -1) {
+				var value = this.item.action.data[key];
+				var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
+				this._addTextInputRow(key, label, value, this.item.action, true);
+			}
 		}
+
+		// add new action property button
+		var $addProp = $('<a href="#add-property">');
+		$addProp.text(_('Add new property'));
+		$addProp.addClass(this._namespace + '-add-prop');
+		$addProp.on('click', this._addNewProperty(this.item.action.data));
+		this.$container.append($('<div class="' + this._namespace + '-row">').append($addProp));
 	}
 
 	// edge options
@@ -206,10 +218,10 @@ Editor.prototype._createEdgeView = function() {
 	this.$container.append($title);
 
 	// rows
-	this._addTextInputRow('source', 'Source', this.item.source.split('-')[0]); // todo select
-	this._addTextInputRow('target', 'Target', this.item.target); // todo select
+	this._addTextInputRow('source', 'Source', this.item.source.split('-')[0], this.item); // todo select
+	this._addTextInputRow('target', 'Target', this.item.target, this.item); // todo select
 	this._addTextInputRow('label', 'Label', this.item.label, this.item, true);
-	this._addColorInputRow('color', 'Color', this.item.color);
+	this._addColorInputRow('color', 'Color', this.item.color, this.item);
 
 	for (var key in this.item.data) {
 		if (['label', 'color', 'targets'].indexOf(key) === -1) {
@@ -219,12 +231,39 @@ Editor.prototype._createEdgeView = function() {
 		}
 	}
 
+	// add new edge property button
+	$addProp = $('<a href="#add-property">');
+	$addProp.text(_('Add new property'));
+	$addProp.addClass(this._namespace + '-add-prop');
+	$addProp.on('click', this._addNewProperty(this.item.data));
+	this.$container.append($('<div class="' + this._namespace + '-row">').append($addProp));
+
 	// remove button
 	var $remove = $('<a href="#remove">');
 	$remove.text(_('Remove transition'));
 	$remove.addClass(this._namespace + '-remove');
 	$remove.on('click', this._removeTransition.bind(this));
 	this.$container.append($('<div class="' + this._namespace + '-row">').append($remove));
+};
+
+/**
+ * Creates new property
+ *
+ * @param {State|Action|Transition} object
+ * @private
+ */
+Editor.prototype._addNewProperty = function(object) {
+	return function() {
+		var name = window.prompt('Property name:');
+		if (name) {
+			var key = name.toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_|_$/g, '');
+			console.log(object);
+			object[key] = "";
+			this.refresh();
+			$('#' + this._namespace + '-' + key).focus();
+		}
+		return false;
+	}.bind(this);
 };
 
 /**
@@ -241,6 +280,7 @@ Editor.prototype._removeTransition = function(e) {
 	}
 	if (window.confirm(text)) {
 		this.item.remove();
+		this.create();
 	}
 };
 
@@ -323,7 +363,7 @@ Editor.prototype._createStateView = function() {
 
 	// rows
 	if (this.item.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
-		this._addTextInputRow('name', 'Name', this.item.id);
+		this._addTextInputRow('name', 'Name', this.item.id, this.item);
 		this._addTextInputRow('label', 'Label', this.item.label, this.item, true);
 		this._addColorInputRow('color', 'Color', this.item.color, this.item);
 	}
@@ -340,9 +380,16 @@ Editor.prototype._createStateView = function() {
 		if (['label', 'color', 'state'].indexOf(key) === -1) {
 			var value = this.item.data[key];
 			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
-			this._addTextInputRow(key, label, value);
+			this._addTextInputRow(key, label, value, this.item);
 		}
 	}
+
+	// add new state property button
+	var $addProp = $('<a href="#add-property">');
+	$addProp.text(_('Add new property'));
+	$addProp.addClass(this._namespace + '-add-prop');
+	$addProp.on('click', this._addNewProperty(this.item.data));
+	this.$container.append($('<div class="' + this._namespace + '-row">').append($addProp));
 
 	// remove button
 	var $remove = $('<a href="#remove">');
@@ -390,6 +437,12 @@ Editor.prototype._createSaveCallback = function(object, key, json, live) {
 		var value = $(e.target).val();
 		value = json ? JSON.parse(value) : value;
 		object[key] = value;
+		if ('properties' in object) {
+			object.properties[key] = value;
+		}
+		if ('data' in object) {
+			object.data[key] = value;
+		}
 		if (!live) {
 			return false;
 		}
