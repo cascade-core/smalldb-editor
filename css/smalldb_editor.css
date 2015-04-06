@@ -148,12 +148,12 @@
 	top: -15px;
 	right: -6px;
 	z-index: 1;
-	background: rgba(238, 238, 238, 0.7);
+	background: #eee;
 	border: 1px solid #333;
+	color: #000;
 	border-radius: 50%;
 	text-decoration: none;
 	display: none;
-	color: #000;
 	width: 20px;
 	height: 20px;
 	text-align: center;
@@ -162,6 +162,8 @@
 	line-height: 20px;
 	font-weight: normal;
 	margin-top: 3px;
+	line-height: 15px;
+	padding-top: 2px;
 }
 
 .smalldb-editor .smalldb-editor-state-remove:hover {
@@ -172,15 +174,26 @@
 	display: block;
 }
 
-.smalldb-editor .smalldb-editor-editor-panel-remove {
+.smalldb-editor .smalldb-editor-editor-panel-remove,
+.smalldb-editor .smalldb-editor-editor-panel-add-prop {
 	font-size: 11px;
-	border: 1px solid red;
-	background: darkred;
-	color: #fff;
+	border: 1px solid #aaa;
 	padding: 2px 5px;
 	display: block;
 	margin: 20px 58px;
 	text-align: center;
+	text-decoration: none;
+}
+
+.smalldb-editor .smalldb-editor-editor-panel-remove:hover,
+.smalldb-editor .smalldb-editor-editor-panel-add-prop:hover {
+	text-decoration: underline;
+}
+
+.smalldb-editor .smalldb-editor-editor-panel-remove {
+	color: #fff;
+	border: 1px solid red;
+	background: darkred;
 }
 
 .smalldb-editor .smalldb-editor-toolbar a {
