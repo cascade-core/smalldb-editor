@@ -403,19 +403,21 @@ Editor.prototype._createStateView = function() {
 		}
 	}
 
-	// add new state property button
-	var $addProp = $('<a href="#add-property">');
-	$addProp.text(_('Add new property'));
-	$addProp.addClass(this._namespace + '-add-prop');
-	$addProp.on('click', this._addNewProperty(this.item.data));
-	this.$container.append($('<div class="' + this._namespace + '-row">').append($addProp));
+	if (this.item.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
+		// add new state property button
+		var $addProp = $('<a href="#add-property">');
+		$addProp.text(_('Add new property'));
+		$addProp.addClass(this._namespace + '-add-prop');
+		$addProp.on('click', this._addNewProperty(this.item.data));
+		this.$container.append($('<div class="' + this._namespace + '-row">').append($addProp));
 
-	// remove button
-	var $remove = $('<a href="#remove">');
-	$remove.text(_('Remove state'));
-	$remove.addClass(this._namespace + '-remove');
-	$remove.on('click', this.item.removeHandler.bind(this.item));
-	this.$container.append($('<div class="' + this._namespace + '-row">').append($remove));
+		// remove button
+		var $remove = $('<a href="#remove">');
+		$remove.text(_('Remove state'));
+		$remove.addClass(this._namespace + '-remove');
+		$remove.on('click', this.item.removeHandler.bind(this.item));
+		this.$container.append($('<div class="' + this._namespace + '-row">').append($remove));
+	}
 };
 
 /**

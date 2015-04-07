@@ -98,9 +98,16 @@ SmalldbEditor.prototype.placeStates = function(force) {
 	var components = tarjan.run();
 
 	if (this.states.__end__.notFound) {
-		// end is not used, move it from first place to end (list is reversed)
-		var end = components.pop();
-		components.unshift(end);
+		// end is not used, move it to the end of list (list is reversed, so move it to the beginning)
+		for (var c in components) {
+			for (var n in components[c]) {
+				if (components[c][n].name === '__end__') {
+					var end = components.splice(c, 1);
+					components.unshift(end[0]);
+					break;
+				}
+			}
+		}
 	}
 
 	// compute max width of each component
@@ -125,7 +132,9 @@ SmalldbEditor.prototype.placeStates = function(force) {
 				state.y = dy;
 				state.redraw(true);
 			}
-			dx += stepX;
+			if (scc.length !== 2) {
+				dx += stepX;
+			}
 			if (scc.length > 1) {
 				dy += sign * stepY;
 				sign *= -1;
