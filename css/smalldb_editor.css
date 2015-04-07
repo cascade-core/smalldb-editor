@@ -324,7 +324,15 @@
 	box-shadow: #D1E6FD 0 0;
 }
 
-.smalldb-editor .smalldb-editor-editor-panel-color {
+.smalldb-editor input.smalldb-editor-editor-panel-color {
+	width: 10px;
+	height: 10px;
+	opacity: 0;
+	display: block;
+	border: none;
+}
+
+.smalldb-editor .smalldb-editor-editor-panel-color-wrapper {
 	width: 10px;
 	height: 10px;
 	position: absolute;

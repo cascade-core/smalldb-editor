@@ -11,7 +11,7 @@ var Editor = function(editor) {
 	this.canvas = editor.canvas;
 	this.dontClose = false; // prevent setting default view when clicking on state or edge
 	this._namespace = SmalldbEditor._namespace + '-editor-panel';
-	this._reservedWords = ['id', 'name', 'label', 'source', 'target', 'color'];
+	this._reservedWords = ['id', 'name', 'label', 'source', 'target', 'color', 'transitions'];
 };
 
 /**
@@ -191,7 +191,16 @@ Editor.prototype._createEdgeView = function() {
 				if (this.item.action.color === tr[t].color) {
 					tr[t].color = val;
 					if (this.item === tr[t]) {
-						$('#smalldb-editor-editor-panel-color-' + this.item.key).val(val);
+						var id = '#' + this._namespace + '-color-' + this.item.key;
+						$(id).val(val);
+						$(id).next().css('background', val);
+						if (val.length === 4) {
+							// #xyz => #xxyyzz
+							val = '#' + val[1] + val[1] + val[2] + val[2] + val[3] + val[3];
+						}
+						if (val.length === 7) {
+							$(id).find('+ div > input[type=color]').val(val);
+						}
 					}
 				}
 			}
@@ -199,7 +208,7 @@ Editor.prototype._createEdgeView = function() {
 
 		// rest of action's properties
 		for (var key in this.item.action.data) {
-			if (['transitions', 'label'].indexOf(key) === -1) {
+			if (this._reservedWords.indexOf(key) === -1) {
 				var value = this.item.action.data[key];
 				var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
 				this._addTextInputRow(key, label, value, this.item.action);
@@ -227,7 +236,7 @@ Editor.prototype._createEdgeView = function() {
 
 	// rest of transition's properties
 	for (var key in this.item.data) {
-		if (['label', 'color', 'targets'].indexOf(key) === -1) {
+		if (this._reservedWords.indexOf(key) === -1) {
 			var value = this.item.data[key];
 			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
 			this._addTextInputRow(key, label, value, this.item);
@@ -409,9 +418,38 @@ Editor.prototype._createStateView = function() {
 	this.$container.append($('<div class="' + this._namespace + '-row">').append($remove));
 };
 
+/**
+ * Creates color input row with label and remove button
+ *
+ * @param {String} key
+ * @param {String} label
+ * @param {String} value
+ * @param {Object} object
+ * @param {Function} [cb] -  additional callback, executed before saving
+ * @return {jQuery} - row <div> object
+ * @private
+ */
 Editor.prototype._addColorInputRow = function(key, label, value, object, cb) {
 	var $row = this._addTextInputRow(key, label, value, object, true, cb);
-	$row.append($('<div>').addClass(this._namespace + '-' + name).css('background', value));
+	var $color = $('<input type="color">').addClass(this._namespace + '-color').val(value);
+	$row.append($color);
+	$color.wrap($('<div>').addClass(this._namespace + '-color-wrapper'));
+	$color.on('change', function() {
+		var val = $(this).val();
+		$(this).parent().css('background', val);
+		$row.find('input:first').val(val).keyup();
+	}).change();
+	$row.find('input:first').on('keyup', function() {
+		var val = $(this).val();
+		if (val.length === 4) {
+			// #xyz => #xxyyzz
+			val = '#' + val[1] + val[1] + val[2] + val[2] + val[3] + val[3];
+		}
+		if (val.length === 7) {
+			$color.val(val).parent().css('background', val);
+		}
+	});
+	return $row;
 };
 
 /**
@@ -440,15 +478,15 @@ Editor.prototype._removeProperty = function(key, object) {
 };
 
 /**
- * Creates
+ * Creates text input row with label and remove button
  *
- * @param key
- * @param label
- * @param value
- * @param object
- * @param live
- * @param cb
- * @return {*|jQuery|HTMLElement}
+ * @param {String} key
+ * @param {String} label
+ * @param {String} value
+ * @param {Object} object
+ * @param {Boolean} [live] - bind keyup event insted of change event defaults to false
+ * @param {Function} [cb] -  additional callback, executed before saving
+ * @return {jQuery} - row <div> object
  * @private
  */
 Editor.prototype._addTextInputRow = function(key, label, value, object, live, cb) {
