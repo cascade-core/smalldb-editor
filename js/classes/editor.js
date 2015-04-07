@@ -11,7 +11,7 @@ var Editor = function(editor) {
 	this.canvas = editor.canvas;
 	this.dontClose = false; // prevent setting default view when clicking on state or edge
 	this._namespace = SmalldbEditor._namespace + '-editor-panel';
-	this._reservedWords = ['id', 'name', 'label', 'source', 'target', 'color', 'transitions'];
+	this._reservedWords = ['id', 'name', 'label', 'source', 'target', 'targets', 'color', 'transitions'];
 };
 
 /**
@@ -539,6 +539,9 @@ Editor.prototype._createSaveCallback = function(object, key, json, live) {
 			setTimeout(function() {
 				$(id).focus();
 			}, 0);
+			return false;
+		}
+		if (object[key] === value) {
 			return false;
 		}
 		object[key] = value;

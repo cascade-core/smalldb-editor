@@ -11,7 +11,7 @@
 var State = function(id, data, editor) {
 	this.id = id;
 	this.label = 'label' in data ? data.label : id;
-	this.color = data.color || '#eee';
+	this.color = data.color.toLowerCase() || '#eeeeee';
 	this.data = data || {};
 	this.editor = editor;
 	this.canvas = editor.canvas;
@@ -29,6 +29,10 @@ State.prototype.render = function() {
 	// create DOM if not exists
 	if (!this.$container) {
 		this.create();
+		if (this.isActive()) {
+			var className = SmalldbEditor._namespace + '-active';
+			this.$container.addClass(className);
+		}
 		this.canvas.$containerInner.append(this.$container);
 	}
 
