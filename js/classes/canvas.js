@@ -464,7 +464,7 @@ Canvas.prototype._writeText = function(text, x, y, color, postpone) {
 	color = color || '#000';
 	this.context.save();
 	this.context.lineWidth = 1.4;
-	this.context.shadowColor = '#ccc';
+	this.context.shadowColor = '#fff';
 	this.context.shadowOffsetX = 0;
 	this.context.shadowOffsetY = 0;
 	this.context.shadowBlur = 2;
