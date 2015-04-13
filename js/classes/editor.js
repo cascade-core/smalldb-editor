@@ -11,7 +11,8 @@ var Editor = function(editor) {
 	this.canvas = editor.canvas;
 	this.dontClose = false; // prevent setting default view when clicking on state or edge
 	this._namespace = SmalldbEditor._namespace + '-editor-panel';
-	this._reservedWords = ['x', 'y', 'id', 'name', 'label', 'source', 'target', 'targets', 'color', 'transitions'];
+	// todo split reserver words into 3 categories (state, action, transition)
+	this._reservedWords = ['state', 'x', 'y', 'id', 'name', 'label', 'source', 'target', 'targets', 'color', 'transitions'];
 };
 
 /**

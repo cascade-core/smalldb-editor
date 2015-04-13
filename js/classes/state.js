@@ -139,7 +139,6 @@ State.prototype.addConnection = function(target) {
 		this.connections.push(target);
 		this.editor.states.__end__.notFound = false;
 		this.redraw();
-		this.editor.onChange();
 	}
 };
 
@@ -255,6 +254,7 @@ State.prototype._onDragEndConnect = function(e) {
 		trans.render(this.editor.states, this.editor.index);
 		action.addTransition(source, trans);
 		this.addConnection(target);
+		this.editor.onChange();
 	}
 
 	// clean up

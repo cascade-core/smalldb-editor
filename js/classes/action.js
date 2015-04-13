@@ -57,7 +57,6 @@ Action.prototype.usesEndNode = function() {
 /**
  * Serializes current action to JSON object
  *
- * @todo merge transitions with same source
  * @returns {Object}
  */
 Action.prototype.serialize = function() {
@@ -68,7 +67,15 @@ Action.prototype.serialize = function() {
 	};
 	for (var id in this.transitions) {
 		var trans = this.transitions[id];
-		A.transitions[trans.source] = trans.serialize();
+		var source = trans.source.split('-')[0]; // cut random suffix
+		source = source === '__start__' ? '' : source;
+		if (A.transitions[source] !== undefined) {
+			// multiple transitions from same source -> merge
+			var target = trans.target === '__end__' ? '' : trans.target;
+			A.transitions[source].targets.push(target);
+		} else {
+			A.transitions[source] = trans.serialize();
+		}
 	}
 	for (var t in this.data) {
 		if (['label', 'color', 'transitions'].indexOf(t) === -1) {

@@ -190,7 +190,7 @@ Transition.prototype.serialize = function() {
 	var T = {
 		label: this.label,
 		color: this.color,
-		targets: [this.target]
+		targets: [this.target === '__end__' ? '' : this.target]
 	};
 	for (var t in this.data) {
 		if (['label', 'color', 'targets'].indexOf(t) === -1) {

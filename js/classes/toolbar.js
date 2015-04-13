@@ -380,7 +380,7 @@ Toolbar.prototype._undo = function() {
 		var redo = this.editor.session.get('redo', true) || [];
 		var prev = undo.pop();
 		redo.push(oldData);
-		console.log(JSON.parse(prev));
+		console.log(JSON.parse(prev), undo, redo);
 		this.editor.setValue(prev);
 
 		this.editor.session.set('undo', undo, true);

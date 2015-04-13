@@ -365,6 +365,7 @@ SmalldbEditor.prototype.onChange = function(dontRefreshEditor) {
 	// normalize string from textarea
 	var oldData = JSON.stringify(JSON.parse(this.getValue()));
 	var newData = this.serialize();
+	console.log(JSON.parse(oldData).actions, JSON.parse(newData).actions);
 	if (oldData !== newData) {
 		// save new history state
 		var undo = this.session.get('undo', true);
@@ -391,19 +392,25 @@ SmalldbEditor.prototype.onChange = function(dontRefreshEditor) {
 /**
  * Serializes all states and parent state information to JSON string
  *
+ * @param {Boolean} [history] - when true, appends also internal information (start, end, noaction), defaults to false
  * @returns {string}
  */
-SmalldbEditor.prototype.serialize = function() {
+SmalldbEditor.prototype.serialize = function(history) {
+	history = history || false;
 	var states = {};
 	for (var i in this.states) {
-		var s = this.states[i];
-		states[s.id] = s.serialize();
+		if (history || i.indexOf('__') !== 0) {
+			var s = this.states[i];
+			states[s.id] = s.serialize();
+		}
 	}
 
 	var actions = {};
 	for (var i in this.actions) {
-		var a = this.actions[i];
-		actions[a.id] = a.serialize();
+		if (history || i.indexOf('__') !== 0) {
+			var a = this.actions[i];
+			actions[a.id] = a.serialize();
+		}
 	}
 
 	var ret = {
