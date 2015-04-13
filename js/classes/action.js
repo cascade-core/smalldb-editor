@@ -27,12 +27,13 @@ Action.prototype._processData = function(data) {
 	this.transitions = {};
 	if ('transitions' in data) {
 		for (var id in data.transitions) {
-			var key = id === '' ? '__start__' : id;
+			var key = id.split('-')[0] || '__start__';
 			var targets = data.transitions[id].targets || [];
 			for (var t in targets) {
-				var trans = new Transition(this, data.transitions[id], key + '-' + t, targets[t], key === targets[t]);
+				var target = targets[t] || '__end__';
+				var trans = new Transition(this, data.transitions[id], key + '-' + t, target, key === target);
 				this.addTransition(key, trans);
-				this.states[key].addConnection(targets[t]);
+				this.states[key].addConnection(target);
 			}
 		}
 	}
@@ -46,7 +47,7 @@ Action.prototype._processData = function(data) {
 Action.prototype.usesEndNode = function() {
 	var endFound = false;
 	for (var id in this.transitions) {
-		if (this.transitions[id].target === '') {
+		if (this.transitions[id].target === '__end__') {
 			endFound = true;
 		}
 	}

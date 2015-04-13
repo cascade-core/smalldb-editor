@@ -100,6 +100,7 @@ State.prototype.getBorderPoint = function(other) {
 /**
  * Removes state from canvas
  *
+ * todo remove transitions connected to this state
  * @returns {Object} state data in JSON object
  */
 State.prototype.remove = function() {

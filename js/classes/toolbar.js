@@ -376,11 +376,12 @@ Toolbar.prototype._undo = function() {
 	var undo = this.editor.session.get('undo', true) || [];
 	if (undo.length) {
 		// save current state to redo
-		var oldData = JSON.stringify(JSON.parse(this.editor.$el.val()));
+		var oldData = JSON.stringify(JSON.parse(this.editor.getValue()));
 		var redo = this.editor.session.get('redo', true) || [];
 		var prev = undo.pop();
 		redo.push(oldData);
-		this.editor.$el.val(prev);
+		console.log(JSON.parse(prev));
+		this.editor.setValue(prev);
 
 		this.editor.session.set('undo', undo, true);
 		this.editor.session.set('redo', redo, true);
@@ -403,12 +404,12 @@ Toolbar.prototype._redo = function() {
 	var redo = this.editor.session.get('redo', true) || [];
 	if (redo.length) {
 		// save current state to undo
-		var oldData = JSON.stringify(JSON.parse(this.editor.$el.val()));
+		var oldData = JSON.stringify(JSON.parse(this.editor.getValue()));
 		var undo = this.editor.session.get('undo', true) || [];
 		var next = redo.pop();
 		undo.push(oldData);
 
-		this.editor.$el.val(next);
+		this.editor.setValue(next);
 		this.editor.refresh();
 
 		this.editor.session.set('undo', undo, true);

@@ -97,7 +97,7 @@ SmalldbEditor.prototype.placeStates = function(force) {
 	var tarjan = new Tarjan(graph);
 	var components = tarjan.run();
 
-	if (this.states.__end__.notFound) {
+	if (!this.options.viewOnly && this.states.__end__.notFound) {
 		// end is not used, move it to the end of list (list is reversed, so move it to the beginning)
 		for (var c in components) {
 			for (var n in components[c]) {
@@ -142,6 +142,7 @@ SmalldbEditor.prototype.placeStates = function(force) {
 		}
 		dy += stepY * (scc.length > 1 ? 2 : 1);
 	}
+	this.onChange();
 	if (force) {
 		this.canvas.redraw();
 	}
@@ -221,7 +222,7 @@ SmalldbEditor.prototype.init = function() {
  * Parses textarea data and initializes machine properties, actions and states
  */
 SmalldbEditor.prototype.processData = function() {
-	this.data = JSON.parse(this.$el[0].innerHTML);
+	this.data = JSON.parse(this.getValue());
 	this.states = {};
 	this.actions = {};
 
@@ -357,10 +358,12 @@ SmalldbEditor.prototype.addState = function(id, data) {
 
 /**
  * On change handler, propagates changes to textarea
+ *
+ * @param {Boolean} [dontRefreshEditor]
  */
-SmalldbEditor.prototype.onChange = function() {
+SmalldbEditor.prototype.onChange = function(dontRefreshEditor) {
 	// normalize string from textarea
-	var oldData = JSON.stringify(JSON.parse(this.$el.val()));
+	var oldData = JSON.stringify(JSON.parse(this.getValue()));
 	var newData = this.serialize();
 	if (oldData !== newData) {
 		// save new history state
@@ -376,10 +379,12 @@ SmalldbEditor.prototype.onChange = function() {
 		this.toolbar.updateDisabledClasses();
 
 		// set data to textarea
-		this.$el.val(newData);
+		this.setValue(newData);
 
 		// refresh editor panel
-		this.editor.refresh();
+		if (!dontRefreshEditor) {
+			this.editor.refresh();
+		}
 	}
 };
 
@@ -411,6 +416,22 @@ SmalldbEditor.prototype.serialize = function() {
 	}
 
 	return JSON.stringify(ret);
+};
+
+/**
+ * Sets textarea value
+ *
+ * @param {String} value
+ */
+SmalldbEditor.prototype.setValue = function(value) {
+	this.$el[0].innerHTML = value;
+};
+
+/**
+ * Gets textarea value
+ */
+SmalldbEditor.prototype.getValue = function() {
+	return this.$el[0].innerHTML;
 };
 
 /**
