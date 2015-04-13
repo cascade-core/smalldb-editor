@@ -30,6 +30,11 @@
 	box-sizing: border-box;
 }
 
+.smalldb-editor [disabled] {
+	background: #eee;
+	border: 1px solid #ccc;
+}
+
 .smalldb-editor.smalldb-editor-view-only .smalldb-editor-toolbar,
 .smalldb-editor.smalldb-editor-view-only .smalldb-editor-editor-panel {
 	display: none !important;
