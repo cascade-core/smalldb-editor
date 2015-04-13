@@ -11,7 +11,7 @@ var Editor = function(editor) {
 	this.canvas = editor.canvas;
 	this.dontClose = false; // prevent setting default view when clicking on state or edge
 	this._namespace = SmalldbEditor._namespace + '-editor-panel';
-	this._reservedWords = ['id', 'name', 'label', 'source', 'target', 'targets', 'color', 'transitions'];
+	this._reservedWords = ['x', 'y', 'id', 'name', 'label', 'source', 'target', 'targets', 'color', 'transitions'];
 };
 
 /**
@@ -382,7 +382,7 @@ Editor.prototype._createStateView = function() {
 
 	// rows
 	if (this.item.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
-		this._addTextInputRow('name', 'Name', this.item.id, this.item);
+		this._addTextInputRow('id', 'Name', this.item.id, this.item);
 		this._addTextInputRow('label', 'Label', this.item.label, this.item, true);
 		this._addColorInputRow('color', 'Color', this.item.color, this.item);
 	}
@@ -390,13 +390,13 @@ Editor.prototype._createStateView = function() {
 	// x / y position
 	var $position = $('<div class="' + this._namespace + '-row">');
 	$position.append($('<label>').text(_('Position')));
-	$position.append($('<input type="text" class="small">').val(this.item.x).attr('title', _('X position')));
-	$position.append($('<input type="text" class="small">').val(this.item.y).attr('title', _('Y position')));
+	$position.append($('<input type="text" class="small" disabled>').val(this.item.x).attr('title', _('X position')));
+	$position.append($('<input type="text" class="small" disabled>').val(this.item.y).attr('title', _('Y position')));
 	this.$container.append($position);
 
 	// dynamic variables
 	for (var key in this.item.data) {
-		if (['label', 'color', 'state'].indexOf(key) === -1) {
+		if (this._reservedWords.indexOf(key) === -1) {
 			var value = this.item.data[key];
 			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
 			this._addTextInputRow(key, label, value, this.item);
@@ -559,7 +559,7 @@ Editor.prototype._createSaveCallback = function(object, key, json, live) {
 		if ('redraw' in object) {
 			object.redraw();
 		}
-		this.editor.onChange();
+		this.editor.onChange(true);
 		this.canvas.redraw();
 	}.bind(this);
 };
