@@ -95,12 +95,15 @@
 	margin: 0;
 	background: rgba(255, 255, 230, 0.7);
 	text-align: center;
+	white-space: nowrap;
+	min-width: 35px;
 }
 
 .smalldb-editor .smalldb-editor-state.smalldb-editor-id-__start__,
 .smalldb-editor .smalldb-editor-state.smalldb-editor-id-__end__ {
 	width: 25px;
 	height: 25px;
+	min-width: 25px;
 }
 
 .smalldb-editor .smalldb-editor-state.smalldb-editor-id-__end__::before {
