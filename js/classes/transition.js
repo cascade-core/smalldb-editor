@@ -7,10 +7,9 @@
  * @param {Object} data
  * @param {String} source
  * @param {String} target
- * @param {Boolean} [cycle] - defaults to false
  * @class
  */
-var Transition = function(action, data, source, target, cycle) {
+var Transition = function(action, data, source, target) {
 	data = data || {};
 	this.editor = action.editor;
 	this.canvas = this.editor.canvas;
@@ -18,8 +17,16 @@ var Transition = function(action, data, source, target, cycle) {
 	this.data = data;
 	this.source = source;
 	this.target = target;
-	this.cycle = cycle || false;
+	this.cycle = source.split('-')[0] === target.split('-')[0];
 	this.label = 'label' in data ? data.label : action.id;
+	if ('dagrePath' in data) {
+		console.log(source, target, data.dagrePath);
+		var path = [];
+		for (var p in data.dagrePath) {
+			path[p] = new Point(data.dagrePath[p].x, data.dagrePath[p].y);
+		}
+		this.dagrePath = path;
+	}
 	this.color = data.color || action.color || '#000000';
 };
 
@@ -49,6 +56,13 @@ Transition.prototype.contains = function(point) {
 		lines = lines.concat(this._segmentize(points, cps));
 		if (cps.length > 2) { // cycle has 2 extra points, add lines from the other side of path
 			lines = lines.concat(this._segmentize(points.reverse(), cps.reverse()));
+			points.reverse();
+			cps.reverse();
+			if (points.length === 6) { // add line segment in the middle
+				lines.push(new Line(points[2], points[3]));
+			} else if (points.length > 6) { // find segments in the middle
+				lines = lines.concat(this._segmentize(points.slice(3), cps.slice(2)));
+			}
 		}
 	}
 
@@ -159,18 +173,28 @@ Transition.prototype.render = function(states, index) {
 	if (this.target === '') {
 		this.target = '__end__';
 	}
+
 	var from = states[s].getBorderPoint(states[this.target].center());
 	var to = states[this.target].getBorderPoint(states[s].center());
 	var key = from.toString() + '-' + to.toString();
 	if (!index[key]) {
 		index[key] = 1;
 	}
+
 	if (s === this.target) {
+		if (this.dagrePath && 'dagre' in window) {
+			this._renderDagrePath(states, s, index[key], false, true);
+			return;
+		}
 		var w = states[s].$container.outerWidth();
 		from.x -= 1; // correction
 		this.path = this.canvas.drawCycleConnection(this.label, from, new Point(to.x - w, to.y), index[key]++, this.color, this.isActive());
 	} else {
 		var bidirectional = states[this.target].isConnected(s);
+		if (this.dagrePath && 'dagre' in window) {
+			this._renderDagrePath(states, s, index[key], bidirectional);
+			return;
+		}
 		if (bidirectional) {
 			var from = states[s].center();
 			from.id = s;
@@ -179,6 +203,24 @@ Transition.prototype.render = function(states, index) {
 		}
 		this.path = this.canvas.drawConnection(this.label, from, to, index[key]++, this.color, bidirectional, this.isActive());
 	}
+};
+
+/**
+ * Renders path computed by dagre
+ *
+ * @param {Object} states
+ * @param {String} s
+ * @param {Object} index
+ * @param {Boolean} bidirectional
+ * @param {Boolean} cycle
+ * @private
+ */
+Transition.prototype._renderDagrePath = function(states, s, index, bidirectional, cycle) {
+	// render dagre path if available, adjust start and end points
+	var p = this.dagrePath;
+	this.dagrePath[0] = states[s].getBorderPoint(p[1]);
+	this.dagrePath[p.length - 1] = states[this.target].getBorderPoint(p[p.length - 2]);
+	this.path = this.canvas.drawDagreConnection(this.label, this.dagrePath, index, cycle, this.color, this.isActive());
 };
 
 /**
@@ -192,6 +234,9 @@ Transition.prototype.serialize = function() {
 		color: this.color,
 		targets: [this.target === '__end__' ? '' : this.target]
 	};
+	if (this.dagrePath) {
+		T.dagrePath = this.dagrePath;
+	}
 	for (var t in this.data) {
 		if (['label', 'color', 'targets'].indexOf(t) === -1) {
 			T[t] = this.data[t];

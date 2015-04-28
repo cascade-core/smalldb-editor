@@ -24,16 +24,32 @@ var State = function(id, data, editor) {
 
 /**
  * Renders state to canvas
+ *
+ * @param {jQuery} [$parent] - where to append
+ * @returns {this}
  */
-State.prototype.render = function() {
+State.prototype.render = function(temp) {
+	var $parent = temp || this.canvas.$containerInner;
+	if (!$parent) {
+		return this;
+	}
 	// create DOM if not exists
-	if (!this.$container) {
+	if (!this.$container && $parent) {
 		this.create();
 		if (this.isActive()) {
 			var className = SmalldbEditor._namespace + '-active';
 			this.$container.addClass(className);
 		}
-		this.canvas.$containerInner.append(this.$container);
+		$parent.append(this.$container);
+
+		// save width and height
+		this.width = this.$container.outerWidth();
+		this.height = this.$container.outerHeight();
+	}
+
+	if (temp) {
+		delete this.$container;
+		return this;
 	}
 
 	// update position
@@ -41,6 +57,8 @@ State.prototype.render = function() {
 		top: this.y + this.canvas.options.canvasExtraWidth,
 		left: this.x + this.canvas.options.canvasExtraHeight
 	});
+
+	return this;
 };
 
 /**
@@ -137,7 +155,9 @@ State.prototype.redraw = function(noCanvasRedraw) {
 State.prototype.addConnection = function(target) {
 	if (this.connections.indexOf(target) === -1) {
 		this.connections.push(target);
-		this.editor.states.__end__.notFound = false;
+		if (target === '__end__') {
+			this.editor.states.__end__.notFound = false;
+		}
 		this.redraw();
 	}
 };

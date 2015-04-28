@@ -69,6 +69,9 @@ Action.prototype.serialize = function() {
 		var trans = this.transitions[id];
 		var source = trans.source.split('-')[0]; // cut random suffix
 		source = source === '__start__' ? '' : source;
+		if (trans.dagrePath && 'dagre' in window) {
+			source += '-' + Math.random().toString(36).slice(10); // use again random suffix when dagre path loaded
+		}
 		if (A.transitions[source] !== undefined) {
 			// multiple transitions from same source -> merge
 			var target = trans.target === '__end__' ? '' : trans.target;

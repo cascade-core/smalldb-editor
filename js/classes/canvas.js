@@ -10,6 +10,7 @@ var Canvas = function(editor) {
 	this.editor = editor;
 	this.options = this.editor.options;
 	this.renderCycles = true;
+	this._renderSVG = false;
 };
 
 /**
@@ -44,31 +45,6 @@ Canvas.prototype._drawLine = function(fromX, fromY, toX, toY) {
 };
 
 /**
- * Draws canvas background
- * @private
- */
-Canvas.prototype._drawBackground = function() {
-	$(this.canvas).css('background', this.options.canvasBackgroundColor);
-	this.context.strokeStyle = this.options.canvasBackgroundLineColor;
-	this.context.lineWidth = 1;
-	var step = this.options.canvasBackgroundLineStep;
-
-	// vertical lines
-	var max = this.width / step;
-	for (var i = 0; i < max; i++) {
-		this._drawLine(i * step, 0, i * step, this.height);
-	}
-
-	// horizontal lines
-	max = this.height / step;
-	for (var i = 0; i < max; i++) {
-		this._drawLine(0, i * step, this.width, i * step);
-	}
-
-	this.context.fillStyle = '#000';
-};
-
-/**
  * Creates container and canvas element
  * @private
  */
@@ -77,8 +53,11 @@ Canvas.prototype.create = function() {
 	this.canvas = $('<canvas>')[0];
 	this.canvas.width = this.width;
 	this.canvas.height = this.height;
-	this.context = this.canvas.getContext('2d');
-	this._drawBackground();
+	if (this._renderSVG) {
+		this.context = new C2S(this.width, this.height);
+	} else {
+		this.context = this.canvas.getContext('2d');
+	}
 
 	// create scroll container
 	this.$container = $('<div>');
@@ -262,9 +241,10 @@ Canvas.prototype._onMouseUp = function(e) {
 			currX /= zoom;
 			currY /= zoom;
 			var stateX = s.position().left;
-			var stateXW = s.position().left + s.$container.width();
+			var stateXW = stateX + s.$container.outerWidth();
 			var stateY = s.position().top;
-			var stateYH = s.position().top + s.$container.height();
+			var stateYH = stateY + s.$container.outerHeight();
+			this.context.strokeRect(stateX, stateY, s.$container.outerWidth(), s.$container.outerHeight());
 
 			if (currX - this._cursor.x < 0) { // right to left selection => allow selecting just part of state
 				if (currX < stateXW && this._cursor.x > stateX &&
@@ -286,6 +266,29 @@ Canvas.prototype._onMouseUp = function(e) {
 		return false;
 	}
 	this._moving = false;
+};
+
+/**
+ *
+ * @param {String} label
+ * @param {Object} points
+ * @param {Object} index
+ * @param {Boolean} cycle
+ * @param {String} color
+ * @param {Boolean} highlight
+ * @returns {Spline|Boolean}
+ */
+Canvas.prototype.drawDagreConnection = function(label, points, index, cycle, color, highlight) {
+	if (cycle && !this.renderCycles) {
+		return;
+	}
+
+	index = index || 1;
+	var path = this._drawPath(points, color, highlight, label === '');
+	// draw action label
+	var mid = points[Math.floor(points.length / 2)];
+	this._writeText(label, mid.x + 15, mid.y + 5, color, !this.editor.dragging);
+	return path;
 };
 
 /**
@@ -412,6 +415,8 @@ Canvas.prototype._drawPath = function(points, color, highlight, dashed) {
 	// draw arrow in the end point
 	var to = points[points.length - 1];
 	var angle = Point.angle(points[points.length - 2], to);
+	this.context.fillStyle = '#000';
+	this.context.strokeStyle = '#000';
 	this._drawArrow(to.x, to.y, angle);
 
 	return path;
@@ -432,6 +437,7 @@ Canvas.prototype._drawArrow = function(x, y, angle) {
 	this.context.translate(x, y);
 	this.context.rotate(-angle);
 
+	this.context.moveTo(0, 0);
 	this.context.lineTo(-6, -3);
 	this.context.lineTo(-4, 0);
 	this.context.lineTo(-6, 3);
@@ -481,11 +487,17 @@ Canvas.prototype._writeText = function(text, x, y, color, postpone) {
  * Redraws canvas
  */
 Canvas.prototype.redraw = function() {
-	this.context.clearRect(0, 0, this.width, this.height);
-	this._drawBackground();
-	this.editor.index = {};
-	for (var id in this.editor.actions) {
-		this.editor.actions[id].renderTransitions(this.editor.states, this.editor.index);
+	if (this.context) {
+		this.context.clearRect(0, 0, this.width, this.height);
+		this.editor.index = {};
+		for (var id in this.editor.actions) {
+			this.editor.actions[id].renderTransitions(this.editor.states, this.editor.index);
+		}
+	}
+	if (this._renderSVG) {
+		var svg = this.context.getSerializedSvg(true); //true here will replace any named entities with numbered ones.
+		this.$containerInner.find('svg, canvas').remove();
+		this.$containerInner.append(svg);
 	}
 };
 

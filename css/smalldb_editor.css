@@ -30,6 +30,14 @@
 	box-sizing: border-box;
 }
 
+.smalldb-editor canvas {
+	background: #fff;
+	background-image: linear-gradient(0deg, transparent 24%, #eef 25%, #eef 26%, transparent 27%, transparent 74%, #eef 75%, #eef 76%, transparent 77%, transparent),
+					  linear-gradient(90deg, transparent 24%, #eef 25%, #eef 26%, transparent 27%, transparent 74%, #eef 75%, #eef 76%, transparent 77%, transparent);
+	background-size: 22px 22px;
+	background-position: -12px -12px;
+}
+
 .smalldb-editor [disabled] {
 	background: #eee;
 	border: 1px solid #ccc;

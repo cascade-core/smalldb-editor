@@ -37,13 +37,18 @@ var Tarjan = function(graph) {
 Tarjan.prototype.run = function() {
 	for (var i in this.graph.nodes) {
 		if (this.graph.nodes[i].index<0) {
-			this.strongConnect(this.graph.nodes[i]);
+			this._strongConnect(this.graph.nodes[i]);
 		}
 	}
 	return this.scc;
 };
 
-Tarjan.prototype.strongConnect = function(node) {
+/**
+ *
+ * @param Node node
+ * @private
+ */
+Tarjan.prototype._strongConnect = function(node) {
 	// Set the depth index for v to the smallest unused index
 	node.index = this.index;
 	node.lowlink = this.index;
@@ -55,7 +60,7 @@ Tarjan.prototype.strongConnect = function(node) {
 		var w = node.connections[i];
 		if (w.index < 0) {
 			// Successor w has not yet been visited; recurse on it
-			this.strongConnect(w);
+			this._strongConnect(w);
 			v.lowlink = Math.min(v.lowlink, w.lowlink);
 		} else if (this.stack.contains(w)) {
 			// Successor w is in stack S and hence in the current SCC

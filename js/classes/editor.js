@@ -230,8 +230,10 @@ Editor.prototype._createEdgeView = function() {
 	this.$container.append($title);
 
 	// rows
-	this._addTextInputRow('source', 'Source', this.item.source.split('-')[0], this.item); // todo select
-	this._addTextInputRow('target', 'Target', this.item.target, this.item); // todo select
+	var $row = this._addTextInputRow('source', 'Source', this.item.source.split('-')[0], this.item);
+	$row.find('input').prop('disabled', true);
+	$row = this._addTextInputRow('target', 'Target', this.item.target, this.item);
+	$row.find('input').prop('disabled', true);
 	this._addTextInputRow('label', 'Label', this.item.label, this.item, true);
 	this._addColorInputRow('color', 'Color', this.item.color, this.item);
 

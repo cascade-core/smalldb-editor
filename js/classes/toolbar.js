@@ -135,7 +135,7 @@ Toolbar.prototype.render = function($container) {
 	this.$cycles = $('<a>');
 	className = SmalldbEditor._namespace + '-cycles';
 	this.$cycles.html('<i class="fa fa-fw fa-dot-circle-o"></i> C');
-	this.$cycles.attr('title', 'Toggle cycles visibility [Ctrl + Shift + C]');
+	this.$cycles.attr('title', 'Toggle cycles visibility [Ctrl + Shift + O]');
 	this.$cycles.attr('href', '#toggle-cycles');
 	this.$cycles.addClass(className);
 	$(document).on('click', 'a.' + className, this._toggleCycles.bind(this));
@@ -275,17 +275,21 @@ Toolbar.prototype._keydown = function(e) {
 	} else if ((e.metaKey || e.ctrlKey) && code === 90) { // ctrl + z => undo
 		this.$undo.addClass('hover');
 		this._undo();
+	} else if ((e.metaKey || e.ctrlKey) && code === 76) { // ctrl + l => automatic layout
+		this.$layout.addClass('hover');
+		this._automaticLayout();
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 70) { // ctrl + shift + f => fullscreen
 		this.$fullscreen.addClass('hover');
 		this._toggleFullScreen();
 		return false;
-	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 82) { // ctrl + shift + r => reload palette data
-		this.$reload.addClass('hover');
-		//this._reloadPalette();
+	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 79) { // ctrl + shift + o => toggle cycles
+		this.$cycles.addClass('hover');
+		this._toggleCycles();
 		return false;
-	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 80) { // ctrl + shift + p => parent state properties
-		this.$parent.addClass('hover');
-		this._toggleParentProperties();
+	} else if ((e.metaKey || e.ctrlKey) && code === 79) { // ctrl + o => automatic action colors
+		this.$colors.addClass('hover');
+		this._automaticEdgeColors();
+		return false;
 	} else if (code === 46 || ((e.metaKey || e.ctrlKey) && code === 8)) { // del / ctrl + backspace => remove selection
 		if (!window.confirm(_('Do you realy want to delete selected states?'))) {
 			return false;
@@ -354,19 +358,6 @@ Toolbar.prototype._toggleFullScreen = function() {
 };
 
 /**
- * Toggles parent state properties editor
- *
- * @returns {Boolean}
- * @private
- */
-Toolbar.prototype._toggleParentProperties = function() {
-	var editor = new ParentEditor(this.editor);
-	editor.render();
-
-	return false;
-};
-
-/**
  * Undo last action
  *
  * @returns {Boolean}
@@ -380,7 +371,6 @@ Toolbar.prototype._undo = function() {
 		var redo = this.editor.session.get('redo', true) || [];
 		var prev = undo.pop();
 		redo.push(oldData);
-		console.log(JSON.parse(prev), undo, redo);
 		this.editor.setValue(prev);
 
 		this.editor.session.set('undo', undo, true);
@@ -428,6 +418,9 @@ Toolbar.prototype._redo = function() {
  * @private
  */
 Toolbar.prototype._copy = function() {
+	if (this.$copy.hasClass('disabled')) {
+		return false;
+	}
 	var ret = {};
 	var box = this.editor.getBoundingBox(true);
 	var midX = box.minX + (box.maxX - box.minX) / 2;
@@ -455,6 +448,9 @@ Toolbar.prototype._copy = function() {
  * @private
  */
 Toolbar.prototype._cut = function() {
+	if (this.$cut.hasClass('disabled')) {
+		return false;
+	}
 	var ret = {};
 	var box = this.editor.getBoundingBox(true);
 	var midX = box.minX + (box.maxX - box.minX) / 2;
@@ -525,7 +521,8 @@ Toolbar.prototype.updateDisabledClasses = function() {
 	// set disabled class to toolbar buttons
 	var active = false;
 	for (var id in this.editor.states) {
-		if (this.editor.states[id].isActive()) {
+		var s = this.editor.states[id];
+		if (s.isActive() && s.id.indexOf('__') !== 0) {
 			active = true;
 			break;
 		}

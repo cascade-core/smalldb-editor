@@ -21,10 +21,7 @@ var SmalldbEditor = function(el) {
 		canvasOffset: 75, // px start rendering states from top left corner of diagram - canvasOffset
 		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
 		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
-		canvasSpeed: 2, // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
-		canvasBackgroundColor: '#fff',
-		canvasBackgroundLineColor: '#eef',
-		canvasBackgroundLineStep: 10 // px
+		canvasSpeed: 2 // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
 	};
 };
 
@@ -35,7 +32,6 @@ SmalldbEditor._namespace = 'smalldb-editor';
  * Initialize options map
  *
  * @param {Array} options
- * @private
  */
 SmalldbEditor.prototype.setOptions = function(options) {
 	// options stored in data attribute
@@ -63,13 +59,33 @@ SmalldbEditor.prototype._createContainer = function() {
 
 /**
  * Places states to some position on canvas
- * uses tarjan's algorithm and renders states based on topological order
+ * if dagre is loaded, use it, otherwise use tarjan
  *
- * @param {Boolean} [force] - override current coordinates? default to false
+ * @param {Boolean} [force] - override current states coordinates? default to false
  */
 SmalldbEditor.prototype.placeStates = function(force) {
 	force = force || false;
 
+	// is dagre loaded?
+	if ("dagre" in window) {
+		this.dagre(force);
+	} else {
+		this.tarjan(force);
+	}
+
+	this.onChange();
+	if (force) {
+		this.canvas.redraw();
+	}
+};
+
+/**
+ * Places states to some position on canvas
+ * uses tarjan's algorithm and renders states based on topological order
+ *
+ * @param {Boolean} [force] - override current coordinates? default to false
+ */
+SmalldbEditor.prototype.tarjan = function(force) {
 	// create nodes
 	var nodes = [], indexed = {};
 	for (var id in this.states) {
@@ -142,10 +158,84 @@ SmalldbEditor.prototype.placeStates = function(force) {
 		}
 		dy += stepY * (scc.length > 1 ? 2 : 1);
 	}
-	this.onChange();
-	if (force) {
-		this.canvas.redraw();
+};
+
+SmalldbEditor.prototype.dagre = function(force) {
+	// create graph
+	var g = new dagre.graphlib.Graph();
+	g.setGraph({});
+
+	// create nodes
+	for (var id in this.states) {
+		if (id === '__end__' && this.states[id].notFound) {
+			continue;
+		}
+		var s = this.states[id];
+		g.setNode(id, {
+			width: s.width || 30,
+			height: s.height || 30
+		});
 	}
+
+	// create node connections
+	for (var id in this.actions) {
+		var action = this.actions[id];
+		var temp = [];
+		for (var t in action.transitions) {
+			var trans = action.transitions[t];
+			if (trans.cycle && trans.action.id === '__noaction__') {
+				continue;
+			}
+			var s = t.split('-')[0];
+			temp.push([s, trans]);
+		}
+		// add transitions in reversed order to prevent rendering overlapping multi-edges
+		temp.reverse();
+		for (var i in temp) {
+			g.setEdge(temp[i][0], temp[i][1].target, { transition: temp[i][1] });
+		}
+	}
+
+	// compute layout
+	dagre.layout(g);
+
+	// update state positions
+	var states = this.states;
+	var endPos = { y: 0 };
+	g.nodes().forEach(function(v) {
+		var state = states[v];
+		if (force || (!state.x && !state.y)) {
+			var meta = g.node(v);
+			state.x = meta.x - meta.width / 2;
+			state.y = meta.y - meta.height / 2;
+			state.redraw(true);
+		}
+		if (state.id === '__start__') {
+			endPos.x = state.x;
+		}
+		endPos.y = Math.max(endPos.y, meta.y);
+	});
+
+	if (!this.options.viewOnly && this.states.__end__.notFound) {
+		// end is not used, position it to the end with same x coordinate as start node
+		this.states.__end__.x = endPos.x;
+		this.states.__end__.y = endPos.y + 65;
+	}
+
+	// update transition positions
+	var opts = this.options;
+	g.edges().forEach(function(e) {
+		var meta =  g.edge(e);
+		var points = [];
+		for (var p in meta.points) {
+			var x = meta.points[p].x;
+			var y = meta.points[p].y;
+			x += opts.canvasExtraWidth;
+			y += opts.canvasExtraHeight;
+			points[p] = new Point(x, y);
+		}
+		meta.transition.dagrePath = points;
+	});
 };
 
 /**
@@ -222,6 +312,14 @@ SmalldbEditor.prototype.init = function() {
  * Parses textarea data and initializes machine properties, actions and states
  */
 SmalldbEditor.prototype.processData = function() {
+	// create temp <div> to render states (we need to know state dimensions for dagre)
+	var $temp = $('<div>').css({
+		'visibility': 'hidden',
+		'position': 'absolute',
+		'z-index': -1
+	});
+	this.$container.append($temp);
+
 	this.data = JSON.parse(this.getValue());
 	this.states = {};
 	this.actions = {};
@@ -235,13 +333,23 @@ SmalldbEditor.prototype.processData = function() {
 	}
 
 	// states
-	this.states.__start__ = new State('__start__', { label: '', color: '#000' }, this);
 	if (this.data.states) {
 		for (var id in this.data.states) {
-			this.states[id] = new State(id, this.data.states[id], this);
+			this.states[id] = new State(id, this.data.states[id], this).render($temp);
 		}
 	}
-	this.states.__end__ = new State('__end__', { label: '', color: '#000' }, this);
+
+	// virtual states (metadata for internal states)
+	if (this.data.virtualStates) {
+		for (var id in this.data.virtualStates) {
+			this.states[id] = new State(id, this.data.virtualStates[id], this).render($temp);
+		}
+	} else {
+		// add start and end states when not present
+		this.states.__start__ = new State('__start__', { label: '', color: '#000' }, this).render($temp);
+		this.states.__end__ = new State('__end__', { label: '', color: '#000' }, this).render($temp);
+	}
+	$temp.remove();
 
 	// actions
 	var endFound = false;
@@ -294,6 +402,7 @@ SmalldbEditor.prototype.render = function() {
 			- this.canvas.options.scrollLeft;
 	this.canvas.$container.scrollTop(top);
 	this.canvas.$container.scrollLeft(left);
+	this.canvas.redraw();
 };
 
 /**
@@ -365,22 +474,24 @@ SmalldbEditor.prototype.onChange = function(dontRefreshEditor) {
 	// normalize string from textarea
 	var oldData = JSON.stringify(JSON.parse(this.getValue()));
 	var newData = this.serialize();
-	console.log(JSON.parse(oldData).actions, JSON.parse(newData).actions);
 	if (oldData !== newData) {
-		// save new history state
-		var undo = this.session.get('undo', true);
-		undo = undo || [];
-		undo.push(oldData);
-		if (undo.length > this.options.historyLimit) {
-			undo.splice(0, undo.length - this.options.historyLimit);
-		}
-		this.session.set('undo', undo, true);
-		this.session.reset('redo');
-
-		this.toolbar.updateDisabledClasses();
-
 		// set data to textarea
 		this.setValue(newData);
+
+		// do not save history when no state position given
+		if (oldData.indexOf(',"x":') > 0) {
+			// save new history state
+			var undo = this.session.get('undo', true);
+			undo = undo || [];
+			undo.push(oldData);
+			if (undo.length > this.options.historyLimit) {
+				undo.splice(0, undo.length - this.options.historyLimit);
+			}
+			this.session.set('undo', undo, true);
+			this.session.reset('redo');
+
+			this.toolbar.updateDisabledClasses();
+		}
 
 		// refresh editor panel
 		if (!dontRefreshEditor) {
@@ -396,7 +507,6 @@ SmalldbEditor.prototype.onChange = function(dontRefreshEditor) {
  * @returns {string}
  */
 SmalldbEditor.prototype.serialize = function(history) {
-	history = history || false;
 	var states = {};
 	for (var i in this.states) {
 		if (history || i.indexOf('__') !== 0) {
@@ -416,6 +526,10 @@ SmalldbEditor.prototype.serialize = function(history) {
 	var ret = {
 		'_': this.properties._, // security
 		'states': states,
+		'virtualStates': {
+			'__start__': this.states.__start__.serialize(),
+			'__end__': this.states.__end__.serialize()
+		},
 		'actions': actions
 	};
 	for (var t in this.properties) {

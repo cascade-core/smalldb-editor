@@ -6,6 +6,7 @@
 	<link rel="stylesheet" href="../css/smalldb_editor.css" type="text/css">
 	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.js"></script>
 	<script type="text/javascript" src="../js/jquery/gettext.js"></script>
+	<script type="text/javascript" src="http://cpettitt.github.io/project/dagre/latest/dagre.js"></script>
 	<script type="text/javascript" src="../js/classes/geometry.js"></script>
 	<script type="text/javascript" src="../js/classes/spline.js"></script>
 	<script type="text/javascript" src="../js/classes/tarjan.js"></script>
@@ -67,8 +68,10 @@
 
 <h2>Article machine</h2>
 
-<textarea id=".main.main.admin.main.training_dummy" data-smalldb-editor-opts='{"viewOnly": false, "scrollLeft": 300, "scrollTop": -50}' class="smalldb_editor" cols="25" rows="80" style="display: block; width: 99%; height: 400px;">{
-    "_": "\u003C?php printf('_%c%c}%c',34,10,10);__halt_compiler();?\u003E",
+<!-- todo view only mode viditelny cely automat, nenastavovat vysku / sirku - dopocitat automaticky dle boundig boxu -->
+
+<textarea id=".main.main.admin.main.training_dummy" data-smalldb-editor-opts='{"viewOnly": false, "scrollLeft": 300, "scrollTop": -50}' class="smalldb_editor" cols="25" rows="80" style="display: block; width: 99%; height: 600px">
+{
     "states": {
         "draft": {
             "state": "draft",
@@ -158,28 +161,6 @@
                 }
             }
         },
-        "test e2": {
-            "transitions": {
-                "draft": {
-                    "label": "test e2",
-                    "color": "#000000",
-                    "targets": [
-                        "published"
-                    ]
-                }
-            }
-        },
-        "ttt": {
-            "transitions": {
-                "draft": {
-                    "label": "ttt",
-                    "color": "#000000",
-                    "targets": [
-                        "draft"
-                    ]
-                }
-            }
-        },
         "create": {
             "transitions": {
                 "": {
@@ -199,17 +180,6 @@
                 },
                 "outputs": {
                     "ref": "return_value"
-                }
-            }
-        },
-        "test e": {
-            "transitions": {
-                "published": {
-                    "label": "test e",
-                    "color": "#000000",
-                    "targets": [
-                        "draft"
-                    ]
                 }
             }
         },
@@ -248,14 +218,6 @@
                     "targets": [
                         "published"
                     ]
-                },
-                "draft": {
-                    "description": "",
-                    "label": "publish",
-                    "color": "#000000",
-                    "targets": [
-                        "draft"
-                    ]
                 }
             }
         },
@@ -273,14 +235,6 @@
                     "color": "#000000",
                     "targets": [
                         "submitted"
-                    ]
-                },
-                "draft": {
-                    "description": "",
-                    "label": "hide",
-                    "color": "#000000",
-                    "targets": [
-                        "draft"
                     ]
                 }
             }

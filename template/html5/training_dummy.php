@@ -25,6 +25,7 @@ function TPL_html5__smalldb_editor__training_dummy($t, $id, $d, $so)
 		"\t<link rel=\"stylesheet\" href=\"/plugin/smalldb_editor/css/smalldb_editor.css\" type=\"text/css\">\n",
 		"\t<script type=\"text/javascript\" src=\"https://code.jquery.com/jquery-2.1.1.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/jquery/gettext.js\"></script>\n",
+		"\t<script type=\"text/javascript\" src=\"http://cpettitt.github.io/project/dagre/latest/dagre.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/geometry.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/spline.js\"></script>\n",
 		"\t<script type=\"text/javascript\" src=\"/plugin/smalldb_editor/js/classes/tarjan.js\"></script>\n",
