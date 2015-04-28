@@ -32,10 +32,10 @@
 
 .smalldb-editor canvas {
 	background: #fff;
-	background-image: linear-gradient(0deg, transparent 24%, #eef 25%, #eef 26%, transparent 27%, transparent 74%, #eef 75%, #eef 76%, transparent 77%, transparent),
-					  linear-gradient(90deg, transparent 24%, #eef 25%, #eef 26%, transparent 27%, transparent 74%, #eef 75%, #eef 76%, transparent 77%, transparent);
-	background-size: 22px 22px;
-	background-position: -12px -12px;
+	background-image: repeating-linear-gradient(0deg, transparent, transparent 9px, #eef 9px, #eef 10px),
+					  repeating-linear-gradient(90deg, transparent, transparent 9px, #eef 9px, #eef 10px);
+	background-size: 10px 10px;
+	background-position: 1px 0;
 }
 
 .smalldb-editor [disabled] {
