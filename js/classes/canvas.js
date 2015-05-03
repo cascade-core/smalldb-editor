@@ -123,7 +123,8 @@ Canvas.prototype._onMouseDown = function(e) {
 	}
 
 	var state = $(e.target).closest('div.' + SmalldbEditor._namespace + '-state')[0];
-	if (!state) {
+	var cp = $(e.target).closest('a.' + SmalldbEditor._namespace + '-control-point')[0];
+	if (!state && !cp) {
 		var zoom = this.getZoom();
 		var speed = this.options.canvasSpeed / zoom;
 		this._moving = true;
@@ -202,11 +203,12 @@ Canvas.prototype._onDblClick = function(e) {
  * @returns {Point}
  */
 Canvas.prototype.clickPosition = function(e, withoutOffset) {
-	withoutOffset = withoutOffset || false
+	withoutOffset = withoutOffset || false;
 	var $c = this.$container;
+	var zoom = this.getZoom();
 	return new Point(
-		(e.pageX - $c.offset().left + $c.scrollLeft()) - (withoutOffset ? 0 : this.options.canvasExtraWidth),
-		(e.pageY - $c.offset().top + $c.scrollTop()) - (withoutOffset ? 0 : this.options.canvasExtraHeight)
+		(e.pageX - $c.offset().left + $c.scrollLeft()) / zoom - (withoutOffset ? 0 : this.options.canvasExtraWidth),
+		(e.pageY - $c.offset().top + $c.scrollTop()) / zoom - (withoutOffset ? 0 : this.options.canvasExtraHeight)
 	);
 };
 
@@ -314,7 +316,7 @@ Canvas.prototype.drawDagreConnection = function(trans, index, cycle) {
 			left: points[p].x
 		});
 		$btn.on('dblclick', this._removeControlPoint(trans, points, p));
-		//$btn.on('mousedown', this._onDragStartCP(trans, points, p));
+		$btn.on('mousedown', this._onDragStartCP(points, p));
 		this.$containerInner.append($btn);
 	}
 
@@ -323,36 +325,60 @@ Canvas.prototype.drawDagreConnection = function(trans, index, cycle) {
 
 /**
  * Drag start handler - used on mousedown event
+ * starts dragging of control point
  *
- * @param {MouseEvent} e - Event
+ * @param {Array} points
+ * @param {Number} point
+ * @returns {function(this:Canvas)}
  * @private
  */
-Canvas.prototype._onDragStartCP = function(e) {
-	var $target = $(e.target);
-	if ((e.metaKey || e.ctrlKey)) {
-		$target.addClass('selecting');
-		$('body').on({
-			'mousemove.state-editor': this._onDragOverConnect.bind(this),
-			'mouseup.state-editor': this._onDragEndConnect.bind(this)
-		});
-		this.editor.dragging = true;
-	} else {
-		var zoom = this.canvas.getZoom();
-		this._cursor = {
-			x: e.clientX / zoom - this.position().left,
-			y: e.clientY / zoom - this.position().top
-		};
+Canvas.prototype._onDragStartCP = function(points, p) {
+	return function() {
 		this._dragging = true;
 		this.editor.dragging = true;
-		this._moved = false;
 
 		$('body').on({
-			'mousemove.state-editor': this._onDragOver.bind(this),
-			'mouseup.state-editor': this._onDragEnd.bind(this)
+			'mousemove.state-editor': this._onDragOverCP(points, p),
+			'mouseup.state-editor': this._onDragEndCP.bind(this)
 		});
-	}
+		return false;
+	}.bind(this);
 };
 
+/**
+ * Drag over handler - used on mousemove event
+ * moves control point over canvas
+ *
+ * @param {Array} points
+ * @param {Number} point
+ * @returns {function(this:Canvas)}
+ * @private
+ */
+Canvas.prototype._onDragOverCP = function(points, p) {
+	return function(e) {
+		if (this._dragging) {
+			var $c = this.$container;
+			var zoom = this.getZoom();
+			points[p].x = (e.pageX - $c.offset().left + $c.scrollLeft()) / zoom;
+			points[p].y = (e.pageY - $c.offset().top + $c.scrollTop()) / zoom;
+			this.redraw();
+		}
+	}.bind(this);
+};
+
+/**
+ * Drag end handler - used on mouseup event
+ * saves new control point position
+ *
+ * @returns {void}
+ * @private
+ */
+Canvas.prototype._onDragEndCP = function() {
+	$('body').off('mousemove.state-editor mouseup.state-editor');
+	this._dragging = false;
+	this.editor.dragging = false;
+	this.editor.onChange();
+};
 
 /**
  * Creates callback for removing control point from path
@@ -364,7 +390,7 @@ Canvas.prototype._onDragStartCP = function(e) {
  * @private
  */
 Canvas.prototype._removeControlPoint = function(trans, points, point) {
-	return function (e) {
+	return function(e) {
 		$(e.target).closest('a').remove();
 		points.splice(point, 1);
 		if (points.length < (trans.cycle ? 4 : 3)) {

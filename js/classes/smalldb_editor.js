@@ -66,6 +66,9 @@ SmalldbEditor.prototype._createContainer = function() {
 SmalldbEditor.prototype.placeStates = function(force) {
 	force = force || false;
 
+	// remove all control point buttons
+	$('a.' + SmalldbEditor._namespace + '-control-point').remove();
+
 	// is dagre loaded?
 	if ("dagre" in window) {
 		this.dagre(force);
