@@ -141,9 +141,13 @@
 	padding: 5px;
 }
 
-.smalldb-editor .smalldb-editor-state.hover-valid,
-.smalldb-editor .smalldb-editor-state.smalldb-editor-active {
+.smalldb-editor .smalldb-editor-state.hover-valid {
 	background: #bfb !important;
+}
+
+.smalldb-editor .smalldb-editor-state.smalldb-editor-active {
+	border: 2px solid #3c3;
+	font-weight: bold;
 }
 
 .smalldb-editor .smalldb-editor-clone {
@@ -192,13 +196,19 @@
 	z-index: 10;
 	display: block;
 	text-align: center;
-	opacity: 0.3;
+	opacity: 0.5;
 	line-height: 10px;
 	padding-left: 0.5px;
+	display: none;
+}
+
+.smalldb-editor.show-control-points .smalldb-editor-control-point {
+	display: block;
 }
 
 .smalldb-editor .smalldb-editor-control-point:hover {
 	opacity: 1;
+	z-index: 15;
 }
 
 .smalldb-editor .smalldb-editor-state-remove:hover {

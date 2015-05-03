@@ -272,15 +272,14 @@ Canvas.prototype._onMouseUp = function(e) {
 
 /**
  *
- * @param {String} label
- * @param {Object} points
+ * @param {Transition} trans
  * @param {Object} index
  * @param {Boolean} cycle
- * @param {String} color
- * @param {Boolean} highlight
  * @returns {Spline|Boolean}
  */
-Canvas.prototype.drawDagreConnection = function(label, points, index, cycle, color, highlight) {
+Canvas.prototype.drawDagreConnection = function(trans, index, cycle) {
+	var points = trans.dagrePath;
+
 	if (cycle && !this.renderCycles) {
 		for (var p = 1; p < points.length - 1; p++) {
 			if (points[p].cpid) {
@@ -291,11 +290,11 @@ Canvas.prototype.drawDagreConnection = function(label, points, index, cycle, col
 	}
 
 	index = index || 1;
-	var path = this._drawPath(points, color, highlight, label === '');
+	var path = this._drawPath(points, trans.color, trans.isActive(), trans.label === '');
 
 	// draw action label
 	var mid = points[Math.floor(points.length / 2)];
-	this._writeText(label, mid.x + 15, mid.y + 5, color, !this.editor.dragging);
+	this._writeText(trans.label, mid.x + 15, mid.y + 5, path, trans.color, trans.isActive(), !this.editor.dragging);
 
 	// render control point remove buttons
 	for (var p = 1; p < points.length - 1; p++) {
@@ -313,7 +312,7 @@ Canvas.prototype.drawDagreConnection = function(label, points, index, cycle, col
 			top: points[p].y,
 			left: points[p].x
 		});
-		$btn.on('click', this._removeControlPoint(points, p));
+		$btn.on('click', this._removeControlPoint(trans, points, p));
 		this.$containerInner.append($btn);
 	}
 
@@ -323,15 +322,24 @@ Canvas.prototype.drawDagreConnection = function(label, points, index, cycle, col
 /**
  * Creates callback for removing control point from path
  *
+ * @param {Transition} trans
  * @param {Array} points
  * @param {Number} point
  * @returns {function(this:Canvas)}
  * @private
  */
-Canvas.prototype._removeControlPoint = function(points, point) {
+Canvas.prototype._removeControlPoint = function(trans, points, point) {
 	return function (e) {
 		$(e.target).closest('a').remove();
 		points.splice(point, 1);
+		if (points.length < (trans.cycle ? 4 : 3)) {
+			for (var p in points) {
+				if (points[p].cpid) {
+					$('#' + points[p].cpid).remove();
+				}
+			}
+			delete trans.dagrePath;
+		}
 		this.redraw();
 		return false;
 	}.bind(this);
@@ -386,7 +394,7 @@ Canvas.prototype.drawConnection = function(label, from, to, index, color, bidire
 	var path = this._drawPath(points, color, highlight, label === '');
 
 	// draw action label
-	this._writeText(label, mid.x + 5, mid.y - 5, color, !this.editor.dragging);
+	this._writeText(label, mid.x + 5, mid.y - 5, path, color, highlight, !this.editor.dragging);
 
 	return path;
 };
@@ -421,7 +429,7 @@ Canvas.prototype.drawCycleConnection = function(label, from, to, index, color, h
 	points.push(to);
 
 	var path = this._drawPath(points, color, highlight, label === '');
-	this._writeText(label, mid.x, mid.y - 30 - 20 * (index - 1), color, !this.editor.dragging);
+	this._writeText(label, mid.x, mid.y - 30 - 20 * (index - 1), path, color, highlight, !this.editor.dragging);
 
 	return path;
 };
@@ -499,18 +507,20 @@ Canvas.prototype._drawArrow = function(x, y, angle) {
  * Writes text to canvas
  *
  * @param {String} text
- * @param {Number} x
- * @param {Number} y
- * @param {String} [color='#000']
+ * @param {Number} x - horizontal position of text
+ * @param {Number} y - vertical position of text
+ * @param {Object} path - for saving label bounding box
+ * @param {String} [color='#000'] - color of rendered text
+ * @param {Boolean} [highlight=false] - highlight rendered text (make it bold)
  * @param {Boolean} [postpone] render with small delay, defaults to false
  * @private
  */
-Canvas.prototype._writeText = function(text, x, y, color, postpone) {
+Canvas.prototype._writeText = function(text, x, y, path, color, highlight, postpone) {
 	// postpone text rendering to draw all curves first (render twice actually to prevent blinking)
 	if (postpone) {
 		var that = this;
 		setTimeout(function() {
-			that._writeText(text, x, y, color);
+			that._writeText(text, x, y, path, color);
 		}, 0);
 	}
 	color = color || '#000';
@@ -527,6 +537,10 @@ Canvas.prototype._writeText = function(text, x, y, color, postpone) {
 	this.context.strokeText(text, x, y);
 	this.context.fillText(text, x, y);
 	this.context.restore();
+
+	// save label bounding box
+	var width = this.context.measureText(text).width;
+	path.labelBox = [x - width / 2, y - 11, x + width / 2, y];
 };
 
 /**

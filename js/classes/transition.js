@@ -46,6 +46,12 @@ Transition.prototype.contains = function(point) {
 		return false;
 	}
 
+	// check click on edge label
+	var box = this.path.labelBox;
+	if (box[0] <= point.x && box[1] <= point.y && box[2] >= point.x && box[3] >= point.y) {
+		return true;
+	}
+
 	// divide spline into straight line segments
 	var lines = []; // lines to check
 	if (points.length === 2) { // straight line
@@ -219,7 +225,7 @@ Transition.prototype._renderDagrePath = function(states, s, index, bidirectional
 	var p = this.dagrePath;
 	this.dagrePath[0] = states[s].getBorderPoint(p[1]);
 	this.dagrePath[p.length - 1] = states[this.target].getBorderPoint(p[p.length - 2]);
-	this.path = this.canvas.drawDagreConnection(this.label, this.dagrePath, index, cycle, this.color, this.isActive());
+	this.path = this.canvas.drawDagreConnection(this, index, cycle);
 };
 
 /**

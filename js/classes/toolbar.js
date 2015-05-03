@@ -5,6 +5,9 @@
  *
  * @param {SmalldbEditor} editor - reference to plugin instance
  * @class
+ * @todo select v properties TB / LR
+ * @todo select v properties na algoritmus tarjan / dagre
+ * @todo select v properties na min padding mezi uzly - maly a stredni ctverec, velky obdelnik na sirku / vysku
  */
 var Toolbar = function(editor) {
 	this.editor = editor;
@@ -141,6 +144,16 @@ Toolbar.prototype.render = function($container) {
 	$(document).on('click', 'a.' + className, this._toggleCycles.bind(this));
 	this.$toolbar.append(this.$cycles);
 
+	// toggle control points button
+	this.$controlPoints = $('<a>');
+	className = SmalldbEditor._namespace + '-control-points';
+	this.$controlPoints.html('<i class="fa fa-fw fa-eye-slash"></i> P');
+	this.$controlPoints.attr('title', 'Toggle control points visibility [Ctrl + Shift + P]');
+	this.$controlPoints.attr('href', '#toggle-cycles');
+	this.$controlPoints.addClass(className);
+	$(document).on('click', 'a.' + className, this._toggleControlPoints.bind(this));
+	this.$toolbar.append(this.$controlPoints);
+
 	// automatic layout button
 	this.$layout = $('<a>');
 	className = SmalldbEditor._namespace + '-layout';
@@ -155,7 +168,7 @@ Toolbar.prototype.render = function($container) {
 	this.$colors = $('<a>');
 	className = SmalldbEditor._namespace + '-colors';
 	this.$colors.html('<i class="fa fa-fw fa-flask"></i> C');
-	this.$colors.attr('title', 'Set automatic action colors [Ctrl + O]');
+	this.$colors.attr('title', 'Assign random color to each action [Ctrl + O]');
 	this.$colors.attr('href', '#action-colors');
 	this.$colors.addClass(className);
 	$(document).on('click', 'a.' + className, this._automaticEdgeColors.bind(this));
@@ -198,6 +211,19 @@ Toolbar.prototype._toggleCycles = function() {
 	$i.toggleClass('fa-circle-o');
 	this.canvas.renderCycles = $i.hasClass('fa-dot-circle-o');
 	this.canvas.redraw();
+	return false;
+};
+
+/**
+ * Toggles control points visibility
+ *
+ * @private
+ */
+Toolbar.prototype._toggleControlPoints = function() {
+	var $i = this.$controlPoints.find('i');
+	$i.toggleClass('fa-eye-slash');
+	$i.toggleClass('fa-eye');
+	this.editor.$container.toggleClass('show-control-points');
 	return false;
 };
 
@@ -285,6 +311,10 @@ Toolbar.prototype._keydown = function(e) {
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 79) { // ctrl + shift + o => toggle cycles
 		this.$cycles.addClass('hover');
 		this._toggleCycles();
+		return false;
+	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 80) { // ctrl + shift + o => toggle cycles
+		this.$controlPoints.addClass('hover');
+		this._toggleControlPoints();
 		return false;
 	} else if ((e.metaKey || e.ctrlKey) && code === 79) { // ctrl + o => automatic action colors
 		this.$colors.addClass('hover');
