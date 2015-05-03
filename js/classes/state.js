@@ -429,6 +429,7 @@ State.prototype.create = function() {
 	}
 
 	// state id and remove button
+	this.$container.attr('title', this.label);
 	this.$container.text(this.label);
 	this.$container.data(SmalldbEditor._namespace + '-id', this.id);
 	var title = this.id;

@@ -112,6 +112,17 @@
 	min-width: 35px;
 }
 
+.smalldb-editor .smalldb-editor-state::after {
+	display: block;
+	content: attr(title);
+	font-weight: bold;
+	height: 1px;
+	color: transparent;
+	overflow: hidden;
+	visibility: hidden;
+	margin-bottom: -1px;
+}
+
 .smalldb-editor .smalldb-editor-state.smalldb-editor-id-__start__,
 .smalldb-editor .smalldb-editor-state.smalldb-editor-id-__end__ {
 	width: 25px;
@@ -148,6 +159,8 @@
 .smalldb-editor .smalldb-editor-state.smalldb-editor-active {
 	border: 2px solid #3c3;
 	font-weight: bold;
+	padding-left: 4.5px !important;
+	padding-right: 4.5px !important;
 }
 
 .smalldb-editor .smalldb-editor-clone {
