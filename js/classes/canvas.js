@@ -10,7 +10,6 @@ var Canvas = function(editor) {
 	this.editor = editor;
 	this.options = this.editor.options;
 	this.renderCycles = true;
-	this._renderSVG = false;
 };
 
 /**
@@ -50,10 +49,14 @@ Canvas.prototype._drawLine = function(fromX, fromY, toX, toY) {
  */
 Canvas.prototype.create = function() {
 	// create canvas element
-	this.canvas = $('<canvas>')[0];
+	var $el = $('<canvas>');
+	if (!this.options.viewOnly) {
+		$el.addClass('smalldb-editor-bg');
+	}
+	this.canvas = $el[0];
 	this.canvas.width = this.width;
 	this.canvas.height = this.height;
-	if (this._renderSVG) {
+	if (this.options.viewOnly && 'C2S' in window) {
 		this.context = new C2S(this.width, this.height);
 	} else {
 		this.context = this.canvas.getContext('2d');
@@ -244,7 +247,6 @@ Canvas.prototype._onMouseUp = function(e) {
 			var stateXW = stateX + s.$container.outerWidth();
 			var stateY = s.position().top;
 			var stateYH = stateY + s.$container.outerHeight();
-			this.context.strokeRect(stateX, stateY, s.$container.outerWidth(), s.$container.outerHeight());
 
 			if (currX - this._cursor.x < 0) { // right to left selection => allow selecting just part of state
 				if (currX < stateXW && this._cursor.x > stateX &&
@@ -280,15 +282,59 @@ Canvas.prototype._onMouseUp = function(e) {
  */
 Canvas.prototype.drawDagreConnection = function(label, points, index, cycle, color, highlight) {
 	if (cycle && !this.renderCycles) {
+		for (var p = 1; p < points.length - 1; p++) {
+			if (points[p].cpid) {
+				$('#' + points[p].cpid).remove();
+			}
+		}
 		return;
 	}
 
 	index = index || 1;
 	var path = this._drawPath(points, color, highlight, label === '');
+
 	// draw action label
 	var mid = points[Math.floor(points.length / 2)];
 	this._writeText(label, mid.x + 15, mid.y + 5, color, !this.editor.dragging);
+
+	// render control point remove buttons
+	for (var p = 1; p < points.length - 1; p++) {
+		if (!points[p].cpid) {
+			points[p].cpid = 'cp-' + Math.random().toString(36).slice(10); // generate random id
+		} else {
+			$('#' + points[p].cpid).remove();
+		}
+		var $btn = $('<a href="#remove">');
+		$btn.attr('id', points[p].cpid);
+		$btn.html('<i class="fa fa-fw fa-trash"></i> &times;</a>');
+		var className = SmalldbEditor._namespace + '-control-point';
+		$btn.addClass(className);
+		$btn.css({
+			top: points[p].y,
+			left: points[p].x
+		});
+		$btn.on('click', this._removeControlPoint(points, p));
+		this.$containerInner.append($btn);
+	}
+
 	return path;
+};
+
+/**
+ * Creates callback for removing control point from path
+ *
+ * @param {Array} points
+ * @param {Number} point
+ * @returns {function(this:Canvas)}
+ * @private
+ */
+Canvas.prototype._removeControlPoint = function(points, point) {
+	return function (e) {
+		$(e.target).closest('a').remove();
+		points.splice(point, 1);
+		this.redraw();
+		return false;
+	}.bind(this);
 };
 
 /**
@@ -494,10 +540,12 @@ Canvas.prototype.redraw = function() {
 			this.editor.actions[id].renderTransitions(this.editor.states, this.editor.index);
 		}
 	}
-	if (this._renderSVG) {
+	if (this.options.viewOnly && 'C2S' in window) {
 		var svg = this.context.getSerializedSvg(true); //true here will replace any named entities with numbered ones.
 		this.$containerInner.find('svg, canvas').remove();
 		this.$containerInner.append(svg);
+		this.$containerInner.find('svg rect').remove();
+		this.context = new C2S(this.width, this.height);
 	}
 };
 

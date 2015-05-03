@@ -32,7 +32,7 @@ Spline.prototype._vector = function(p1, p2) {
  * @param {Point} p1
  * @param {Point} p2
  * @param {Point} p3
- * @returns {[{Point}, {Point}]}
+ * @returns {Array}
  * @private
  */
 Spline.prototype._controlPoints = function(p1, p2, p3) {
@@ -96,7 +96,7 @@ Spline.prototype._drawCurvedPath = function() {
 
 /**
  * Renders points and control points for debugging
-
+ *
  * @private
  */
 Spline.prototype._debug = function() {
@@ -125,4 +125,4 @@ Spline.prototype._debug = function() {
 		this.context.strokeStyle = color;
 	}
 
-}
+};

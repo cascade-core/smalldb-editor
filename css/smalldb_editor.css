@@ -30,7 +30,7 @@
 	box-sizing: border-box;
 }
 
-.smalldb-editor canvas {
+.smalldb-editor canvas.smalldb-editor-bg {
 	background: #fff;
 	background-image: repeating-linear-gradient(0deg, transparent, transparent 9px, #eef 9px, #eef 10px),
 					  repeating-linear-gradient(90deg, transparent, transparent 9px, #eef 9px, #eef 10px);
@@ -159,6 +159,7 @@
 	color: #666;
 }
 
+.smalldb-editor .smalldb-editor-control-point,
 .smalldb-editor .smalldb-editor-state-remove {
 	position: absolute;
 	top: -15px;
@@ -179,6 +180,25 @@
 	margin-top: 3px;
 	line-height: 15px;
 	padding-top: 2px;
+}
+
+.smalldb-editor .smalldb-editor-control-point {
+	border-color: #c66;
+	color: #c66;
+	width: 14px;
+	height: 14px;
+	margin: -7px 0 0 -7px;
+	font-size: 70%;
+	z-index: 10;
+	display: block;
+	text-align: center;
+	opacity: 0.3;
+	line-height: 10px;
+	padding-left: 0.5px;
+}
+
+.smalldb-editor .smalldb-editor-control-point:hover {
+	opacity: 1;
 }
 
 .smalldb-editor .smalldb-editor-state-remove:hover {
@@ -206,9 +226,9 @@
 }
 
 .smalldb-editor .smalldb-editor-editor-panel-remove {
-	color: #fff;
-	border: 1px solid red;
-	background: darkred;
+	color: darkred;
+	border: 1px solid darkred;
+	background: #fee;
 }
 
 .smalldb-editor .smalldb-editor-editor-panel-remove-prop {

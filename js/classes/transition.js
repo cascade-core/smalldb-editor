@@ -20,7 +20,6 @@ var Transition = function(action, data, source, target) {
 	this.cycle = source.split('-')[0] === target.split('-')[0];
 	this.label = 'label' in data ? data.label : action.id;
 	if ('dagrePath' in data) {
-		console.log(source, target, data.dagrePath);
 		var path = [];
 		for (var p in data.dagrePath) {
 			path[p] = new Point(data.dagrePath[p].x, data.dagrePath[p].y);
