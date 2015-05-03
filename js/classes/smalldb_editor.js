@@ -213,7 +213,9 @@ SmalldbEditor.prototype.dagre = function(force) {
 		if (state.id === '__start__') {
 			endPos.x = state.x;
 		}
-		endPos.y = Math.max(endPos.y, meta.y);
+		if (meta && 'y' in meta) {
+			endPos.y = Math.max(endPos.y, meta.y);
+		}
 	});
 
 	if (!this.options.viewOnly && this.states.__end__.notFound) {
@@ -523,6 +525,7 @@ SmalldbEditor.prototype.serialize = function(history) {
 		}
 	}
 
+	// @todo __noaction__ ulozit do actions pod klicem ""
 	var ret = {
 		'_': this.properties._, // security
 		'states': states,

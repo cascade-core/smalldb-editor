@@ -304,20 +304,55 @@ Canvas.prototype.drawDagreConnection = function(trans, index, cycle) {
 			$('#' + points[p].cpid).remove();
 		}
 		var $btn = $('<a href="#remove">');
+		$btn.attr('title', _('Double click to remove this control point'));
 		$btn.attr('id', points[p].cpid);
-		$btn.html('<i class="fa fa-fw fa-trash"></i> &times;</a>');
+		$btn.html('<i class="fa fa-certificate"></i> &times;</a>');
 		var className = SmalldbEditor._namespace + '-control-point';
 		$btn.addClass(className);
 		$btn.css({
 			top: points[p].y,
 			left: points[p].x
 		});
-		$btn.on('click', this._removeControlPoint(trans, points, p));
+		$btn.on('dblclick', this._removeControlPoint(trans, points, p));
+		//$btn.on('mousedown', this._onDragStartCP(trans, points, p));
 		this.$containerInner.append($btn);
 	}
 
 	return path;
 };
+
+/**
+ * Drag start handler - used on mousedown event
+ *
+ * @param {MouseEvent} e - Event
+ * @private
+ */
+Canvas.prototype._onDragStartCP = function(e) {
+	var $target = $(e.target);
+	if ((e.metaKey || e.ctrlKey)) {
+		$target.addClass('selecting');
+		$('body').on({
+			'mousemove.state-editor': this._onDragOverConnect.bind(this),
+			'mouseup.state-editor': this._onDragEndConnect.bind(this)
+		});
+		this.editor.dragging = true;
+	} else {
+		var zoom = this.canvas.getZoom();
+		this._cursor = {
+			x: e.clientX / zoom - this.position().left,
+			y: e.clientY / zoom - this.position().top
+		};
+		this._dragging = true;
+		this.editor.dragging = true;
+		this._moved = false;
+
+		$('body').on({
+			'mousemove.state-editor': this._onDragOver.bind(this),
+			'mouseup.state-editor': this._onDragEnd.bind(this)
+		});
+	}
+};
+
 
 /**
  * Creates callback for removing control point from path
@@ -520,7 +555,7 @@ Canvas.prototype._writeText = function(text, x, y, path, color, highlight, postp
 	if (postpone) {
 		var that = this;
 		setTimeout(function() {
-			that._writeText(text, x, y, path, color);
+			that._writeText(text, x, y, path, color, highlight);
 		}, 0);
 	}
 	color = color || '#000';
@@ -532,7 +567,10 @@ Canvas.prototype._writeText = function(text, x, y, path, color, highlight, postp
 	this.context.shadowBlur = 2;
 	this.context.strokeStyle = '#fff';
 	this.context.fillStyle = color;
-	this.context.font = "11px Arial";
+	this.context.font = '11px Arial';
+	if (highlight) {
+		this.context.font = 'bold 11px Arial';
+	}
 	this.context.textAlign = 'center';
 	this.context.strokeText(text, x, y);
 	this.context.fillText(text, x, y);

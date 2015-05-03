@@ -5,7 +5,7 @@
  *
  * @param {SmalldbEditor} editor - reference to plugin instance
  * @class
- * @todo select v properties TB / LR
+ * @todo select v properties TB / LR - fa-refresh ico
  * @todo select v properties na algoritmus tarjan / dagre
  * @todo select v properties na min padding mezi uzly - maly a stredni ctverec, velky obdelnik na sirku / vysku
  */
@@ -258,7 +258,6 @@ Toolbar.prototype._automaticEdgeColors = function() {
  */
 Toolbar.prototype._automaticLayout = function() {
 	this.editor.placeStates(true);
-	this.editor.onChange();
 	return false;
 };
 

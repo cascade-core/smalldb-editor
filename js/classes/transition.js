@@ -42,10 +42,6 @@ Transition.prototype.contains = function(point) {
 
 	var points = 'points' in this.path ? this.path.points : this.path;
 
-	if (!this.cycle && 0) { // todo
-		return false;
-	}
-
 	// check click on edge label
 	var box = this.path.labelBox;
 	if (box[0] <= point.x && box[1] <= point.y && box[2] >= point.x && box[3] >= point.y) {
@@ -66,7 +62,9 @@ Transition.prototype.contains = function(point) {
 			if (points.length === 6) { // add line segment in the middle
 				lines.push(new Line(points[2], points[3]));
 			} else if (points.length > 6) { // find segments in the middle
-				lines = lines.concat(this._segmentize(points.slice(3), cps.slice(2)));
+				for (var i = 2, j = 2; i < points.length - 2; i += 2, j++) {
+					lines = lines.concat(this._segmentize(points.slice(i), cps.slice(j)));
+				}
 			}
 		}
 	}

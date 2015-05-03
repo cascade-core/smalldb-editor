@@ -12,7 +12,7 @@ var Editor = function(editor) {
 	this.dontClose = false; // prevent setting default view when clicking on state or edge
 	this._namespace = SmalldbEditor._namespace + '-editor-panel';
 	// todo split reserver words into 3 categories (state, action, transition)
-	this._reservedWords = ['state', 'x', 'y', 'id', 'name', 'label', 'source', 'target', 'targets', 'color', 'transitions'];
+	this._reservedWords = ['state', 'x', 'y', 'id', 'name', 'label', 'source', 'target', 'targets', 'color', 'transitions', 'virtualStates', 'dagrePath'];
 };
 
 /**
@@ -39,6 +39,43 @@ Editor.prototype.refresh = function() {
 	} else {
 		this.create();
 	}
+};
+
+/**
+ * Creates new control points, finds correct position in path
+ *
+ * @param {Transition} trans
+ * @param {Point} pos
+ * @private
+ */
+Editor.prototype._createNewCP = function(trans, pos) {
+	var dist = [];
+	var path = trans.dagrePath;
+	var min = Number.POSITIVE_INFINITY;
+	var minPos = -1;
+	for (var p in path) {
+		dist[p] = pos.dist(path[p]);
+		if (dist[p] < min) {
+			min = dist[p];
+			minPos = parseInt(p);
+		}
+	}
+
+	// do not add points to the first place in path
+	minPos = Math.max(minPos, 1);
+
+	// fix position for edge cases
+	if (minPos < path.length - 1) {
+		var p1 = path[minPos - 1], p2 = path[minPos], p3 = path[minPos + 1];
+		var l1 = new Line(p1, p2), l2 = new Line(p2, p3);
+		var d1 = l1.dist(pos), d2 = l2.dist(pos);
+		if (d1 > d2) {
+			minPos++;
+		}
+	}
+
+	// insert new point to path
+	trans.dagrePath.splice(minPos, 0, pos);
 };
 
 /**
@@ -73,6 +110,9 @@ Editor.prototype._bind = function() {
 					for (var t in act.transitions) {
 						var trans = act.transitions[t];
 						if (trans.contains(pos)) {
+							if (trans.isActive()) { // transition already active, create new control point
+								this._createNewCP(trans, pos);
+							}
 							return trans.activate();
 						}
 					}
@@ -142,7 +182,7 @@ Editor.prototype._createSummaryView = function() {
 	this.$container.append($title);
 
 	for (var key in this.editor.properties) {
-		if (['_', 'actions', 'states'].indexOf(key) === -1) {
+		if (['_', 'actions', 'states', 'virtualStates'].indexOf(key) === -1) {
 			var value = this.editor.properties[key];
 			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
 			this._addTextInputRow(key, label, value);
