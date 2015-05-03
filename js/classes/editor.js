@@ -270,9 +270,17 @@ Editor.prototype._createEdgeView = function() {
 	this.$container.append($title);
 
 	// rows
-	var $row = this._addTextInputRow('source', 'Source', this.item.source.split('-')[0], this.item);
+	var src = this.item.source.split('-')[0];
+	if (src.indexOf('__') === 0) {
+		src = src.substring(2, src.length - 2);
+	}
+	var tgt = this.item.target.split('-')[0];
+	if (tgt.indexOf('__') === 0) {
+		tgt = tgt.substring(2, tgt.length - 2);
+	}
+	var $row = this._addTextInputRow('source', 'Source', src, this.item);
 	$row.find('input').prop('disabled', true);
-	$row = this._addTextInputRow('target', 'Target', this.item.target, this.item);
+	$row = this._addTextInputRow('target', 'Target', tgt, this.item);
 	$row.find('input').prop('disabled', true);
 	this._addTextInputRow('label', 'Label', this.item.label, this.item, true);
 	this._addColorInputRow('color', 'Color', this.item.color, this.item);

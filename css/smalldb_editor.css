@@ -157,7 +157,7 @@
 }
 
 .smalldb-editor .smalldb-editor-state.smalldb-editor-active {
-	border: 2px solid #3c3;
+	border: 2px solid #3a3;
 	font-weight: bold;
 	padding-left: 4.5px !important;
 	padding-right: 4.5px !important;
@@ -197,6 +197,10 @@
 	margin-top: 3px;
 	line-height: 15px;
 	padding-top: 2px;
+}
+
+.smalldb-editor .smalldb-editor-state-remove i {
+	padding-left: 5px;
 }
 
 .smalldb-editor .smalldb-editor-control-point {
