@@ -7,6 +7,7 @@
  * @class
  */
 var Action = function(id, data, editor) {
+	data = data || {};
 	this.id = id;
 	this.data = data;
 	this.label = 'label' in data ? data.label : id;

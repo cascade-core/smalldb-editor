@@ -50,6 +50,13 @@ Editor.prototype.refresh = function() {
  */
 Editor.prototype._createNewCP = function(trans, pos) {
 	var dist = [];
+	if (!trans.dagrePath) {
+		var states = this.editor.states;
+		var s = trans.source.split('-')[0];
+		var from = states[s].getBorderPoint(states[trans.target].center());
+		var to = states[trans.target].getBorderPoint(states[s].center());
+		trans.dagrePath = [from, to];
+	}
 	var path = trans.dagrePath;
 	var min = Number.POSITIVE_INFINITY;
 	var minPos = -1;

@@ -311,6 +311,7 @@ SmalldbEditor.prototype.init = function() {
 	this.editor.render();
 	this.render();
 	this.canvas.$container.scroll(); // force scroll event to save center of viewport
+	this.setValue(this.serialize()); // update textarea with state positions
 };
 
 /**
@@ -332,7 +333,7 @@ SmalldbEditor.prototype.processData = function() {
 	// known machine properties
 	this.properties = {};
 	for (var opt in this.data) {
-		if ($.inArray(opt, ['states', 'actions']) === -1) {
+		if ($.inArray(opt, ['states', 'actions', 'virtualStates']) === -1) {
 			this.properties[opt] = this.data[opt];
 		}
 	}
@@ -360,6 +361,9 @@ SmalldbEditor.prototype.processData = function() {
 	var endFound = false;
 	if (this.data.actions) {
 		for (var id in this.data.actions) {
+			if (id === '') {
+				id = '__noaction__';
+			}
 			var a = new Action(id, this.data.actions[id], this);
 			endFound |= a.usesEndNode();
 			this.actions[id] = a;
@@ -407,7 +411,10 @@ SmalldbEditor.prototype.render = function() {
 			- this.canvas.options.scrollLeft;
 	this.canvas.$container.scrollTop(top);
 	this.canvas.$container.scrollLeft(left);
-	this.canvas.redraw();
+
+	if (this.options.viewOnly && 'C2S' in window) {
+		this.canvas.redraw();
+	}
 };
 
 /**
@@ -445,6 +452,9 @@ SmalldbEditor.prototype.refresh = function() {
 	for (var id in this.states) {
 		this.states[id].$container.remove();
 	}
+
+	// remove control point buttons
+	$('a.' + SmalldbEditor._namespace + '-control-point').remove();
 
 	// update data
 	this.processData();
@@ -508,13 +518,12 @@ SmalldbEditor.prototype.onChange = function(dontRefreshEditor) {
 /**
  * Serializes all states and parent state information to JSON string
  *
- * @param {Boolean} [history] - when true, appends also internal information (start, end, noaction), defaults to false
  * @returns {string}
  */
-SmalldbEditor.prototype.serialize = function(history) {
+SmalldbEditor.prototype.serialize = function() {
 	var states = {};
 	for (var i in this.states) {
-		if (history || i.indexOf('__') !== 0) {
+		if (i.indexOf('__') !== 0) {
 			var s = this.states[i];
 			states[s.id] = s.serialize();
 		}
@@ -522,13 +531,10 @@ SmalldbEditor.prototype.serialize = function(history) {
 
 	var actions = {};
 	for (var i in this.actions) {
-		if (history || i.indexOf('__') !== 0) {
-			var a = this.actions[i];
-			actions[a.id] = a.serialize();
-		}
+		var a = this.actions[i];
+		actions[i === '__noaction__' ? '' : a.id] = a.serialize();
 	}
 
-	// @todo __noaction__ ulozit do actions pod klicem ""
 	var ret = {
 		'_': this.properties._, // security
 		'states': states,
