@@ -98,6 +98,7 @@
 }
 
 .smalldb-editor .smalldb-editor-state {
+	cursor: crosshair;
 	font-size: 10px;
 	border: 1px solid #333;
 	line-height: 20px;
@@ -114,7 +115,7 @@
 
 .smalldb-editor .smalldb-editor-state::after {
 	display: block;
-	content: attr(title);
+	content: attr(data-title);
 	font-weight: bold;
 	height: 1px;
 	color: transparent;
@@ -142,6 +143,7 @@
 
 .smalldb-editor .smalldb-editor-state.smalldb-editor-active,
 .smalldb-editor .smalldb-editor-state.smalldb-editor-active:hover {
+	cursor: move;
 	background: #efe;
 	border-width: 2px;
 	padding: 5px;
@@ -216,11 +218,6 @@
 	opacity: 0.5;
 	line-height: 10px;
 	padding-left: 0.5px;
-	display: none;
-}
-
-.smalldb-editor.show-control-points .smalldb-editor-control-point {
-	display: block;
 }
 
 .smalldb-editor .smalldb-editor-control-point:hover {
@@ -279,14 +276,30 @@
 	color: darkred;
 }
 
+.smalldb-editor .smalldb-editor-create-action,
+.smalldb-editor .smalldb-editor-rename-action,
 .smalldb-editor .smalldb-editor-toolbar a {
 	display: inline-block;
 	width: 20px;
 	height: 20px;
 	margin: 2px;
 	border: 1px solid #aaa;
+	background: #fff;
 }
 
+.smalldb-editor .smalldb-editor-create-action,
+.smalldb-editor .smalldb-editor-rename-action {
+	position: absolute;
+	top: 0px;
+	right: 5px;
+}
+
+.smalldb-editor .smalldb-editor-rename-action {
+	right: 30px;
+}
+
+.smalldb-editor .smalldb-editor-create-action:hover,
+.smalldb-editor .smalldb-editor-rename-action:hover,
 .smalldb-editor.smalldb-editor-toolbar a.hover,
 .smalldb-editor.smalldb-editor-toolbar a:hover {
 	border: 1px solid #666;
@@ -413,6 +426,8 @@
 	border-color: #8B9;
 }
 
+.smalldb-editor .smalldb-editor-create-action,
+.smalldb-editor .smalldb-editor-rename-action,
 .smalldb-editor .smalldb-editor-state-remove,
 .smalldb-editor .smalldb-editor-toolbar > * {
 	overflow: hidden;

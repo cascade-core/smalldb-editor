@@ -188,35 +188,33 @@ State.prototype.isConnected = function(target) {
 
 /**
  * Drag start handler - used on mousedown event
- * when CTRL is pressed, creates new connections
+ * when state is not active, creates new connections
  *
  * @param {MouseEvent} e - Event
  * @private
  */
 State.prototype._onDragStart = function(e) {
-	var $target = $(e.target);
-	if ((e.metaKey || e.ctrlKey)) {
-		$target.addClass('selecting');
+	var zoom = this.canvas.getZoom();
+	this._cursor = {
+		x: e.clientX / zoom - this.position().left,
+		y: e.clientY / zoom - this.position().top
+	};
+	if (!this.isActive()) {
+		$(e.target).addClass('selecting');
 		$('body').on({
 			'mousemove.state-editor': this._onDragOverConnect.bind(this),
 			'mouseup.state-editor': this._onDragEndConnect.bind(this)
 		});
-		this.editor.dragging = true;
 	} else {
-		var zoom = this.canvas.getZoom();
-		this._cursor = {
-			x: e.clientX / zoom - this.position().left,
-			y: e.clientY / zoom - this.position().top
-		};
-		this._dragging = true;
-		this.editor.dragging = true;
-		this._moved = false;
 
 		$('body').on({
 			'mousemove.state-editor': this._onDragOver.bind(this),
 			'mouseup.state-editor': this._onDragEnd.bind(this)
 		});
 	}
+	this._moved = false;
+	this._dragging = true;
+	this.editor.dragging = true;
 };
 
 /**
@@ -228,6 +226,7 @@ State.prototype._onDragStart = function(e) {
  */
 State.prototype._onDragOverConnect = function(e) {
 	// compute current mouse position
+	this._moved = true;
 	var zoom = this.canvas.getZoom();
 	var x = e.pageX
 		  + this.canvas.$container[0].scrollLeft
@@ -265,7 +264,7 @@ State.prototype._onDragOverConnect = function(e) {
 State.prototype._onDragEndConnect = function(e) {
 	var source = this.id;
 	// create connection
-	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state')) {
+	if (this._moved && $(e.target).hasClass(SmalldbEditor._namespace + '-state')) {
 		var target = $(e.target).data(SmalldbEditor._namespace + '-id');
 		var action = this.editor.actions.__noaction__;
 		var trans = new Transition(action, {}, source, target);
@@ -362,7 +361,7 @@ State.prototype._onClick = function(e) {
 	}
 	if (!this._moved && !$(e.target).is('a')) {
 		if ((e.metaKey || e.ctrlKey)) {
-			this.toggle();
+			this.toggle(true);
 		} else {
 			this.activate();
 		}
@@ -380,10 +379,12 @@ State.prototype.isActive = function() {
 
 /**
  * Toggles active state of current state
+ *
+ * @param {Boolean} [multiple] - allow selection of multiple states, defaults to false (removes selection first)
  */
-State.prototype.toggle = function() {
+State.prototype.toggle = function(multiple) {
 	if (!this._active) {
-		this.activate();
+		this.activate(multiple);
 	} else {
 		this.deactivate();
 	}
@@ -429,17 +430,18 @@ State.prototype.create = function() {
 	}
 
 	// state id and remove button
-	this.$container.attr('title', this.label);
+	this.$container.attr('data-title', this.label);
 	this.$container.text(this.label);
 	this.$container.data(SmalldbEditor._namespace + '-id', this.id);
-	var title = this.id;
-	if (this.id === '__start__') {
-		title = _('Initial state');
+	if (this.id.indexOf('__') === 0) {
+		if (this.id === '__start__') {
+			title = _('Initial state');
+		}
+		if (this.id === '__end__') {
+			title = _('Final state');
+		}
+		this.$container.attr('title', title);
 	}
-	if (this.id === '__end__') {
-		title = _('Final state');
-	}
-	this.$container.attr('title', title);
 
 	if (!this.editor.options.viewOnly) {
 		// make it draggable

@@ -115,8 +115,6 @@ Transition.prototype.activate = function() {
 	this._active = true;
 	this.editor.editor.create('edge', this);
 	this.canvas.redraw();
-	// bind keydown event to catch delete key
-	// todo
 };
 
 /**
@@ -124,9 +122,8 @@ Transition.prototype.activate = function() {
  */
 Transition.prototype.deactivate = function() {
 	this._active = false;
+	$('.' + SmalldbEditor._namespace + '-control-point').remove();
 	this.canvas.redraw();
-	// unbind keydown event
-	// todo
 };
 
 /**

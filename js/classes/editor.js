@@ -97,6 +97,8 @@ Editor.prototype._bind = function() {
 		var code = e.keyCode ? e.keyCode : e.which;
 		if (code === 27) {
 			return this.create();
+		} else if (code === 8 && (e.metaKey || e.ctrlKey)) {
+			this._removeTransition();
 		} else {
 			return true;
 		}
@@ -213,7 +215,29 @@ Editor.prototype._createSummaryView = function() {
 Editor.prototype._createEdgeView = function() {
 	// action options
 	var $title = $('<div class="' + this._namespace + '-title">');
+	var $add = $('<a href="#add-new-action">');
+	var className = SmalldbEditor._namespace + '-create-action';
+	$add.html('<i class="fa fa-fw fa-plus-circle"></i> +');
+	$add.attr('title', 'Create new action');
+	$add.attr('href', '#fullscreen');
+	$add.addClass(className);
+	$add.on('click', function() {
+		this.$container.find('select').val('__create__').change();
+		return false;
+	}.bind(this));
+	var $edit = $('<a href="#add-new-action">');
+	var className = SmalldbEditor._namespace + '-rename-action';
+	$edit.html('<i class="fa fa-fw fa-edit"></i> E');
+	$edit.attr('title', _('Rename action "%s"', [this.item.action.id]));
+	$edit.attr('href', '#fullscreen');
+	$edit.addClass(className);
+	$edit.on('click', function() {
+		this.$container.find('select').val('__rename__').change();
+		return false;
+	}.bind(this));
 	$title.text(_('Action options'));
+	$title.append($add);
+	$title.append($edit);
 	this.$container.append($title);
 
 	this._createChangeActionSelect();
@@ -344,12 +368,11 @@ Editor.prototype._addNewProperty = function(object) {
 };
 
 /**
- * Removes active transition
+ * Removes active transition, used as onclick handler
  *
- * @param {MouseEvent} e
  * @private
  */
-Editor.prototype._removeTransition = function(e) {
+Editor.prototype._removeTransition = function() {
 	if (this.item.label) {
 		var text = _('Do you wish to remove transition "%s"?', [this.item.label]);
 	} else {
@@ -401,14 +424,24 @@ Editor.prototype._changeAction = function(e) {
 	var val = $(e.target).val();
 	if (val === '__rename__') {
 		var name = this.getNewName(_('Rename action "%s":', [act.id]), act.id, this.editor.actions);
+		var tr = act.transitions;
+		for (var t in tr) {
+			if (act.label === tr[t].label) {
+				// action name corresponds with transition label, change both
+				tr[t].label = name;
+			}
+		}
 		if (act.id.toLowerCase() === act.label.toLowerCase()) {
-			// action name corresponds with transition label, change both
 			act.label = name;
 		}
-		if (this.item.label === name) {
-			this.item.label = name;
-		}
+
+		var old = act.id;
 		act.id = name;
+		delete this.editor.actions[old];
+		this.editor.actions[act.id] = act;
+		this.refresh();
+		this.$container.find('select').val(name);
+		this.canvas.redraw();
 	} else if (val === '__create__') {
 		var name = this.getNewName(_('Create new action:'), '', this.editor.actions);
 		var a = new Action(name, { label: name }, this.editor);
@@ -418,6 +451,7 @@ Editor.prototype._changeAction = function(e) {
 		this.item.color = a.color;
 		this.item.label = a.label;
 		this.editor.actions[name] = a;
+		this.$container.find('select').val(name);
 		this.canvas.redraw();
 	} else { // change to existing action
 		this.item.setAction(this.editor.actions[val]);

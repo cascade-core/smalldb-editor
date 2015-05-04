@@ -298,26 +298,28 @@ Canvas.prototype.drawDagreConnection = function(trans, index, cycle) {
 	var mid = points[Math.floor(points.length / 2)];
 	this._writeText(trans.label, mid.x + 15, mid.y + 5, path, trans.color, trans.isActive(), !this.editor.dragging);
 
-	// render control point remove buttons
-	for (var p = 1; p < points.length - 1; p++) {
-		if (!points[p].cpid) {
-			points[p].cpid = 'cp-' + Math.random().toString(36).slice(10); // generate random id
-		} else {
-			$('#' + points[p].cpid).remove();
+	// render control point buttons
+	if (this.editor.showControlPoints || trans.isActive()) {
+		for (var p = 1; p < points.length - 1; p++) {
+			if (!points[p].cpid) {
+				points[p].cpid = 'cp-' + Math.random().toString(36).slice(10); // generate random id
+			} else {
+				$('#' + points[p].cpid).remove();
+			}
+			var $btn = $('<a href="#remove">');
+			$btn.attr('title', _('Double click to remove this control point'));
+			$btn.attr('id', points[p].cpid);
+			$btn.html('<i class="fa fa-certificate"></i> &times;</a>');
+			var className = SmalldbEditor._namespace + '-control-point';
+			$btn.addClass(className);
+			$btn.css({
+				top: points[p].y,
+				left: points[p].x
+			});
+			$btn.on('dblclick', this._removeControlPoint(trans, points, p));
+			$btn.on('mousedown', this._onDragStartCP(points, p));
+			this.$containerInner.append($btn);
 		}
-		var $btn = $('<a href="#remove">');
-		$btn.attr('title', _('Double click to remove this control point'));
-		$btn.attr('id', points[p].cpid);
-		$btn.html('<i class="fa fa-certificate"></i> &times;</a>');
-		var className = SmalldbEditor._namespace + '-control-point';
-		$btn.addClass(className);
-		$btn.css({
-			top: points[p].y,
-			left: points[p].x
-		});
-		$btn.on('dblclick', this._removeControlPoint(trans, points, p));
-		$btn.on('mousedown', this._onDragStartCP(points, p));
-		this.$containerInner.append($btn);
 	}
 
 	return path;
@@ -604,7 +606,7 @@ Canvas.prototype._writeText = function(text, x, y, path, color, highlight, postp
 
 	// save label bounding box
 	var width = this.context.measureText(text).width;
-	path.labelBox = [x - width / 2, y - 11, x + width / 2, y];
+	path.labelBox = [x - width / 2 - 3, y - 10, x + width / 2 + 3, y + 3];
 };
 
 /**

@@ -23,6 +23,8 @@ var SmalldbEditor = function(el) {
 		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
 		canvasSpeed: 2 // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
 	};
+
+	this.showControlPoints = false;
 };
 
 /** @property {string} _namespace plugin namespace */

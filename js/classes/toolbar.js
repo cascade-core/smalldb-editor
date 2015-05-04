@@ -223,7 +223,9 @@ Toolbar.prototype._toggleControlPoints = function() {
 	var $i = this.$controlPoints.find('i');
 	$i.toggleClass('fa-eye-slash');
 	$i.toggleClass('fa-eye');
-	this.editor.$container.toggleClass('show-control-points');
+	this.editor.showControlPoints = $i.hasClass('fa-eye');
+	$('.' + SmalldbEditor._namespace + '-control-point').remove();
+	this.canvas.redraw();
 	return false;
 };
 
