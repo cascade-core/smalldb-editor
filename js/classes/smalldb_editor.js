@@ -569,6 +569,38 @@ SmalldbEditor.prototype.getValue = function() {
 	return this.$el[0].innerHTML;
 };
 
+SmalldbEditor.prototype._createHelp = function() {
+	var html = '<h2>Smalldb Editor Help</h2>';
+	html += '<ul>';
+	html += '<li>Hold <kbd>ctrl</kbd> and drag canvas with mouse to move around</li>';
+	html += '<li>To create new state just double click on canvas</li>';
+	html += '<li>To change state label, you can just double click on state</li>';
+	html += '<li>When you select edge, you can add more control points just by clicking on it again</li>';
+	html += '<li>You can move control points just by dragging them</li>';
+	html += '<li>To move state, select it first</li>';
+	html += '</ul>';
+	this.$help = $('<div>').addClass(SmalldbEditor._namespace + '-help-modal');
+	this.$help.html(html);
+	var $close = $('<a href="#close">&times;</a>');
+	$close.addClass(SmalldbEditor._namespace + '-close');
+	$close.on('click', function() {
+		this.$help.remove();
+		delete this.$help;
+		return false;
+	}.bind(this));
+	this.$help.append($close);
+	this.$container.append(this.$help);
+};
+
+SmalldbEditor.prototype.toggleHelp = function() {
+	if (this.$help) {
+		this.$help.remove();
+		delete this.$help;
+	} else {
+		this._createHelp();
+	}
+};
+
 /**
  * Removes editor instance
  *

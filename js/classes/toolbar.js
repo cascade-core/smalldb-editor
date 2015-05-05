@@ -19,10 +19,35 @@ var Toolbar = function(editor) {
 };
 
 /**
+ * Creates button element
+ *
+ * @param {String} name
+ * @param {String} icon
+ * @param {String} title
+ * @param {Boolean} [enable=false]
+ * @param {String} [letter]
+ * @returns {jQuery}
+ * @private
+ */
+Toolbar.prototype._createButton = function (name, icon, title, enabled, letter) {
+	var $btn = $('<a>');
+	var className = SmalldbEditor._namespace + '-' + name;
+	letter = letter || name.charAt(0).toUpperCase();
+	$btn.html('<i class="fa fa-fw fa-' + icon + '"></i> ' + letter);
+	$btn.attr('title', title);
+	$btn.attr('href', '#' + name);
+	$btn.addClass(className);
+	if (!enabled) {
+		$btn.addClass('disabled')
+	}
+	return $btn;
+};
+
+/**
  * Renders toolbar
  *
  * @param {jQuery} $container
- * @returns {jQuery}
+ * @returns {void}
  */
 Toolbar.prototype.render = function($container) {
 	if (this._rendered) {
@@ -35,18 +60,7 @@ Toolbar.prototype.render = function($container) {
 	this.$toolbar = $('<div>');
 	this.$toolbar.addClass(SmalldbEditor._namespace + '-toolbar');
 
-	// fullscreen button
 	var $divider = $('<div>').addClass(SmalldbEditor._namespace + '-toolbar-divider');
-	this.$fullscreen = $('<a>');
-	var className = SmalldbEditor._namespace + '-fullscreen-toggle';
-	this.$fullscreen.html('<i class="fa fa-fw fa-arrows-alt"></i> F');
-	this.$fullscreen.attr('title', 'Toggle fullscreen [Ctrl + Shift + F]');
-	this.$fullscreen.attr('href', '#fullscreen');
-	this.$fullscreen.addClass(className);
-	$(document).on('click', 'a.' + className, this._toggleFullScreen.bind(this));
-	this.$toolbar.append(this.$fullscreen);
-
-	this.$toolbar.append($divider.clone());
 
 	// undo button
 	this.$undo = $('<a>').addClass('disabled');
@@ -180,10 +194,23 @@ Toolbar.prototype.render = function($container) {
 	$(document).off('click.disable-selection', this.canvas.$container)
 		.on('click.disable-selection', this.canvas.$container, this.disableSelection.bind(this));
 
-	this.$container.append(this.$toolbar);
-	this.updateDisabledClasses();
+	// right toolbar
+	this.$right = $('<div>');
+	this.$right.addClass(SmalldbEditor._namespace + '-toolbar-right');
 
-	return this.$toolbar;
+	// help button
+	this.$help = this._createButton('help', 'lightbulb-o', 'Help [Ctrl + H]', true);
+	$(document).on('click', 'a.' + SmalldbEditor._namespace + '-help', this._toggleHelp.bind(this));
+	this.$right.append(this.$help);
+
+	// fullscreen button
+	this.$fullscreen = this._createButton('fullscreen-toggle', 'arrows-alt', 'Toggle fullscreen [Ctrl + Shift + F]', true);
+	$(document).on('click', 'a.' + SmalldbEditor._namespace + '-fullscreen-toggle', this._toggleFullScreen.bind(this));
+	this.$right.append(this.$fullscreen);
+
+	this.$container.append(this.$toolbar);
+	this.$container.append(this.$right);
+	this.updateDisabledClasses();
 };
 
 /**
@@ -286,6 +313,10 @@ Toolbar.prototype._keydown = function(e) {
 		for (var id in this.editor.states) {
 			this.editor.states[id].activate(true);
 		}
+		return false;
+	} else if ((e.metaKey || e.ctrlKey) && code === 72) { // ctrl + h => help
+		this.$help.addClass('hover');
+		this._toggleHelp();
 		return false;
 	} else if ((e.metaKey || e.ctrlKey) && code === 67) { // ctrl + c => copy
 		this.$copy.addClass('hover');
@@ -662,6 +693,7 @@ Toolbar.prototype._zoomOut = function() {
 	}
 	return false;
 };
+
 /**
  * Resets zoom
  *
@@ -669,5 +701,15 @@ Toolbar.prototype._zoomOut = function() {
  */
 Toolbar.prototype._zoomReset = function() {
 	this._zoomTo(1);
+	return false;
+};
+
+/**
+ * Toggles help modal
+ *
+ * @private
+ */
+Toolbar.prototype._toggleHelp = function() {
+	this.editor.toggleHelp();
 	return false;
 };

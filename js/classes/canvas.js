@@ -108,7 +108,8 @@ Canvas.prototype.create = function() {
  * @private
  */
 Canvas.prototype._onMouseDown = function(e) {
-	if ((e.metaKey || e.ctrlKey) && $(e.target).is('canvas')) { // selecting states
+	if (!(e.metaKey || e.ctrlKey) && $(e.target).is('canvas')) { // selecting states
+		this.editor.toolbar.disableSelection();
 		this._cursor = {
 			x: e.pageX - this.$container.offset().left + this.$container.scrollLeft(),
 			y: e.pageY - this.$container.offset().top + this.$container.scrollTop()
@@ -118,7 +119,6 @@ Canvas.prototype._onMouseDown = function(e) {
 			left: this._cursor.x,
 			top: this._cursor.y
 		});
-		this.$container.append(this._$selection);
 		return;
 	}
 
@@ -145,6 +145,10 @@ Canvas.prototype._onMouseMove = function(e) {
 	var $c = this.$container;
 
 	if (this._$selection) {
+		if (!this._$selection.is(':visible')) {
+			this.$container.append(this._$selection);
+		}
+
 		var currX = e.pageX - $c.offset().left + $c.scrollLeft();
 		var currY = e.pageY - $c.offset().top + $c.scrollTop();
 		var width = currX - this._cursor.x;
