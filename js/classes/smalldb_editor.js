@@ -578,6 +578,7 @@ SmalldbEditor.prototype._createHelp = function() {
 	html += '<li>When you select edge, you can add more control points just by clicking on it again</li>';
 	html += '<li>You can move control points just by dragging them</li>';
 	html += '<li>To move state, select it first</li>';
+	html += '<li>When selecting multiple states, selection from left to right will select only fully overlapping states. Selection from right to left will also select partially overlapping states. </li>';
 	html += '</ul>';
 	this.$help = $('<div>').addClass(SmalldbEditor._namespace + '-help-modal');
 	this.$help.html(html);

@@ -302,12 +302,12 @@
 .smalldb-editor .smalldb-editor-create-action,
 .smalldb-editor .smalldb-editor-rename-action {
 	position: absolute;
-	top: 0px;
-	right: 5px;
+	top: -1px;
+	right: 2px;
 }
 
 .smalldb-editor .smalldb-editor-rename-action {
-	right: 30px;
+	right: 26px;
 }
 
 .smalldb-editor .smalldb-editor-create-action:hover,
