@@ -241,10 +241,17 @@ State.prototype._onDragOverConnect = function(e) {
 
 	// highlight target
 	$('.' + SmalldbEditor._namespace).find('.hover-valid, .hover-invalid').removeClass('hover-valid hover-invalid');
+	if (this.id === '__end__') {
+		this.$container.addClass('hover-invalid');
+	}
 	if ($(e.target).hasClass(SmalldbEditor._namespace + '-state')) {
 		$(e.target).addClass('hover-valid');
 		var id = $(e.target).data(SmalldbEditor._namespace + '-id');
 		var state = this.editor.states[id];
+		if (state.id === '__start__') {
+			$(e.target).removeClass('hover-valid');
+			$(e.target).addClass('hover-invalid');
+		}
 		target = state.getBorderPoint(this.center());
 		target.id = id;
 		var trans = new Transition(this.editor.actions.__noaction__, { label: '', color: '#c60', dashed: true }, this.id, target.id, this.id === id);
@@ -263,9 +270,15 @@ State.prototype._onDragOverConnect = function(e) {
  */
 State.prototype._onDragEndConnect = function(e) {
 	var source = this.id;
+	if (source === '__end__') {
+		source = '__start__';
+	}
 	// create connection
 	if (this._moved && $(e.target).hasClass(SmalldbEditor._namespace + '-state')) {
 		var target = $(e.target).data(SmalldbEditor._namespace + '-id');
+		if (target === '__start__') {
+			target = '__end__';
+		}
 		var action = this.editor.actions.__noaction__;
 		var trans = new Transition(action, {}, source, target);
 		trans.label = '';
