@@ -18,7 +18,7 @@ var SmalldbEditor = function(el) {
 		historyLimit: 1000, // count of remembered changes,
 		splineTension: 0.3, // used to render connections, more means higher elasticity of connections
 		edgeClickOffset: 5, // px to both sides from line
-		canvasOffset: 75, // px start rendering states from top left corner of diagram - canvasOffset
+		canvasOffset: 25, // px start rendering states from top left corner of diagram - canvasOffset
 		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
 		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
 		canvasSpeed: 2 // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
@@ -176,9 +176,13 @@ SmalldbEditor.prototype.dagre = function(force) {
 			continue;
 		}
 		var s = this.states[id];
+		// make state square
+		var w = s.width || 30;
+		var h = s.height || 30;
+		var max = Math.max(w, h);
 		g.setNode(id, {
-			width: s.width || 30,
-			height: s.height || 30
+			width: max,
+			height: max
 		});
 	}
 
@@ -211,8 +215,8 @@ SmalldbEditor.prototype.dagre = function(force) {
 		var state = states[v];
 		if (force || (!state.x && !state.y)) {
 			var meta = g.node(v);
-			state.x = meta.x - meta.width / 2;
-			state.y = meta.y - meta.height / 2;
+			state.x = meta.x;
+			state.y = meta.y;
 			state.redraw(true);
 		}
 		if (state.id === '__start__') {
@@ -308,10 +312,11 @@ SmalldbEditor.prototype.init = function() {
 	this.toolbar.render(this.$container);
 	this.processData(); // load and process data from textarea
 	this.placeStates(); // find position for each state
-	this.box = this.getBoundingBox();
+	this.box = this.getBoundingBox(false, true);
 	this.canvas.render(this.box);
 	this.editor.render();
 	this.render();
+	this.canvas.$container[0].scrollLeft = (this.box);
 	this.canvas.$container.scroll(); // force scroll event to save center of viewport
 	this.setValue(this.serialize()); // update textarea with state positions
 };
@@ -422,10 +427,11 @@ SmalldbEditor.prototype.render = function() {
 /**
  * Finds diagram bounding box
  *
- * @param {Boolean} [active] - Process all or only active states
+ * @param {Boolean} [active=false] - Process all or only active states
+ * @param {Boolean} [square=false] - return squared bounding box (expand smaller side)
  * @returns {{minX: number, maxX: number, minY: number, maxY: number}}
  */
-SmalldbEditor.prototype.getBoundingBox = function(active) {
+SmalldbEditor.prototype.getBoundingBox = function(active, square) {
 	var minX = Infinity, maxX = -Infinity;
 	var minY = Infinity, maxY = -Infinity;
 
@@ -434,16 +440,34 @@ SmalldbEditor.prototype.getBoundingBox = function(active) {
 		if (active && !s.isActive()) {
 			continue;
 		}
-		minX = Math.min(minX, s.x);
-		maxX = Math.max(maxX, s.x + (s.$container ? s.$container.outerWidth() : 50));
-		minY = Math.min(minY, s.y);
-		maxY = Math.max(maxY, s.y + (s.$container ? s.$container.outerHeight() : 50));
+		var w = s.$container ? s.$container.outerWidth() : 50;
+		var h = s.$container ? s.$container.outerHeight() : 50;
+		minX = Math.min(minX, s.x - w / 2);
+		maxX = Math.max(maxX, s.x + w / 2);
+		minY = Math.min(minY, s.y - h / 2);
+		maxY = Math.max(maxY, s.y + h / 2);
 	}
 
-	return {
+	var box = {
 		minX: minX, maxX: maxX,
 		minY: minY, maxY: maxY
 	};
+
+	if (square) {
+		// make bounding box square
+		var max = Math.max(box.maxX - box.minX, box.maxY - box.minY);
+		if (box.maxX - box.minX < max) {
+			var step = (max - box.maxX + box.minX) / 2;
+			box.minX -= step;
+			box.maxX += step;
+		} else {
+			var step = (max - box.maxY + box.minY) / 2;
+			box.minY -= step;
+			box.maxY += step;
+		}
+	}
+
+	return box;
 };
 
 /**
@@ -593,6 +617,9 @@ SmalldbEditor.prototype._createHelp = function() {
 	this.$container.append(this.$help);
 };
 
+/**
+ * Toggles help modal window
+ */
 SmalldbEditor.prototype.toggleHelp = function() {
 	if (this.$help) {
 		this.$help.remove();
@@ -600,6 +627,58 @@ SmalldbEditor.prototype.toggleHelp = function() {
 	} else {
 		this._createHelp();
 	}
+};
+
+/**
+ * Rotates whole entity in counter-clockwise direction
+ */
+SmalldbEditor.prototype.rotate = function() {
+	var box = this.getBoundingBox(false, true);
+	var center = new Point(box.minX + (box.maxX - box.minX) / 2, box.minY + (box.maxY - box.minY) / 2);
+
+	// rotate states
+	for (var id in this.states) {
+		var s = this.states[id];
+		// get direction vector from center to state
+		var direction = new Point(s.x, s.y).minus(center);
+		// rotate it by 90deg (x,y) -> (y,-x)
+		var dx = direction.x;
+		direction.x = direction.y;
+		direction.y = -dx;
+		// add it to center to get new coordinates
+		var pos = center.plus(direction);
+		s.x = pos.x;
+		s.y = pos.y;
+		s.redraw(true);
+	}
+
+	// rotate transition control points
+	for (var id in this.actions) {
+		var a = this.actions[id];
+		for (var t in a.transitions) {
+			var trans = a.transitions[t];
+			if (trans.dagrePath) {
+				for (var p in trans.dagrePath) {
+					var cp = trans.dagrePath[p];
+					cp.x -= this.options.canvasExtraWidth;
+					cp.y -= this.options.canvasExtraHeight;
+					// get direction vector from center to CP
+					var direction = cp.minus(center);
+					// rotate it by 90deg (x,y) -> (y,-x)
+					var dx = direction.x;
+					direction.x = direction.y;
+					direction.y = -dx;
+					// add it to center to get new coordinates
+					var pos = center.plus(direction);
+					cp.x = pos.x + this.options.canvasExtraWidth;
+					cp.y = pos.y + this.options.canvasExtraHeight;
+				}
+			}
+		}
+	}
+	setTimeout(function() {
+		this.canvas.redraw();
+	}.bind(this));
 };
 
 /**

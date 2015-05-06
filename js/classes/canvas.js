@@ -94,9 +94,10 @@ Canvas.prototype.create = function() {
 
 	// save initial center position of viewport
 	var $c = this.$container;
+	var zoom = this.getZoom();
 	this._center = {
-		x: ($c.scrollLeft() + $c.width() / 2),
-		y: ($c.scrollTop() + $c.height() / 2)
+		x: ($c.scrollLeft() + ($c.width() - 250) / 2) / zoom,
+		y: ($c.scrollTop() + $c.height() / 2) / zoom
 	};
 };
 
@@ -226,8 +227,9 @@ Canvas.prototype._onScroll = function(e) {
 	// save center of viewport
 	var zoom = this.getZoom();
 	var $c = this.$container;
+	var $panel = $c.next();
 	this._center = {
-		x: ($c.scrollLeft() + $c.width() / 2) / zoom,
+		x: ($c.scrollLeft() + ($c.width() - $panel.outerWidth()) / 2) / zoom,
 		y: ($c.scrollTop() + $c.height() / 2) / zoom
 	};
 };
@@ -319,6 +321,9 @@ Canvas.prototype.drawDagreConnection = function(trans, index, cycle) {
 			$btn.css({
 				top: points[p].y,
 				left: points[p].x
+			});
+			$btn.on('click', function() {
+				return false;
 			});
 			$btn.on('dblclick', this._removeControlPoint(trans, points, p));
 			$btn.on('mousedown', this._onDragStartCP(points, p));
@@ -536,8 +541,6 @@ Canvas.prototype._drawPath = function(points, color, highlight, dashed) {
 	// draw arrow in the end point
 	var to = points[points.length - 1];
 	var angle = Point.angle(points[points.length - 2], to);
-	this.context.fillStyle = '#000';
-	this.context.strokeStyle = '#000';
 	this._drawArrow(to.x, to.y, angle);
 
 	return path;
@@ -565,8 +568,8 @@ Canvas.prototype._drawArrow = function(x, y, angle) {
 	this.context.lineTo(0, 0);
 
 	this.context.closePath();
-	this.context.fill();
 	this.context.stroke();
+	this.context.fill();
 	this.context.restore();
 };
 

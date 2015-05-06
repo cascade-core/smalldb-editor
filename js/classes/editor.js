@@ -595,6 +595,7 @@ Editor.prototype._addTextInputRow = function(key, label, value, object, live, cb
 	if (cb) {
 		$input.on(live ? 'keyup' : 'change', cb.bind(this));
 	}
+	$input.on('keydown', this._keydown.bind(this));
 	$input.on(live ? 'keyup' : 'change', this._createSaveCallback(object, key, json, live));
 	$row.append($input);
 
@@ -645,6 +646,16 @@ Editor.prototype._createSaveCallback = function(object, key, json, live) {
 		if ('data' in object) {
 			object.data[key] = value;
 		}
+
+		// highlight input for a while
+		$(e.target).css('background', '#efe');
+		if (this._highlightTimeout) {
+			clearTimeout(this._highlightTimeout);
+		}
+		this._highlightTimeout = setTimeout(function() {
+			$(e.target).css('background', '#fff');
+		}, 150);
+
 		if (!live) {
 			return false;
 		}
@@ -681,17 +692,15 @@ Editor.prototype._isValidJson = function(str) {
  */
 Editor.prototype._keydown = function(e) {
 	var code = e.keyCode ? e.keyCode : e.which;
-	if (!e.shiftKey && code === 9) { // tab without shift => allow adding tabs to textarea
-		return this._fixTabs(e);
-	} else if ((e.metaKey || e.ctrlKey) && code === 13) { // ctrl + enter => save form
-		return this._save();
-	} else if (e.shiftKey && code === 9) { // shift + tab => focus type select
-		var $type = this.$type;
-		// wait for other events to propagate (changeType event focuses textarea, we need to focus after that)
-		setTimeout(function() {
-			$type.focus();
-		}, 0);
-		return false;
+	if (code === 13) { // set focus to next input on enter
+		var $next = $(e.target).parent().next().find('input:text:not(:disabled)');
+		if (!$next[0]) { // skip disabled row
+			$next = $(e.target).parent().next().next().find('input:text:not(:disabled)');
+		}
+		if (!$next[0]) { // end, go to add property button
+			$next = $(e.target).parent().next().find('a.' + this._namespace + '-add-prop');
+		}
+		$next.focus();
 	}
 };
 

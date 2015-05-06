@@ -54,8 +54,8 @@ State.prototype.render = function(temp) {
 
 	// update position
 	this.$container.css({
-		top: this.y + this.canvas.options.canvasExtraWidth,
-		left: this.x + this.canvas.options.canvasExtraHeight
+		top: this.y - this.height / 2 + this.canvas.options.canvasExtraWidth,
+		left: this.x - this.width / 2 + this.canvas.options.canvasExtraHeight
 	});
 
 	return this;

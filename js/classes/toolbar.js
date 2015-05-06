@@ -64,7 +64,7 @@ Toolbar.prototype.render = function($container) {
 
 	// undo button
 	this.$undo = $('<a>').addClass('disabled');
-	className = SmalldbEditor._namespace + '-undo';
+	var className = SmalldbEditor._namespace + '-undo';
 	this.$undo.html('<i class="fa fa-fw fa-undo"></i> &larr;');
 	this.$undo.attr('title', 'Redo [Ctrl + Z]');
 	this.$undo.attr('href', '#undo');
@@ -187,6 +187,11 @@ Toolbar.prototype.render = function($container) {
 	this.$colors.addClass(className);
 	$(document).on('click', 'a.' + className, this._automaticEdgeColors.bind(this));
 	this.$toolbar.append(this.$colors);
+
+	// rotate button
+	this.$rotate = this._createButton('rotate', 'refresh fa-flip-horizontal', 'Rotate automaton [Shift + R]', true);
+	$(document).on('click', 'a.' + SmalldbEditor._namespace + '-rotate', this._rotate.bind(this));
+	this.$toolbar.append(this.$rotate);
 
 	$(document).off('keydown.toolbar').on('keydown.toolbar', this._keydown.bind(this));
 
@@ -318,6 +323,9 @@ Toolbar.prototype._keydown = function(e) {
 		this.$help.addClass('hover');
 		this._toggleHelp();
 		return false;
+	} else if (e.shiftKey && code === 82) { // shift + r => rotate
+		this.$rotate.addClass('hover');
+		this._rotate();
 	} else if ((e.metaKey || e.ctrlKey) && code === 67) { // ctrl + c => copy
 		this.$copy.addClass('hover');
 		this._copy();
@@ -549,6 +557,7 @@ Toolbar.prototype._paste = function() {
 			var b = states[id];
 			var exists = id in this.editor.states;
 			if (exists) {
+				alert(_('State with given name already exists, please select another one!'));
 				id = this.editor.states[id].getNewLabel();
 				if (!id) {
 					continue;
@@ -565,7 +574,7 @@ Toolbar.prototype._paste = function() {
 			state.x += center.x;
 			state.y += center.y;
 			state.render();
-			state.activate();
+			state.activate(true);
 		}
 		this.editor.storage.set('clipboard', states, true);
 		this.canvas.redraw();
@@ -659,7 +668,7 @@ Toolbar.prototype._zoomTo = function(scale) {
 
 	// compensate scroll to preserve center point
 	var $c = this.canvas.$container;
-	this.canvas.$container.scrollLeft(centerX - $c.width() / 2);
+	this.canvas.$container.scrollLeft(centerX - ($c.width() - $c.next().outerWidth()) / 2);
 	this.canvas.$container.scrollTop(centerY - $c.height() / 2);
 
 	// force browser to re-render inner container
@@ -711,5 +720,15 @@ Toolbar.prototype._zoomReset = function() {
  */
 Toolbar.prototype._toggleHelp = function() {
 	this.editor.toggleHelp();
+	return false;
+};
+
+/**
+ * Rotates whole entity in counter-clockwise direction
+ *
+ * @private
+ */
+Toolbar.prototype._rotate = function() {
+	this.editor.rotate();
 	return false;
 };
