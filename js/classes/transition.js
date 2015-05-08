@@ -52,18 +52,35 @@ Transition.prototype.contains = function(point) {
 	var lines = []; // lines to check
 	if (points.length === 2) { // straight line
 		lines.push(new Line(points[0], points[1]));
-	} else if ('cps' in this.path) { // cubic bezier line - divide curve into straight line segments
+	} else if (points.length > 2) { // quadratic bezier curve on both sides of path - divide curve into straight line segments
 		var cps = this.path.cps;
-		lines = lines.concat(this._segmentize(points, cps));
-		if (cps.length > 2) { // cycle has 2 extra points, add lines from the other side of path
-			lines = lines.concat(this._segmentize(points.reverse(), cps.reverse()));
-			points.reverse();
-			cps.reverse();
-			if (points.length === 6) { // add line segment in the middle
-				lines.push(new Line(points[2], points[3]));
-			} else if (points.length > 6) { // find segments in the middle
-				for (var i = 2, j = 2; i < points.length - 2; i += 2, j++) {
-					lines = lines.concat(this._segmentize(points.slice(i), cps.slice(j)));
+		var bez = [points[0], cps[0], points[1]];
+		var split = this._segmentize(bez);
+		var prev = split(0);
+		for (var t = 1; t <= 3; t++) {
+			var cp = split(t / 3);
+			lines = lines.concat(new Line(prev, cp));
+			prev = cp;
+		}
+		var len = points.length;
+		bez = [points[len - 1], cps[cps.length - 1], points[len - 2]];
+		split = this._segmentize(bez);
+		prev = split(0);
+		for (var t = 1; t <= 3; t++) {
+			var cp = split(t / 3);
+			lines = lines.concat(new Line(prev, cp));
+			prev = cp;
+		}
+		if (points.length > 3) { // cubic bezier line - divide curve into straight line segments
+			for (var i = 2; i < len - 1; i++) {
+				var k = 2 * (i - 1);
+				bez = [points[i - 1], cps[k - 1], cps[k], points[i]];
+				split = this._segmentize(bez);
+				prev = split(0);
+				for (var t = 1; t <= 5; t++) {
+					var cp = split(t / 5);
+					lines = lines.concat(new Line(prev, cp));
+					prev = cp;
 				}
 			}
 		}
@@ -80,32 +97,28 @@ Transition.prototype.contains = function(point) {
 };
 
 /**
- * Divides bezier curve to segments, uses first 3 points + 2 control points
+ * Creates bezier curve split callback, uses de Casteljau's algorithm
  *
  * @param {Array} points
- * @param {Array} cps
- * @returns {Array}
+ * @returns {Function}
  * @private
  */
-Transition.prototype._segmentize = function(points, cps) {
-	var lines = [];
-	// segment 1
-	var l1 = new Line(points[0], cps[0]);
-	l1.to = l1.middle();
-	lines.push(l1);
-
-	// segment 2
-	var l2 = new Line(l1.to, points[1]);
-	lines.push(l2);
-
-	// segment 3 & 4
-	var l4 = new Line(cps[1], points[2]);
-	l4.from = l4.middle();
-	var l3 = new Line(l2.to, l4.from);
-	lines.push(l3);
-	lines.push(l4);
-
-	return lines;
+Transition.prototype._segmentize = function(points) {
+	var pts = [];
+	for (var i = 0; i < points.length; i++) {
+		var p = points[i];
+		pts.push([p.x, p.y]);
+	}
+	return function (t) {
+		for (var a = pts; a.length > 1; a = b) { // do..while loop in disguise
+			for (var i = 0, b = [], j; i < a.length - 1; i++) { // cycle over control points
+				for (b[i] = [], j = 0; j < a[i].length; j++) { // cycle over dimensions
+					b[i][j] = a[i][j] * (1 - t) + a[i + 1][j] * t;  // interpolation
+				}
+			}
+		}
+		return new Point(a[0][0], a[0][1]);
+	};
 };
 
 /**

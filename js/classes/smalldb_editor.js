@@ -1,5 +1,5 @@
 /**
- * state Editor 2.0
+ * Smalldb Editor 1.0
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
@@ -60,7 +60,7 @@ SmalldbEditor.prototype._createContainer = function() {
 };
 
 /**
- * Places states to some position on canvas
+ * Places states to some position on canvas;
  * if dagre is loaded, use it, otherwise use tarjan
  *
  * @param {Boolean} [force] - override current states coordinates? default to false
@@ -85,7 +85,7 @@ SmalldbEditor.prototype.placeStates = function(force) {
 };
 
 /**
- * Places states to some position on canvas
+ * Places states to some position on canvas,
  * uses tarjan's algorithm and renders states based on topological order
  *
  * @param {Boolean} [force] - override current coordinates? default to false
@@ -107,7 +107,7 @@ SmalldbEditor.prototype.tarjan = function(force) {
 			var from = indexed[s];
 			var to = indexed[action.transitions[t].target];
 			// ignore multi-edges and cycles
-			if (from.connections.indexOf(to) === -1 && !from.equals(to)) {
+			if (to && from.connections.indexOf(to) === -1 && !from.equals(to)) {
 				from.connections.push(to);
 			}
 		}
@@ -165,6 +165,11 @@ SmalldbEditor.prototype.tarjan = function(force) {
 	}
 };
 
+/**
+ * Places states to some position on canvas using dagre
+ *
+ * @param {Boolean} [force] - override current coordinates? default to false
+ */
 SmalldbEditor.prototype.dagre = function(force) {
 	// create graph
 	var g = new dagre.graphlib.Graph();
@@ -250,7 +255,7 @@ SmalldbEditor.prototype.dagre = function(force) {
 };
 
 /**
- * Sorts strongly connected component by its rank
+ * Sorts strongly connected component by its rank,
  * preserve first item (stored in the end of array)
  *
  * @param {Array} component
@@ -283,7 +288,7 @@ SmalldbEditor.prototype._sortComponent = function(component) {
 };
 
 /**
- * Initialization, loads palette data via AJAX
+ * Initialization
  *
  * @private
  */
@@ -322,7 +327,7 @@ SmalldbEditor.prototype.init = function() {
 };
 
 /**
- * Parses textarea data and initializes machine properties, actions and states
+ * Parses <textarea> data and initializes machine properties, actions and states
  */
 SmalldbEditor.prototype.processData = function() {
 	// create temp <div> to render states (we need to know state dimensions for dagre)
@@ -393,7 +398,7 @@ SmalldbEditor.prototype.processData = function() {
 };
 
 /**
- * Renders state editor
+ * Renders Smalldb editor
  */
 SmalldbEditor.prototype.render = function() {
 	// render all states first to get their offset
@@ -471,7 +476,7 @@ SmalldbEditor.prototype.getBoundingBox = function(active, square) {
 };
 
 /**
- * Refreshes editor based on textarea data
+ * Refreshes editor based on <textarea> data
  */
 SmalldbEditor.prototype.refresh = function() {
 	// remove old states
@@ -507,7 +512,7 @@ SmalldbEditor.prototype.addState = function(id, data) {
 };
 
 /**
- * On change handler, propagates changes to textarea
+ * On change handler, propagates changes to <textarea>
  *
  * @param {Boolean} [dontRefreshEditor]
  */
@@ -578,7 +583,7 @@ SmalldbEditor.prototype.serialize = function() {
 };
 
 /**
- * Sets textarea value
+ * Sets <textarea> value
  *
  * @param {String} value
  */
@@ -587,12 +592,17 @@ SmalldbEditor.prototype.setValue = function(value) {
 };
 
 /**
- * Gets textarea value
+ * Gets <textarea> value
  */
 SmalldbEditor.prototype.getValue = function() {
 	return this.$el[0].innerHTML;
 };
 
+/**
+ * Creates help modal window
+ *
+ * @private
+ */
 SmalldbEditor.prototype._createHelp = function() {
 	var html = '<h2>Smalldb Editor Help</h2>';
 	html += '<ul>';

@@ -1,8 +1,8 @@
 /**
- * Simple storage wrapper
+ * Simple namespaced browser storage wrapper
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
- * @param {Object} storage
+ * @param {object} storage
  * @param {string} namespace
  * @class
  */
@@ -23,8 +23,10 @@ Storage.prototype._key = function(key) {
 };
 
 /**
+ * Gets value for given key
+ *
  * @param {string} key
- * @param {Boolean} json - return JSON object
+ * @param {boolean} json - return JSON object
  * @returns {Object}
  * @private
  */
@@ -41,7 +43,7 @@ Storage.prototype.get = function(key, json) {
  *
  * @param {string} key
  * @param {mixed} value
- * @param {Boolean} json - save JSON string of {value}
+ * @param {boolean} json - save JSON string of {value}
  * @returns {Object}
  */
 Storage.prototype.set = function(key, value, json) {

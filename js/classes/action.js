@@ -29,12 +29,16 @@ Action.prototype._processData = function(data) {
 	if ('transitions' in data) {
 		for (var id in data.transitions) {
 			var key = id.split('-')[0] || '__start__';
-			var targets = data.transitions[id].targets || [];
-			for (var t in targets) {
-				var target = targets[t] || '__end__';
-				var trans = new Transition(this, data.transitions[id], key + '-' + t, target, key === target);
-				this.addTransition(key, trans);
-				this.states[key].addConnection(target);
+			if (key in this.states) {
+				var targets = data.transitions[id].targets || [];
+				for (var t in targets) {
+					var target = targets[t] || '__end__';
+					if (target in this.states) {
+						var trans = new Transition(this, data.transitions[id], key + '-' + t, target, key === target);
+						this.addTransition(key, trans);
+						this.states[key].addConnection(target);
+					}
+				}
 			}
 		}
 	}

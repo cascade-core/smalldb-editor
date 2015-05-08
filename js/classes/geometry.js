@@ -12,6 +12,8 @@ var Point = function(x, y) {
 };
 
 /**
+ * Is given point equal to this point?
+ *
  * @param {Point} p
  * @returns {Boolean}
  */
@@ -20,6 +22,8 @@ Point.prototype.equals = function(p) {
 };
 
 /**
+ * Adds points together, returns new Point instance
+ *
  * @param {Point} p
  * @returns {Point}
  */
@@ -28,6 +32,8 @@ Point.prototype.plus = function(p) {
 };
 
 /**
+ * Subtracts points, returns new Point instance
+ *
  * @param {Point} p
  * @returns {Point} resulting vector
  */
@@ -66,6 +72,10 @@ Point.prototype.dist = function(p) {
 	return Math.sqrt(dx + dy);
 };
 
+/**
+ * Returns string representation of this point
+ * @returns {string}
+ */
 Point.prototype.toString = function() {
 	return '[' + parseInt(this.x) + ';' + parseInt(this.y) + ']';
 };

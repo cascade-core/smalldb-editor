@@ -1,5 +1,5 @@
 /**
- * state / transition editor
+ * Editor panel, with state, transition and machine summary views
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
  *
@@ -16,7 +16,7 @@ var Editor = function(editor) {
 };
 
 /**
- * Renders variable editor
+ * Renders editor panel
  */
 Editor.prototype.render = function() {
 	// remove existing editors
@@ -29,7 +29,7 @@ Editor.prototype.render = function() {
 };
 
 /**
- * Refresh editor
+ * Refresh editor panel
  */
 Editor.prototype.refresh = function() {
 	if (this.item instanceof Transition) {
@@ -133,7 +133,7 @@ Editor.prototype._bind = function() {
 };
 
 /**
- * Creates variable editor container
+ * Creates editor panel container
  *
  * @param {String} [view] - mode of editor, defaults to 'summary', other options are 'edge' and 'state'
  * @param {State|Transition} [item] - item to edit (State or Transition instance)
@@ -164,7 +164,7 @@ Editor.prototype.create = function(view, item, multiple) {
 };
 
 /**
- * Creates summary view
+ * Creates summary view,
  * called by create()
  *
  * @private
@@ -207,7 +207,7 @@ Editor.prototype._createSummaryView = function() {
 };
 
 /**
- * Creates action & edge options view
+ * Creates action & edge options view,
  * called by create('edge')
  *
  * @private
@@ -385,7 +385,7 @@ Editor.prototype._removeTransition = function() {
 };
 
 /**
- * Creates change action select
+ * Creates change action <select>
  *
  * @private
  */
@@ -461,7 +461,7 @@ Editor.prototype._changeAction = function(e) {
 };
 
 /**
- * Creates state options view
+ * Creates state options view,
  * called by create('state')
  *
  * @private
@@ -547,7 +547,7 @@ Editor.prototype._addColorInputRow = function(key, label, value, object, cb) {
 };
 
 /**
- * Creates hadler for property removal
+ * Creates handler for property removal
  *
  * @param {String} key
  * @param {Object} object
@@ -702,49 +702,6 @@ Editor.prototype._keydown = function(e) {
 		}
 		$next.focus();
 	}
-};
-
-/**
- * Allows sending tabs to textarea
- *
- * @param {KeyboardEvent} e - Event
- * @returns {Boolean}
- * @private
- */
-Editor.prototype._fixTabs = function(e) {
-	// get caret position
-	var pos, r, re, rc;
-	if (e.target.selectionStart) {
-		pos = e.target.selectionStart;
-	} else if (document.selection) {
-		r = document.selection.createRange();
-		if (r === null) {
-			return true;
-		}
-		re = e.target.createTextRange();
-		rc = re.duplicate();
-		re.moveToBookmark(r.getBookmark());
-		rc.setEndPoint('EndToStart', re);
-		pos = rc.text.length;
-	} else {
-		pos = 0;
-	}
-
-	// update value
-	var str = $(e.target).val();
-	str = str.slice(0, pos) + '\t' + str.slice(pos);
-	pos += 1;
-	$(e.target).val(str);
-
-	// set caret position
-	if (e.target.selectionStart) {
-		e.target.selectionStart = pos;
-		e.target.selectionEnd = pos;
-	} else if (document.selection) {
-		var start = offsetToRangeCharacterMove(e.target, pos);
-		re.move("character", start);
-	}
-	return false;
 };
 
 /**

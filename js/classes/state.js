@@ -118,7 +118,7 @@ State.prototype.getBorderPoint = function(other) {
 /**
  * Removes state from canvas
  *
- * todo remove transitions connected to this state
+ * @todo remove transitions connected to this state
  * @returns {Object} state data in JSON object
  */
 State.prototype.remove = function() {
@@ -187,7 +187,7 @@ State.prototype.isConnected = function(target) {
 };
 
 /**
- * Drag start handler - used on mousedown event
+ * Drag start handler - used on mousedown event,
  * when state is not active, creates new connections
  *
  * @param {MouseEvent} e - Event
@@ -218,7 +218,7 @@ State.prototype._onDragStart = function(e) {
 };
 
 /**
- * Drag over handler - used on mousemove event
+ * Drag over handler - used on mousemove event,
  * renders connection from this state to current mouse position
  *
  * @param {MouseEvent} e - Event
@@ -262,7 +262,7 @@ State.prototype._onDragOverConnect = function(e) {
 };
 
 /**
- * Drag end handler - used on mouseup event
+ * Drag end handler - used on mouseup event,
  * creates connection from output of source state to target
  *
  * @param {MouseEvent} e - Event
@@ -297,7 +297,7 @@ State.prototype._onDragEndConnect = function(e) {
 };
 
 /**
- * Drag over handler - used on mousemove event
+ * Drag over handler - used on mousemove event,
  * moves state over canvas
  *
  * @param {MouseEvent} e - Event
@@ -330,7 +330,7 @@ State.prototype._onDragOver = function(e) {
 };
 
 /**
- * Drag end handler - used on mouseup event
+ * Drag end handler - used on mouseup event,
  * saves new state position
  *
  * @param {MouseEvent} e - Event
@@ -485,7 +485,7 @@ State.prototype.getNewLabel = function() {
 };
 
 /**
- * Changes current state label
+ * Changes current state label,
  * used as on click handler
  *
  * @returns {Boolean}
@@ -506,7 +506,7 @@ State.prototype._changeLabel = function() {
 };
 
 /**
- * Removes current state
+ * Removes current state,
  * used as on click handler
  *
  * @returns {Boolean}

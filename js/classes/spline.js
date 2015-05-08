@@ -15,18 +15,6 @@ var Spline = function(points, tension, context) {
 };
 
 /**
- * Computes vector from two points
- *
- * @param {Point} p1
- * @param {Point} p2
- * @returns {Point}
- * @private
- */
-Spline.prototype._vector = function(p1, p2) {
-	return new Point(p2.x - p1.x, p2.y - p1.y);
-};
-
-/**
  * Computes bezier curve control points based on 3 following points
  *
  * @param {Point} p1
@@ -37,7 +25,7 @@ Spline.prototype._vector = function(p1, p2) {
  */
 Spline.prototype._controlPoints = function(p1, p2, p3) {
 	var t = this.tension;
-	var v = this._vector(p1, p3);
+	var v = p3.minus(p1);
 	var d12 = p1.dist(p2);
 	var d23 = p2.dist(p3);
 	var d123 = d12 + d23;
@@ -124,5 +112,4 @@ Spline.prototype._debug = function() {
 		}
 		this.context.strokeStyle = color;
 	}
-
 };
