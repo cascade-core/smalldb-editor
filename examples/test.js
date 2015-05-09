@@ -3,8 +3,6 @@
  */
 
 var atm0 = '{"states":{},"actions":{}}';
-var atm1 = '{"states":{"a":{"state":"a"}},"actions":{}}';
-var atm10 = '{"states":{"a":{"state":"a"},"b":{"state":"b"},"c":{"state":"c"}},"actions":{}}';
 
 // generate ATM
 var generate = function(N, E) {
@@ -29,8 +27,10 @@ $(document).ready(function() {
 	var el = $('textarea')[0];
 	var editor = $('textarea').data('smalldbEditor');
 	var canvas = editor.canvas;
+	canvas.debug = true;
 	el.innerHTML = generate(60, 120);
 	editor.refresh();
+	//editor.tarjan(true);
 	var N = 0;
 	var total = 0;
 

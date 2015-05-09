@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Smalldb Editor plugin -->
+	<link rel="stylesheet" href="../external/font-awesome-4.3.0/css/font-awesome.min.css" type="text/css">
+	<link rel="stylesheet" href="../css/smalldb_reset.css" type="text/css">
+	<link rel="stylesheet" href="../css/smalldb_editor.css" type="text/css">
+	<script type="text/javascript" src="../external/jquery.js"></script>
+	<script type="text/javascript" src="../external/gettext.js"></script>
+	<script type="text/javascript" src="../external/dagre.js"></script>
+	<script type="text/javascript" src="../external/c2s.js"></script>
+	<script type="text/javascript" src="../js/classes/geometry.js"></script>
+	<script type="text/javascript" src="../js/classes/spline.js"></script>
+	<script type="text/javascript" src="../js/classes/tarjan.js"></script>
+	<script type="text/javascript" src="../js/classes/state.js"></script>
+	<script type="text/javascript" src="../js/classes/action.js"></script>
+	<script type="text/javascript" src="../js/classes/transition.js"></script>
+	<script type="text/javascript" src="../js/classes/editor.js"></script>
+	<script type="text/javascript" src="../js/classes/canvas.js"></script>
+	<script type="text/javascript" src="../js/classes/storage.js"></script>
+	<script type="text/javascript" src="../js/classes/toolbar.js"></script>
+	<script type="text/javascript" src="../js/classes/smalldb_editor.js"></script>
+	<script type="text/javascript" src="../js/smalldb_editor.js"></script>
+	<script type="text/javascript" src="../js/init.js"></script>
+
+    <style>
+        body, div, td, th, p, h1, h2, h3, h4, h5, h6, li, dd, dt, a, label { font-family: "DejaVu Sans", "Verdana", sans-serif; }
+        a { text-decoration: underline; color: #228; }
+        a:visited { color: #336; }
+        h1, h2, h3, h4, h5, h6 {
+            color: #258;
+            font-weight: normal;
+            text-shadow: 1px 1px 1px #aaa;
+        }
+
+        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a,
+        h1 a:visited, h2 a:visited, h3 a:visited, h4 a:visited, h5 a:visited, h6 a:visited {
+            color: #258;
+            text-decoration: none;
+        }
+
+		h1 {
+			font-size: 2.5em;
+			font-weight: normal;
+			text-decoration: none;
+			font-variant: small-caps;
+			margin: 0em;
+			padding: 0em;
+		}
+
+		h2 {
+			font-size: 1.6em;
+			margin: 1.4em 0em 1em 0em;
+		}
+
+		h3 {
+			font-size: 1.3em;
+			margin: 1.7em 0em 1em 0em;
+		}
+
+		h4 {
+			font-size: 1.1em;
+			margin: 1.9em 0em 1em 0em;
+		}
+
+		#menu {
+			position: absolute;
+			top: 25px;
+			right: 50px;
+		}
+
+		#menu li {
+			display: inline-block;
+			border: 1px solid #333;
+			padding: 3px 6px;
+			background: #fff;
+		}
+    </style>
+</head>
+<body>
+
+<h1>Smalldb Editor Examples</h1>
+
+<ul id="menu">
+	<li><a href="article.html">Article</a></li>
+	<li><a href="article-viewonly.html">View Only</a></li>
+	<li><a href="article-cycles.html">Cycles</a></li>
+	<li><a href="tarjan-crossing.html">Tarjan Crossing</a></li>
+	<li><a href="tarjan-big.html">Big Entity - Tarjan</a></li>
+	<li><a href="dagre-big.html">Big Entity - Dagre</a></li>
+</ul>
+
+<h2>Article machine - Static Image Mode</h2>
+
+<!-- todo view only mode viditelny cely automat, nenastavovat vysku / sirku - dopocitat automaticky dle boundig boxu -->
+
+<textarea id=".main.main.admin.main.training_dummy" data-smalldb-editor-opts='{"viewOnly": true, "scrollLeft": -90}' class="smalldb_editor" cols="25" rows="80" style="display: block; width: 400px; height: 600px">
+	{"states":{"draft":{"state":"draft","label":"Draft","color":"#eeeeee","x":51.5,"y":96.5,"url":""},"published":{"state":"published","label":"Published","color":"#99ff33","x":34.5,"y":431.5,"url":""},"rejected":{"state":"rejected","label":"Rejected","color":"#ff6633","x":216.25,"y":431.5,"url":""},"submitted":{"state":"submitted","label":"Submitted","color":"#eeeeee","x":51.5,"y":204,"url":""},"waiting":{"state":"waiting","label":"Waiting","color":"#eeeeee","x":41.5,"y":318.5,"url":""}},"virtualStates":{"__start__":{"state":"__start__","label":"","color":"#000","x":51.5,"y":12.5},"__end__":{"state":"__end__","label":"","color":"#000","x":114.25,"y":528.5}},"actions":{"accept":{"label":"accept","color":"#522900","transitions":{"submitted-moixjemi":{"label":"accept","color":"#522900","targets":["waiting"],"dagrePath":[{"x":1542.9143154758601,"y":1720.4953308967727},{"x":1519.75,"y":1765},{"x":1534.8422311123554,"y":1802.4703668996408}]},"submitted-49t9ms4i":{"label":"accept","color":"#522900","targets":["published"],"dagrePath":[{"x":1533.758009076325,"y":1718.7246455284921},{"x":1478,"y":1765},{"x":1478,"y":1818.5},{"x":1478,"y":1872},{"x":1519.9787673824055,"y":1916.5792219990146}]}}},"return":{"label":"return","color":"#008080","transitions":{"submitted-gdl07ldi":{"label":"return","color":"#008080","targets":["draft"],"dagrePath":[{"x":1557.7527874332127,"y":1687.2657772220107},{"x":1571,"y":1651.8125,"cpid":"cp-jpyfd2t9"},{"x":1557.3219358319586,"y":1613.3648645020116}]}}},"submit":{"label":"submit","color":"#0000cc","transitions":{"draft-6plgcik9":{"label":"submit","color":"#0000cc","targets":["submitted"],"dagrePath":[{"x":1545.0233964867668,"y":1613.2103361188774},{"x":1530,"y":1650.8125,"cpid":"cp-kxogvi"},{"x":1544.7533255329054,"y":1687.309825664251}]}}},"reject":{"label":"reject","color":"#1b0a33","transitions":{"submitted-0ju1sjor":{"label":"reject","color":"#1b0a33","targets":["rejected"],"dagrePath":[{"x":1579.584386529757,"y":1714.3984678501681},{"x":1716.25,"y":1765},{"x":1716.25,"y":1818.5},{"x":1716.25,"y":1872},{"x":1716.4291668457522,"y":1915.0000429805066}]}}},"withdraw":{"label":"withdraw","color":"#003d00","transitions":{"submitted-nh035wmi":{"label":"withdraw","color":"#003d00","targets":["draft"],"dagrePath":[{"x":1569.4159222915803,"y":1689.3237287053196},{"x":1603,"y":1661.8125,"cpid":"cp-e4s4i"},{"x":1604,"y":1637.8125,"cpid":"cp-t99ysyvi"},{"x":1566.831350895684,"y":1608.9183001605734}]}}},"create":{"label":"Create","color":"#444444","transitions":{"-gavh1tt9":{"label":"create","color":"#444444","targets":["draft"],"dagrePath":[{"x":1551.5,"y":1525},{"x":1551.5,"y":1550},{"x":1551.5,"y":1580}]}},"heading":"New article","returns":"new_id","block":{"inputs":{"item":null},"outputs":{"ref":"return_value"}}},"edit":{"label":"Edit","color":"#D11975","transitions":{"submitted-h27c766r":{"label":"edit","color":"#D11975","targets":["submitted"],"dagrePath":[{"x":1573.4936015045043,"y":1690.6555676264807},{"x":1610.8333333333333,"y":1668},{"x":1616.6666666666667,"y":1668},{"x":1622.5,"y":1704},{"x":1616.6666666666667,"y":1740},{"x":1610.8333333333333,"y":1740},{"x":1573.493601504504,"y":1717.3444323735193}]},"draft-rydb1emi":{"label":"edit","color":"#D11975","targets":["draft"],"dagrePath":[{"x":1569.7680041923,"y":1588.0357748944848},{"x":1596.3333333333333,"y":1575},{"x":1602.1666666666667,"y":1575},{"x":1608,"y":1596.5},{"x":1602.1666666666667,"y":1618},{"x":1596.3333333333333,"y":1618},{"x":1569.9979104161528,"y":1605.6644487451124}]}},"heading":"Edit article","block":{"inputs":{"ref":null,"item":null},"outputs":[]}},"publish":{"label":"publish","color":"#000000","transitions":{"waiting-db8iwwmi":{"label":"publish","color":"#000000","targets":["published"],"dagrePath":[{"x":1541.5,"y":1836},{"x":1541.5,"y":1872},{"x":1536.480064113597,"y":1915.0280218834537}]}}},"hide":{"label":"hide","color":"#3D0099","transitions":{"published-3g7j5rk9":{"label":"hide","color":"#3D0099","targets":["submitted"],"dagrePath":[{"x":1551.786604170387,"y":1917.2879964507347},{"x":1605,"y":1872},{"x":1605,"y":1818.5},{"x":1605,"y":1765},{"x":1565.2466247136629,"y":1719.673721636139}]},"waiting-n0e2vs4i":{"label":"hide","color":"#3D0099","targets":["submitted"],"dagrePath":[{"x":1544.629115751783,"y":1802.1027749403718},{"x":1551.5,"y":1765},{"x":1551.5,"y":1721}]}}},"listing":{"label":"listing","color":"#754719","transitions":{},"heading":"Articles"},"show":{"label":"show","color":"#00B200","transitions":{},"heading":"{title}","heading_without_links":true},"remove":{"label":"remove","color":"#942192","transitions":{"rejected-h7u8fr":{"label":"remove","color":"#942192","targets":[""],"dagrePath":[{"x":1716.4279662900417,"y":1948.9999555501856},{"x":1716.25,"y":1991},{"x":1626.2287968749715,"y":2024.1773475890768}]},"waiting-agntrzfr":{"label":"remove","color":"#942192","targets":[""],"dagrePath":[{"x":1563.5293545784361,"y":1829.7857348051466},{"x":1649.75,"y":1872},{"x":1649.75,"y":1931.5},{"x":1649.75,"y":1991},{"x":1623.0613751095987,"y":2019.392154138725}]},"published-fzloko6r":{"label":"remove","color":"#942192","targets":[""],"dagrePath":[{"x":1534.5,"y":1949},{"x":1534.5,"y":1991},{"x":1603.1817633005141,"y":2023.194576547116}]}}},"":{"label":"","color":"#dd0000","transitions":{}}},"class":"ExampleApplication\\UniversalStateMachine","include":["article.graphml"],"name":"Article","desc":"Article","table":"article","flupdo_resource":"database","io_name":"item","url":"/article/{id}","parent_url":"/article","default_access_policy":null,"state_select":"state","properties":{"id":{"type":"number","label":"ID","is_pk":true,"link":"/article/{id}","calculated":true},"title":{"type":"text","label":"Title","required":true,"link":"/article/{id}"},"state":{"type":"text","label":"State","calculated":true},"perex":{"type":"textarea","label":"Perex","required":true,"tabular_hidden":true,"class":"perex","rows":10},"body_md":{"type":"markdownarea","label":"Text","required":true,"tabular_hidden":true,"rows":24},"created":{"type":"datetime","label":"Created","format":"%Y-%m-%d %H:%M","readonly":true,"tabular_hidden":false,"tabular_width":84,"calculated":true},"modified":{"type":"datetime","label":"Modified","format":"%Y-%m-%d %H:%M","readonly":true,"tabular_hidden":false,"tabular_width":84,"calculated":true}},"default_filters":{"order_by":"created","order_asc":false}}
+</textarea>
+
+</body>
+</html>

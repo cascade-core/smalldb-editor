@@ -24,7 +24,7 @@
 	<script type="text/javascript" src="../js/init.js"></script>
 
     <style>
-        body, div, td, th, p, h1, h2, h3, h4, h5, h6, li, dd, dt, a, label { font-family: "DejaVu Sans", "Verdana", sans-serif; font-size: 10pt; }
+		body, div, td, th, p, h1, h2, h3, h4, h5, h6, li, dd, dt, a, label { font-family: "DejaVu Sans", "Verdana", sans-serif; }
         a { text-decoration: underline; color: #228; }
         a:visited { color: #336; }
         h1, h2, h3, h4, h5, h6 {
@@ -62,11 +62,33 @@
             font-size: 1.1em;
             margin: 1.9em 0em 1em 0em;
         }
+
+		#menu {
+			position: absolute;
+			top: 25px;
+			right: 50px;
+		}
+
+		#menu li {
+			display: inline-block;
+			border: 1px solid #333;
+			padding: 3px 6px;
+			background: #fff;
+		}
     </style>
 </head>
 <body>
 
 <h1>Smalldb Editor Examples</h1>
+
+<ul id="menu">
+	<li><a href="article.html">Article</a></li>
+	<li><a href="article-viewonly.html">View Only</a></li>
+	<li><a href="article-cycles.html">Cycles</a></li>
+	<li><a href="tarjan-crossing.html">Tarjan Crossing</a></li>
+	<li><a href="tarjan-big.html">Big Entity - Tarjan</a></li>
+	<li><a href="dagre-big.html">Big Entity - Dagre</a></li>
+</ul>
 
 <h2>Article machine</h2>
 

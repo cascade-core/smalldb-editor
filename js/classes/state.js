@@ -119,15 +119,18 @@ State.prototype.getBorderPoint = function(other) {
  * Removes state from canvas
  *
  * @todo remove transitions connected to this state
+ * @param {Boolean} [dontPropagate] - do not fire onchange callback on editor
  * @returns {Object} state data in JSON object
  */
-State.prototype.remove = function() {
+State.prototype.remove = function(dontPropagate) {
 	if (this.$container) {
 		this.$container.remove();
 		delete this.$container;
 	}
 	delete this.editor.states[this.id];
-	this.editor.onChange();
+	if (!dontPropagate) {
+		this.editor.onChange();
+	}
 	return this.serialize();
 };
 

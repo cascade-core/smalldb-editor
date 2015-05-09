@@ -388,7 +388,7 @@ SmalldbEditor.prototype.processData = function() {
 	// remove end node when never used (only in view mode)
 	if (!endFound) {
 		if (this.options.viewOnly) {
-			this.states.__end__.remove();
+			this.states.__end__.remove(true);
 			delete this.states.__end__;
 		} else {
 			// mark node as not found to force its position in the end of machine
@@ -517,6 +517,9 @@ SmalldbEditor.prototype.addState = function(id, data) {
  * @param {Boolean} [dontRefreshEditor]
  */
 SmalldbEditor.prototype.onChange = function(dontRefreshEditor) {
+	if (this.options.viewOnly) {
+		return;
+	}
 	// normalize string from textarea
 	var oldData = JSON.stringify(JSON.parse(this.getValue()));
 	var newData = this.serialize();
@@ -552,6 +555,9 @@ SmalldbEditor.prototype.onChange = function(dontRefreshEditor) {
  * @returns {string}
  */
 SmalldbEditor.prototype.serialize = function() {
+	if (this.options.viewOnly) {
+		return '';
+	}
 	var states = {};
 	for (var i in this.states) {
 		if (i.indexOf('__') !== 0) {
