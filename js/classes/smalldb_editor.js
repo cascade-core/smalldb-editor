@@ -421,8 +421,10 @@ SmalldbEditor.prototype.render = function() {
 			- this.options.canvasOffset
 			+ this.canvas.options.canvasExtraHeight
 			- this.canvas.options.scrollLeft;
-	this.canvas.$container.scrollTop(top);
-	this.canvas.$container.scrollLeft(left);
+	setTimeout(function() {
+		this.canvas.$container.scrollTop(top);
+		this.canvas.$container.scrollLeft(left);
+	}.bind(this), 0);
 
 	if (this.options.viewOnly && 'C2S' in window) {
 		this.canvas.redraw();
