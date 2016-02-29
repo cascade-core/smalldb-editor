@@ -338,7 +338,8 @@ SmalldbEditor.prototype.processData = function() {
 	});
 	this.$container.append($temp);
 
-	this.data = JSON.parse(this.getValue());
+	var value = this.getValue();
+	this.data = value ? JSON.parse(value) : {};
 	this.states = {};
 	this.actions = {};
 
@@ -523,7 +524,8 @@ SmalldbEditor.prototype.onChange = function(dontRefreshEditor) {
 		return;
 	}
 	// normalize string from textarea
-	var oldData = JSON.stringify(JSON.parse(this.getValue()));
+	var value = this.getValue();
+	var oldData = value ? JSON.stringify(JSON.parse(value), null, 4) : "";
 	var newData = this.serialize();
 	if (oldData !== newData) {
 		// set data to textarea
@@ -587,7 +589,7 @@ SmalldbEditor.prototype.serialize = function() {
 		ret[t] = this.properties[t];
 	}
 
-	return JSON.stringify(ret);
+	return JSON.stringify(ret, null, 4);
 };
 
 /**
@@ -596,14 +598,15 @@ SmalldbEditor.prototype.serialize = function() {
  * @param {String} value
  */
 SmalldbEditor.prototype.setValue = function(value) {
-	this.$el[0].innerHTML = value;
+	this.$el.val(value);
+	this.$el.change();
 };
 
 /**
  * Gets <textarea> value
  */
 SmalldbEditor.prototype.getValue = function() {
-	return this.$el[0].innerHTML;
+	return this.$el.val();
 };
 
 /**
