@@ -49,11 +49,11 @@ SmalldbEditor.prototype.setOptions = function(options) {
 SmalldbEditor.prototype._createContainer = function() {
 	this.$container = $('<div>');
 	this.$container.attr('class', SmalldbEditor._namespace);
-	this.$container.css({
-		width: this.$el.width(),
-		height: this.$el.height()
-	});
 	if (this.options.viewOnly) {
+		this.$container.css({
+			width: this.$el.width(),
+			height: this.$el.height()
+		});
 		this.$container.addClass(SmalldbEditor._namespace + '-view-only');
 	}
 	this.$el.after(this.$container).hide();
