@@ -25,7 +25,7 @@ Editor.prototype.render = function() {
 	// create new editor element
 	this.create();
 	this._bind();
-	this.editor.$container.append(this.$container);
+	this.editor.$container.append(this.$containerHolder);
 };
 
 /**
@@ -143,12 +143,22 @@ Editor.prototype.create = function(view, item, multiple) {
 	view = view || 'summary';
 	this.multiple = multiple || false;
 
+	if (!this.$containerHolder) {
+		this.$containerHolder = $('<div class="' + this._namespace + '">');
+	}
+
 	// create / wipe editor container
 	if (this.$container) {
 		this.$container.empty();
 	} else {
-		this.$container = $('<div class="' + this._namespace + '">');
+		this.$container = $('<table class="' + this._namespace + '-content">');
+		this.$containerHolder.append(this.$container);
 	}
+
+	// set column widths
+	this.$container.append('<col width="30%">');
+	this.$container.append('<col width="70%">');
+	this.$container.append('<col>');
 
 	// deactivate previous item
 	if (!this.multiple && this.item && this.item !== item) {
@@ -170,24 +180,30 @@ Editor.prototype.create = function(view, item, multiple) {
  * @private
  */
 Editor.prototype._createSummaryView = function() {
-	// basic summary
-	var $title = $('<div class="' + this._namespace + '-title">');
-	$title.text(_('Summary'));
-	this.$container.append($title);
+	// Summary
+	this.$container.append(
+			$('<tr class="' + this._namespace + '-title">').append(
+				$('<th colspan="3">').text(_('Summary'))
+			),
+			$('<tr>').append(
+				$('<td colspan="3">').append(
+					$('<p>')
+						.text(_('Total states count: '))
+						.append($('<strong>').text(this.countObject(this.editor.states)))
+				)
+			),
+			$('<tr>').append(
+				$('<td colspan="3">').append(
+					$('<p>')
+						.text(_('Total actions count: '))
+						.append($('<strong>').text(this.countObject(this.editor.actions) - 1)) // do not count __noaction__
+				)
+			)
+		);
 
-	var $statesCount = $('<div class="' + this._namespace + '-row">');
-	$statesCount.text(_('Total states count: '));
-	$statesCount.append($('<strong>').text(this.countObject(this.editor.states)));
-	this.$container.append($statesCount);
-
-	var $actionsCount = $('<div class="' + this._namespace + '-row">');
-	$actionsCount.text(_('Total actions count: '));
-	$actionsCount.append($('<strong>').text(this.countObject(this.editor.actions) - 1)); // do not count __noaction__
-	this.$container.append($actionsCount);
-
-	// machine properties
-	$title = $('<div class="' + this._namespace + '-title">');
-	$title.text(_('Machine properties'));
+	// Machine properties
+	$title = $('<tr class="' + this._namespace + '-title">');
+	$title.append($('<th colspan="3">').text(_('Machine properties')));
 	this.$container.append($title);
 
 	for (var key in this.editor.properties) {
@@ -203,7 +219,7 @@ Editor.prototype._createSummaryView = function() {
 	$addProp.text(_('Add new property'));
 	$addProp.addClass(this._namespace + '-add-prop');
 	$addProp.on('click', this._addNewProperty(this.editor.properties));
-	this.$container.append($('<div class="' + this._namespace + '-row">').append($addProp));
+	this.$container.append($('<tr>').append($('<td colspan="3">').append($addProp)));
 };
 
 /**
@@ -214,7 +230,7 @@ Editor.prototype._createSummaryView = function() {
  */
 Editor.prototype._createEdgeView = function() {
 	// action options
-	var $title = $('<div class="' + this._namespace + '-title">');
+	var $title = $('<tr class="' + this._namespace + '-title">');
 	var $add = $('<a href="#add-new-action">');
 	var className = SmalldbEditor._namespace + '-create-action';
 	$add.html('<i class="fa fa-fw fa-plus-circle"></i> +');
@@ -235,9 +251,10 @@ Editor.prototype._createEdgeView = function() {
 		this.$container.find('select').val('__rename__').change();
 		return false;
 	}.bind(this));
-	$title.text(_('Action options'));
-	$title.append($add);
-	$title.append($edit);
+	$title.append($('<th colspan="3">')
+		.text(_('Action options'))
+		.append($add)
+		.append($edit));
 	this.$container.append($title);
 
 	this._createChangeActionSelect();
@@ -292,13 +309,13 @@ Editor.prototype._createEdgeView = function() {
 		$addProp.text(_('Add new property'));
 		$addProp.addClass(this._namespace + '-add-prop');
 		$addProp.on('click', this._addNewProperty(this.item.action.data));
-		this.$container.append($('<div class="' + this._namespace + '-row">').append($addProp));
+		this.$container.append($('<tr class="' + this._namespace + '-row">').append($('<td colspan="3">').append($addProp)));
 	}
 
 	// edge options
-	$title = $('<div class="' + this._namespace + '-title">');
-	$title.text(_('Edge options'));
-	this.$container.append($title);
+	this.$container.append($('<tr class="' + this._namespace + '-title">')
+			.append($('<th colspan="3">')
+			.text(_('Transition options'))));
 
 	// rows
 	var src = this.item.source.split('-')[0];
@@ -330,14 +347,17 @@ Editor.prototype._createEdgeView = function() {
 	$addProp.text(_('Add new property'));
 	$addProp.addClass(this._namespace + '-add-prop');
 	$addProp.on('click', this._addNewProperty(this.item.data));
-	this.$container.append($('<div class="' + this._namespace + '-row">').append($addProp));
 
 	// remove button
 	var $remove = $('<a href="#remove">');
 	$remove.text(_('Remove transition'));
 	$remove.addClass(this._namespace + '-remove');
 	$remove.on('click', this._removeTransition.bind(this));
-	this.$container.append($('<div class="' + this._namespace + '-row">').append($remove));
+
+	this.$container.append($('<tr class="' + this._namespace + '-row">')
+			.append($('<td colspan="3">')
+			.append($addProp)
+			.append($remove)));
 };
 
 /**
@@ -390,9 +410,9 @@ Editor.prototype._removeTransition = function() {
  * @private
  */
 Editor.prototype._createChangeActionSelect = function() {
-	var $name = $('<div class="' + this._namespace + '-row">');
-	$name.append($('<label>').text(_('Name')));
+	var id = this._namespace + '-action_name';
 	var $select = $('<select>');
+	$select.attr('id', id);
 	for (var a in this.editor.actions) {
 		if (a === '__noaction__') {
 			continue;
@@ -407,9 +427,19 @@ Editor.prototype._createChangeActionSelect = function() {
 		$select.prepend($('<option>').text(_('* Rename action "%s"', [this.item.action.id])).val('__rename__'));
 		$select.prepend($('<option>').text(_('* Create new action')).val('__create__'));
 	}
-	$name.append($select.val(this.item.action.id));
-	this.$container.append($name);
+	$select.val(this.item.action.id);
 	$select.on('change.' + this._namespace, this._changeAction.bind(this));
+	$select.on('focus', this._onInputFocus.bind(this));
+	$select.on('blur', this._onInputBlur.bind(this));
+
+	this.$container.append(
+		$('<tr>').append(
+			$('<th>').append(
+				$('<label>').attr('for', id).text(_('Name'))
+			),
+			$('<td colspan="2">').append($select)
+		));
+
 	$select.focus();
 };
 
@@ -467,10 +497,12 @@ Editor.prototype._changeAction = function(e) {
  * @private
  */
 Editor.prototype._createStateView = function() {
-	// title
-	var $title = $('<div class="' + this._namespace + '-title">');
-	$title.text(_('State options'));
-	this.$container.append($title);
+	// Title
+	this.$container.append(
+			$('<tr class="' + this._namespace + '-title">').append(
+				$('<th colspan="3">').text(_('State options'))
+			)
+		);
 
 	// rows
 	if (this.item.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
@@ -480,11 +512,18 @@ Editor.prototype._createStateView = function() {
 	}
 
 	// x / y position
-	var $position = $('<div class="' + this._namespace + '-row">');
-	$position.append($('<label>').text(_('Position')));
-	$position.append($('<input type="text" class="small" disabled>').val(this.item.x).attr('title', _('X position')));
-	$position.append($('<input type="text" class="small" disabled>').val(this.item.y).attr('title', _('Y position')));
-	this.$container.append($position);
+	this.$container.append($('<tr>').append(
+			$('<th>').append(
+				$('<label>').text(_('Position'))
+			),
+			$('<td>').append(
+				$('<label>').append(
+					$('<input type="text" class="small" disabled>').val(this.item.x).attr('title', _('X position')),
+					$('<input type="text" class="small" disabled>').val(this.item.y).attr('title', _('Y position'))
+				)
+			),
+			$('<td>')
+		));
 
 	// dynamic variables
 	for (var key in this.item.data) {
@@ -497,18 +536,22 @@ Editor.prototype._createStateView = function() {
 
 	if (this.item.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
 		// add new state property button
-		var $addProp = $('<a href="#add-property">');
-		$addProp.text(_('Add new property'));
-		$addProp.addClass(this._namespace + '-add-prop');
-		$addProp.on('click', this._addNewProperty(this.item.data));
-		this.$container.append($('<div class="' + this._namespace + '-row">').append($addProp));
+		var $addProp = $('<a href="#add-property">')
+			.text(_('Add new property'))
+			.addClass(this._namespace + '-add-prop')
+			.on('click', this._addNewProperty(this.item.data));
 
 		// remove button
-		var $remove = $('<a href="#remove">');
-		$remove.text(_('Remove state'));
-		$remove.addClass(this._namespace + '-remove');
-		$remove.on('click', this.item.removeHandler.bind(this.item));
-		this.$container.append($('<div class="' + this._namespace + '-row">').append($remove));
+		var $remove = $('<a href="#remove">')
+			.text(_('Remove state'))
+			.addClass(this._namespace + '-remove')
+			.on('click', this.item.removeHandler.bind(this.item));
+
+		this.$container.append($('<tr>').append(
+				$('<td colspan="3">').append(
+					$addProp, $remove
+				)
+			));
 	}
 };
 
@@ -587,29 +630,60 @@ Editor.prototype._addTextInputRow = function(key, label, value, object, live, cb
 	var json = typeof(value) === 'object';
 	value = json ? JSON.stringify(value) : value;
 	object = object || this.item || this.editor.properties;
+
 	// create unique id - append transition key suffix when available
 	var id = this._namespace + '-' + key + (object instanceof Transition ? '-' + this.item.key : '');
-	var $row = $('<div class="' + this._namespace + '-row">');
-	$row.append($('<label>').attr('for', id).text(_(label)));
-	var $input = $('<input type="text">').attr('id', id).val(value);
+
+	var $input = $('<input type="text">')
+		.attr('id', id)
+		.val(value)
+		.on('keydown', this._keydown.bind(this))
+		.on(live ? 'keyup' : 'change', this._createSaveCallback(object, key, json, live))
+		.on('focus', this._onInputFocus.bind(this))
+		.on('blur', this._onInputBlur.bind(this));
 	if (cb) {
 		$input.on(live ? 'keyup' : 'change', cb.bind(this));
 	}
-	$input.on('keydown', this._keydown.bind(this));
-	$input.on(live ? 'keyup' : 'change', this._createSaveCallback(object, key, json, live));
-	$row.append($input);
 
+	var $remove = null;
 	if (this._reservedWords.indexOf(key) === -1) {
-		var $remove = $('<a href="#remove-prop">');
-		$remove.addClass(this._namespace + '-remove-prop');
-		$remove.html(_('&times;'));
-		$remove.attr('title', _('Remove property \'%s\'', [key]));
-		$remove.on('click', this._removeProperty(key, object));
-		$row.append($remove);
+		$remove = $('<a href="#remove-prop" tabindex="-1">')
+			.addClass(this._namespace + '-remove-prop')
+			.html(_('&times;'))
+			.attr('title', _('Remove property \'%s\'', [key]))
+			.on('click', this._removeProperty(key, object));
 	}
+
+	var $row = $('<tr>').append(
+			$('<th>').append(
+				$('<label>').attr('for', id).text(label)
+			),
+			$('<td>').append(
+				$('<label>').append(
+					$input
+				)
+			),
+			$('<td>').append(
+				$remove
+			)
+		);
 
 	this.$container.append($row);
 	return $row;
+};
+
+/**
+ * Adds class to nearest <tr> parent on focus
+ */
+Editor.prototype._onInputFocus = function(ev) {
+	$(ev.target).parents('tr:first').addClass(this._namespace + '-focus');
+};
+
+/**
+ * Reverts effect of _onInputFocus
+ */
+Editor.prototype._onInputBlur = function(ev) {
+	$(ev.target).parents('tr:first').removeClass(this._namespace + '-focus');
 };
 
 /**
