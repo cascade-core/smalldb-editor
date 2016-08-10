@@ -575,6 +575,8 @@ Editor.prototype._addColorInputRow = function(key, label, value, object, cb) {
 	var $color = $('<input type="color">')
 		.addClass(this._namespace + '-color-preview')
 		.val(value)
+		.on('focus', this._onInputFocus.bind(this))
+		.on('blur', this._onInputBlur.bind(this))
 		.on('change', function() {
 			var val = $(this).val();
 			$firstInput.val(val).keyup();
