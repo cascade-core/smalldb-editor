@@ -209,7 +209,7 @@ Editor.prototype._createSummaryView = function() {
 	for (var key in this.editor.properties) {
 		if (['_', 'actions', 'states', 'virtualStates'].indexOf(key) === -1) {
 			var value = this.editor.properties[key];
-			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
+			var label = key;
 			this._addTextInputRow(key, label, value);
 		}
 	}
@@ -282,7 +282,7 @@ Editor.prototype._createEdgeView = function() {
 					if (this.item === tr[t]) {
 						var id = '#' + this._namespace + '-color-' + this.item.key;
 						$(id).val(val);
-						$(id).next().css('background', val);
+						//$(id).next().css('background', val);
 						if (val.length === 4) {
 							// #xyz => #xxyyzz
 							val = '#' + val[1] + val[1] + val[2] + val[2] + val[3] + val[3];
@@ -299,7 +299,7 @@ Editor.prototype._createEdgeView = function() {
 		for (var key in this.item.action.data) {
 			if (this._reservedWords.indexOf(key) === -1) {
 				var value = this.item.action.data[key];
-				var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
+				var label = key;
 				this._addTextInputRow(key, label, value, this.item.action);
 			}
 		}
@@ -529,7 +529,7 @@ Editor.prototype._createStateView = function() {
 	for (var key in this.item.data) {
 		if (this._reservedWords.indexOf(key) === -1) {
 			var value = this.item.data[key];
-			var label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '); // capitalize first letter
+			var label = key;
 			this._addTextInputRow(key, label, value, this.item);
 		}
 	}
@@ -568,24 +568,31 @@ Editor.prototype._createStateView = function() {
  */
 Editor.prototype._addColorInputRow = function(key, label, value, object, cb) {
 	var $row = this._addTextInputRow(key, label, value, object, true, cb);
-	var $color = $('<input type="color">').addClass(this._namespace + '-color').val(value);
-	$row.append($color);
-	$color.wrap($('<div>').addClass(this._namespace + '-color-wrapper'));
-	$color.on('change', function() {
-		var val = $(this).val();
-		$(this).parent().css('background', val);
-		$row.find('input:first').val(val).keyup();
-	}).change();
-	$row.find('input:first').on('keyup', function() {
+	$row.addClass(this._namespace + '-color');
+
+	var $firstInput = $row.find('input:first');
+
+	var $color = $('<input type="color">')
+		.addClass(this._namespace + '-color-preview')
+		.val(value)
+		.on('change', function() {
+			var val = $(this).val();
+			$firstInput.val(val).keyup();
+		})
+		.change();
+
+	$firstInput.on('keyup', function() {
 		var val = $(this).val();
 		if (val.length === 4) {
 			// #xyz => #xxyyzz
 			val = '#' + val[1] + val[1] + val[2] + val[2] + val[3] + val[3];
 		}
 		if (val.length === 7) {
-			$color.val(val).parent().css('background', val);
+			$color.val(val);
 		}
 	});
+
+	$firstInput.after($color);
 	return $row;
 };
 
@@ -720,15 +727,6 @@ Editor.prototype._createSaveCallback = function(object, key, json, live) {
 		if ('data' in object) {
 			object.data[key] = value;
 		}
-
-		// highlight input for a while
-		$(e.target).css('background', '#efe');
-		if (this._highlightTimeout) {
-			clearTimeout(this._highlightTimeout);
-		}
-		this._highlightTimeout = setTimeout(function() {
-			$(e.target).css('background', '#fff');
-		}, 150);
 
 		if (!live) {
 			return false;
