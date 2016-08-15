@@ -97,7 +97,7 @@ Editor.prototype._bind = function() {
 		var code = e.keyCode ? e.keyCode : e.which;
 		if (code === 27) {
 			return this.create();
-		} else if (code === 8 && (e.metaKey || e.ctrlKey)) {
+		} else if (code === 8) {
 			this._removeTransition();
 		} else {
 			return true;

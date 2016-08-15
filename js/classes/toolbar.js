@@ -364,12 +364,14 @@ Toolbar.prototype._keydown = function(e) {
 		this._automaticEdgeColors();
 		return false;
 	} else if (code === 46 || ((e.metaKey || e.ctrlKey) && code === 8)) { // del / ctrl + backspace => remove selection
-		if (!window.confirm(_('Do you realy want to delete selected states?'))) {
-			return false;
-		}
+		var yes;
 		for (var id in this.editor.states) {
 			if (this.editor.states[id].isActive()) {
-				this.editor.states[id].remove();
+				if (yes || (yes = window.confirm(_('Do you realy want to delete selected states?')))) {
+					this.editor.states[id].remove();
+				} else {
+					return false;
+				}
 			}
 		}
 		this.canvas.redraw();
