@@ -440,7 +440,9 @@ Editor.prototype._createChangeActionSelect = function() {
 			$('<td colspan="2">').append($select)
 		));
 
-	$select.focus();
+	if (this.item.action.id === '__noaction__') {
+		$select.focus();
+	}
 };
 
 /**
@@ -701,23 +703,25 @@ Editor.prototype._onInputBlur = function(ev) {
  * @param {Object} object
  * @param {String} key
  * @param {Boolean} json
- * @param {Boolean} [live] - defaults to false
+ * @param {Boolean} [live] - if true, the property influences visual representation of the element (default: false)
  * @return {Function}
  * @private
  */
 Editor.prototype._createSaveCallback = function(object, key, json, live) {
 	return function(e) {
 		var value = $(e.target).val();
-		try {
-			value = json ? JSON.parse(value) : value;
-		} catch (e) {
-			alert(_('Provided string in property \'%s\' is not valid JSON!', [key]));
-			var id = '#' + this._namespace + '-' + key + (object instanceof Transition ? '-' + this.item.key : '');
-			// wait to blur event occur, than focus again invalid input
-			setTimeout(function() {
-				$(id).focus();
-			}, 0);
-			return false;
+		console.log('Save:', value, "->", key);
+		if (json) {
+			try {
+				value = JSON.parse(value);
+			} catch (e) {
+				alert(_('Provided string in property \'%s\' is not valid JSON!', [key]));
+				// wait to blur event occur, then focus again the invalid input
+				setTimeout(function() {
+					$(e.target).focus();
+				}, 0);
+				return false;
+			}
 		}
 		if (object[key] === value) {
 			return false;
@@ -729,6 +733,7 @@ Editor.prototype._createSaveCallback = function(object, key, json, live) {
 		if ('data' in object) {
 			object.data[key] = value;
 		}
+		this.editor.onChange(true);
 
 		if (!live) {
 			return false;
@@ -736,7 +741,6 @@ Editor.prototype._createSaveCallback = function(object, key, json, live) {
 		if ('redraw' in object) {
 			object.redraw();
 		}
-		this.editor.onChange(true);
 		this.canvas.redraw();
 	}.bind(this);
 };
