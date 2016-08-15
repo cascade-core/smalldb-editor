@@ -34,6 +34,7 @@ Toolbar.prototype._createButton = function (name, icon, title, enabled, letter) 
 	var className = SmalldbEditor._namespace + '-' + name;
 	letter = letter || name.charAt(0).toUpperCase();
 	$btn.html('<i class="fa fa-fw fa-' + icon + '"></i> ' + letter);
+	$btn.attr('tabindex', '-1');
 	$btn.attr('title', title);
 	$btn.attr('href', '#' + name);
 	$btn.addClass(className);
@@ -212,6 +213,8 @@ Toolbar.prototype.render = function($container) {
 	this.$fullscreen = this._createButton('fullscreen-toggle', 'arrows-alt', 'Toggle fullscreen [Ctrl + Shift + F]', true);
 	$(document).on('click', 'a.' + SmalldbEditor._namespace + '-fullscreen-toggle', this._toggleFullScreen.bind(this));
 	this.$right.append(this.$fullscreen);
+
+	this.$toolbar.find('a').attr('tabindex', '-1');
 
 	this.$container.append(this.$toolbar);
 	this.$container.append(this.$right);
