@@ -293,6 +293,8 @@ SmalldbEditor.prototype._sortComponent = function(component) {
  * @private
  */
 SmalldbEditor.prototype.init = function() {
+	this.initializing = true;
+
 	// create html container
 	this._createContainer();
 
@@ -323,7 +325,7 @@ SmalldbEditor.prototype.init = function() {
 	this.render();
 	this.canvas.$container[0].scrollLeft = (this.box);
 	this.canvas.$container.scroll(); // force scroll event to save center of viewport
-	this.setValue(this.serialize()); // update textarea with state positions
+	this.initializing = false;
 };
 
 /**
@@ -595,11 +597,16 @@ SmalldbEditor.prototype.serialize = function() {
 /**
  * Sets <textarea> value
  *
+ * The <textarea> is not changed during initialization to avoid unwanted
+ * modification until editor is touched by user.
+ *
  * @param {String} value
  */
 SmalldbEditor.prototype.setValue = function(value) {
-	this.$el.val(value);
-	this.$el.change();
+	if (!this.initializing) {
+		this.$el.val(value);
+		this.$el.change();
+	}
 };
 
 /**
