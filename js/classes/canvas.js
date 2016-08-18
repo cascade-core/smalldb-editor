@@ -92,7 +92,7 @@ Canvas.prototype.create = function() {
 	var $c = this.$container;
 	var zoom = this.getZoom();
 	this._center = {
-		x: ($c.scrollLeft() + ($c.width() - 250) / 2) / zoom,
+		x: ($c.scrollLeft() + $c.width() / 2) / zoom,
 		y: ($c.scrollTop() + $c.height() / 2) / zoom
 	};
 };

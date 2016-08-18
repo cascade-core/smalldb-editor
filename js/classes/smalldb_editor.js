@@ -19,7 +19,8 @@ var SmalldbEditor = function(el) {
 		historyLimit: 1000, // count of remembered changes,
 		splineTension: 0.3, // used to render connections, more means higher elasticity of connections
 		edgeClickOffset: 5, // px to both sides from line
-		canvasOffset: 25, // px start rendering states from top left corner of diagram - canvasOffset
+		canvasOffsetX: 0, // px start rendering states from top left corner of diagram - canvasOffset
+		canvasOffsetY: 25, // px start rendering states from top left corner of diagram - canvasOffset
 		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
 		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
 		canvasSpeed: 2 // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
@@ -387,7 +388,7 @@ SmalldbEditor.prototype.processData = function() {
 	if (this.data.actions) {
 		for (var id in this.data.actions) {
 			if (id === '') {
-				id = '__noaction__';
+				continue;
 			}
 			var a = new Action(id, this.data.actions[id], this);
 			endFound |= a.usesEndNode();
@@ -396,7 +397,7 @@ SmalldbEditor.prototype.processData = function() {
 	}
 
 	// placeholder for rendering temporary transitions without proper action
-	this.actions.__noaction__ = new Action('__noaction__', { label: '' }, this);
+	this.actions.__noaction__ = new Action('__noaction__', { }, this);
 
 	// remove end node when never used (only in view mode)
 	if (!endFound) {
@@ -428,16 +429,22 @@ SmalldbEditor.prototype.render = function() {
 	}
 
 	// scroll to top left corner of diagram bounding box
-	var top = this.box.minY
-			- this.options.canvasOffset
-			+ this.canvas.options.canvasExtraWidth
-			- this.canvas.options.scrollTop;
-	var left = this.box.minX
-			- this.options.canvasOffset
-			+ this.canvas.options.canvasExtraHeight
-			- this.canvas.options.scrollLeft;
 	setTimeout(function() {
-		this.canvas.$container.scrollTop(top);
+		var top_min = this.box.minY
+				- this.options.canvasOffsetY
+				+ this.canvas.options.canvasExtraWidth
+				- this.canvas.options.scrollTop;
+		var top_center = (this.box.minY + this.box.maxY) / 2
+				- this.options.canvasOffsetY
+				+ this.canvas.options.canvasExtraWidth
+				- this.canvas.options.scrollTop
+				- this.canvas.$container.height() * 0.5;
+		var left = (this.box.minX + this.box.maxX) / 2
+				- this.options.canvasOffsetX
+				+ this.canvas.options.canvasExtraHeight
+				- this.canvas.options.scrollLeft
+				- this.canvas.$container.width() * 0.5;
+		this.canvas.$container.scrollTop(top_center > top_min ? top_min : (top_min + top_center) / 2);
 		this.canvas.$container.scrollLeft(left);
 	}.bind(this), 0);
 
@@ -586,8 +593,11 @@ SmalldbEditor.prototype.serialize = function() {
 
 	var actions = {};
 	for (var i in this.actions) {
+		if (i == '' || i == '__noaction__') {
+			continue;
+		}
 		var a = this.actions[i];
-		actions[i === '__noaction__' ? '' : a.id] = a.serialize();
+		actions[i] = a.serialize();
 	}
 
 	var ret = {
