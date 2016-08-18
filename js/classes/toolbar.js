@@ -70,7 +70,7 @@ Toolbar.prototype.render = function($container) {
 	this.$undo.attr('title', 'Redo [Ctrl + Z]');
 	this.$undo.attr('href', '#undo');
 	this.$undo.addClass(className);
-	$(document).on('click', 'a.' + className, this._undo.bind(this));
+	$(document).on('click', 'a.' + className, this.undo.bind(this));
 	this.$toolbar.append(this.$undo);
 
 	// redo button
@@ -80,7 +80,7 @@ Toolbar.prototype.render = function($container) {
 	this.$redo.attr('title', 'Undo [Ctrl + Shift + Z]');
 	this.$redo.attr('href', '#redo');
 	this.$redo.addClass(className);
-	$(document).on('click', 'a.' + className, this._redo.bind(this));
+	$(document).on('click', 'a.' + className, this.redo.bind(this));
 	this.$toolbar.append(this.$redo);
 
 	this.$toolbar.append($divider.clone());
@@ -92,7 +92,7 @@ Toolbar.prototype.render = function($container) {
 	this.$copy.attr('title', 'Copy active state [Ctrl + C]');
 	this.$copy.attr('href', '#copy');
 	this.$copy.addClass(className);
-	$(document).on('click', 'a.' + className, this._copy.bind(this));
+	$(document).on('click', 'a.' + className, this.copy.bind(this));
 	this.$toolbar.append(this.$copy);
 
 	// cut button
@@ -102,7 +102,7 @@ Toolbar.prototype.render = function($container) {
 	this.$cut.attr('title', 'Cut active state [Ctrl + X]');
 	this.$cut.attr('href', '#cut');
 	this.$cut.addClass(className);
-	$(document).on('click', 'a.' + className, this._cut.bind(this));
+	$(document).on('click', 'a.' + className, this.cut.bind(this));
 	this.$toolbar.append(this.$cut);
 
 	// paste button
@@ -112,7 +112,7 @@ Toolbar.prototype.render = function($container) {
 	this.$paste.attr('title', 'Paste state [Ctrl + V]');
 	this.$paste.attr('href', '#paste');
 	this.$paste.addClass(className);
-	$(document).on('click', 'a.' + className, this._paste.bind(this));
+	$(document).on('click', 'a.' + className, this.paste.bind(this));
 	this.$toolbar.append(this.$paste);
 
 	this.$toolbar.append($divider.clone());
@@ -124,7 +124,7 @@ Toolbar.prototype.render = function($container) {
 	this.$zoomIn.attr('title', 'Zoom in [+ / =]');
 	this.$zoomIn.attr('href', '#zoom-in');
 	this.$zoomIn.addClass(className);
-	$(document).on('click', 'a.' + className, this._zoomIn.bind(this));
+	$(document).on('click', 'a.' + className, this.zoomIn.bind(this));
 	this.$toolbar.append(this.$zoomIn);
 
 	// zoom out button
@@ -134,7 +134,7 @@ Toolbar.prototype.render = function($container) {
 	this.$zoomOut.attr('title', 'Zoom out [-]');
 	this.$zoomOut.attr('href', '#zoom-out');
 	this.$zoomOut.addClass(className);
-	$(document).on('click', 'a.' + className, this._zoomOut.bind(this));
+	$(document).on('click', 'a.' + className, this.zoomOut.bind(this));
 	this.$toolbar.append(this.$zoomOut);
 
 	// zoom reset button
@@ -144,7 +144,7 @@ Toolbar.prototype.render = function($container) {
 	this.$zoomReset.attr('title', 'Reset zoom [0]');
 	this.$zoomReset.attr('href', '#zoom-reset');
 	this.$zoomReset.addClass(className);
-	$(document).on('click', 'a.' + className, this._zoomReset.bind(this));
+	$(document).on('click', 'a.' + className, this.zoomReset.bind(this));
 	this.$toolbar.append(this.$zoomReset);
 
 	this.$toolbar.append($divider.clone());
@@ -156,7 +156,7 @@ Toolbar.prototype.render = function($container) {
 	this.$cycles.attr('title', 'Toggle cycles visibility [Ctrl + Shift + O]');
 	this.$cycles.attr('href', '#toggle-cycles');
 	this.$cycles.addClass(className);
-	$(document).on('click', 'a.' + className, this._toggleCycles.bind(this));
+	$(document).on('click', 'a.' + className, this.toggleCycles.bind(this));
 	this.$toolbar.append(this.$cycles);
 
 	// toggle control points button
@@ -166,7 +166,7 @@ Toolbar.prototype.render = function($container) {
 	this.$controlPoints.attr('title', 'Toggle control points visibility [Ctrl + Shift + P]');
 	this.$controlPoints.attr('href', '#toggle-cycles');
 	this.$controlPoints.addClass(className);
-	$(document).on('click', 'a.' + className, this._toggleControlPoints.bind(this));
+	$(document).on('click', 'a.' + className, this.toggleControlPoints.bind(this));
 	this.$toolbar.append(this.$controlPoints);
 
 	// automatic layout button
@@ -176,7 +176,7 @@ Toolbar.prototype.render = function($container) {
 	this.$layout.attr('title', 'Set automatic layout [Ctrl + L]');
 	this.$layout.attr('href', '#layout');
 	this.$layout.addClass(className);
-	$(document).on('click', 'a.' + className, this._automaticLayout.bind(this));
+	$(document).on('click', 'a.' + className, this.automaticLayout.bind(this));
 	this.$toolbar.append(this.$layout);
 
 	// automatic edge colors button
@@ -186,12 +186,12 @@ Toolbar.prototype.render = function($container) {
 	this.$colors.attr('title', 'Assign random color to each action [Ctrl + O]');
 	this.$colors.attr('href', '#action-colors');
 	this.$colors.addClass(className);
-	$(document).on('click', 'a.' + className, this._automaticEdgeColors.bind(this));
+	$(document).on('click', 'a.' + className, this.automaticEdgeColors.bind(this));
 	this.$toolbar.append(this.$colors);
 
 	// rotate button
 	this.$rotate = this._createButton('rotate', 'refresh fa-flip-horizontal', 'Rotate automaton [Shift + R]', true);
-	$(document).on('click', 'a.' + SmalldbEditor._namespace + '-rotate', this._rotate.bind(this));
+	$(document).on('click', 'a.' + SmalldbEditor._namespace + '-rotate', this.rotate.bind(this));
 	this.$toolbar.append(this.$rotate);
 
 	$(document).off('keydown.toolbar').on('keydown.toolbar', this._keydown.bind(this));
@@ -206,7 +206,7 @@ Toolbar.prototype.render = function($container) {
 
 	// help button
 	this.$help = this._createButton('help', 'lightbulb-o', 'Help [Ctrl + H]', true);
-	$(document).on('click', 'a.' + SmalldbEditor._namespace + '-help', this._toggleHelp.bind(this));
+	$(document).on('click', 'a.' + SmalldbEditor._namespace + '-help', this.toggleHelp.bind(this));
 	this.$right.append(this.$help);
 
 	// fullscreen button
@@ -235,17 +235,28 @@ Toolbar.prototype.disableSelection = function(e) {
 	this.canvas.selection = false;
 };
 
+
+/**
+ * Hide toolbar
+ */
+Toolbar.prototype.hideToolbars = function() {
+	this.$toolbar.hide();
+	this.$right.hide();
+};
+
+
 /**
  * Toggles cycles visibility
  *
  * @private
  */
-Toolbar.prototype._toggleCycles = function() {
+Toolbar.prototype.toggleCycles = function() {
 	var $i = this.$cycles.find('i');
 	$i.toggleClass('fa-dot-circle-o');
 	$i.toggleClass('fa-circle-o');
 	this.canvas.renderCycles = $i.hasClass('fa-dot-circle-o');
 	this.canvas.redraw();
+	this.editor.options.onToggleCycles(this.canvas.renderCycles);
 	return false;
 };
 
@@ -254,13 +265,14 @@ Toolbar.prototype._toggleCycles = function() {
  *
  * @private
  */
-Toolbar.prototype._toggleControlPoints = function() {
+Toolbar.prototype.toggleControlPoints = function() {
 	var $i = this.$controlPoints.find('i');
 	$i.toggleClass('fa-eye-slash');
 	$i.toggleClass('fa-eye');
 	this.editor.showControlPoints = $i.hasClass('fa-eye');
 	$('.' + SmalldbEditor._namespace + '-control-point').remove();
 	this.canvas.redraw();
+	this.editor.options.onToggleControlPoints(this.canvas.showControlPoints);
 	return false;
 };
 
@@ -269,7 +281,7 @@ Toolbar.prototype._toggleControlPoints = function() {
  *
  * @private
  */
-Toolbar.prototype._automaticEdgeColors = function() {
+Toolbar.prototype.automaticEdgeColors = function() {
 	var colors = JSON.parse(JSON.stringify(Action.colors)); // copy to tmp array
 	for (var a in this.editor.actions) {
 		if (a === '__noaction__') {
@@ -293,7 +305,7 @@ Toolbar.prototype._automaticEdgeColors = function() {
  *
  * @private
  */
-Toolbar.prototype._automaticLayout = function() {
+Toolbar.prototype.automaticLayout = function() {
 	this.editor.placeStates(true);
 	return false;
 };
@@ -328,40 +340,40 @@ Toolbar.prototype._keydown = function(e) {
 		return false;
 	} else if (e.shiftKey && code === 82) { // shift + r => rotate
 		this.$rotate.addClass('hover');
-		this._rotate();
+		this.rotate();
 	} else if ((e.metaKey || e.ctrlKey) && code === 67) { // ctrl + c => copy
 		this.$copy.addClass('hover');
-		this._copy();
+		this.copy();
 	} else if ((e.metaKey || e.ctrlKey) && code === 86) { // ctrl + v => paste
 		this.$paste.addClass('hover');
-		this._paste();
+		this.paste();
 	} else if ((e.metaKey || e.ctrlKey) && code === 88) { // ctrl + x => cut
 		this.$cut.addClass('hover');
-		this._cut();
+		this.cut();
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 90) { // ctrl + shift + z => redo
 		this.$redo.addClass('hover');
-		this._redo();
+		this.redo();
 	} else if ((e.metaKey || e.ctrlKey) && code === 90) { // ctrl + z => undo
 		this.$undo.addClass('hover');
-		this._undo();
+		this.undo();
 	} else if ((e.metaKey || e.ctrlKey) && code === 76) { // ctrl + l => automatic layout
 		this.$layout.addClass('hover');
-		this._automaticLayout();
+		this.automaticLayout();
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 70) { // ctrl + shift + f => fullscreen
 		this.$fullscreen.addClass('hover');
 		this._toggleFullScreen();
 		return false;
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 79) { // ctrl + shift + o => toggle cycles
 		this.$cycles.addClass('hover');
-		this._toggleCycles();
+		this.toggleCycles();
 		return false;
 	} else if ((e.metaKey || e.ctrlKey) && e.shiftKey && code === 80) { // ctrl + shift + o => toggle cycles
 		this.$controlPoints.addClass('hover');
-		this._toggleControlPoints();
+		this.toggleControlPoints();
 		return false;
 	} else if ((e.metaKey || e.ctrlKey) && code === 79) { // ctrl + o => automatic action colors
 		this.$colors.addClass('hover');
-		this._automaticEdgeColors();
+		this.automaticEdgeColors();
 		return false;
 	} else if (code === 46 || ((e.metaKey || e.ctrlKey) && code === 8)) { // del / ctrl + backspace => remove selection
 		var yes;
@@ -380,11 +392,11 @@ Toolbar.prototype._keydown = function(e) {
 			this.editor.states[id].deactivate();
 		}
 	} else if (code === 48) { // 0 => reset zoom
-		this._zoomReset();
+		this.zoomReset();
 	} else if (code === 189) { // - => zoom out
-		this._zoomOut();
+		this.zoomOut();
 	} else if (code === 187) { // = / + => zoom in
-		this._zoomIn();
+		this.zoomIn();
 	}
 };
 
@@ -438,7 +450,7 @@ Toolbar.prototype._toggleFullScreen = function() {
  * @returns {Boolean}
  * @private
  */
-Toolbar.prototype._undo = function() {
+Toolbar.prototype.undo = function() {
 	var undo = this.editor.session.get('undo', true) || [];
 	if (undo.length) {
 		// save current state to redo
@@ -465,7 +477,7 @@ Toolbar.prototype._undo = function() {
  * @returns {Boolean}
  * @private
  */
-Toolbar.prototype._redo = function() {
+Toolbar.prototype.redo = function() {
 	var redo = this.editor.session.get('redo', true) || [];
 	if (redo.length) {
 		// save current state to undo
@@ -492,7 +504,7 @@ Toolbar.prototype._redo = function() {
  * @returns {Boolean}
  * @private
  */
-Toolbar.prototype._copy = function() {
+Toolbar.prototype.copy = function() {
 	if (this.$copy.hasClass('disabled')) {
 		return false;
 	}
@@ -522,7 +534,7 @@ Toolbar.prototype._copy = function() {
  * @returns {Boolean}
  * @private
  */
-Toolbar.prototype._cut = function() {
+Toolbar.prototype.cut = function() {
 	if (this.$cut.hasClass('disabled')) {
 		return false;
 	}
@@ -553,7 +565,7 @@ Toolbar.prototype._cut = function() {
  * @returns {Boolean}
  * @private
  */
-Toolbar.prototype._paste = function() {
+Toolbar.prototype.paste = function() {
 	var states = this.editor.storage.get('clipboard', true);
 	if (states) {
 		var center = this.canvas.getCenter();
@@ -606,47 +618,63 @@ Toolbar.prototype.updateDisabledClasses = function() {
 
 	var undo = this.editor.session.get('undo', true);
 	if (undo && undo.length) {
+		this.editor.options.onUndoAvailable(true);
 		this.$undo.removeClass('disabled');
 	} else {
+		this.editor.options.onUndoAvailable(false);
 		this.$undo.addClass('disabled');
 	}
 
 	var redo = this.editor.session.get('redo', true);
 	if (redo && redo.length) {
+		this.editor.options.onRedoAvailable(true);
 		this.$redo.removeClass('disabled');
 	} else {
+		this.editor.options.onRedoAvailable(false);
 		this.$redo.addClass('disabled');
 	}
 
 	var clipboard = this.editor.storage.get('clipboard', true);
 	if (clipboard) {
+		this.editor.options.onPasteAvailable(true);
 		this.$paste.removeClass('disabled');
 	} else {
+		this.editor.options.onPasteAvailable(false);
 		this.$paste.addClass('disabled');
 	}
 
 	if (this._zoom < this._zoomMax) {
+		this.editor.options.onZoomInAvailable(true);
 		this.$zoomIn.removeClass('disabled');
 	} else {
+		this.editor.options.onZoomInAvailable(false);
 		this.$zoomIn.addClass('disabled');
 	}
 
 	if (this._zoom > this._zoomMin) {
+		this.editor.options.onZoomOutAvailable(true);
 		this.$zoomOut.removeClass('disabled');
 	} else {
+		this.editor.options.onZoomOutAvailable(false);
 		this.$zoomOut.addClass('disabled');
 	}
 
 	if (this._zoom !== 1.0) {
+		this.editor.options.onZoomResetAvailable(true);
 		this.$zoomReset.removeClass('disabled');
 	} else {
+		this.editor.options.onZoomResetAvailable(false);
 		this.$zoomReset.addClass('disabled');
 	}
 
 	if (active) {
+		this.editor.options.onCopyAvailable(true);
+		this.editor.options.onCutAvailable(true);
 		this.$copy.removeClass('disabled');
 		this.$cut.removeClass('disabled');
 	} else {
+		this.editor.options.onCopyAvailable(false);
+		this.editor.options.onCutAvailable(false);
 		this.$copy.addClass('disabled');
 		this.$cut.addClass('disabled');
 	}
@@ -689,7 +717,7 @@ Toolbar.prototype._zoomTo = function(scale) {
  *
  * @private
  */
-Toolbar.prototype._zoomIn = function() {
+Toolbar.prototype.zoomIn = function() {
 	if (this._zoom < this._zoomMax) {
 		this._zoomTo(this._zoom + this._zoomStep);
 	}
@@ -701,7 +729,7 @@ Toolbar.prototype._zoomIn = function() {
  *
  * @private
  */
-Toolbar.prototype._zoomOut = function() {
+Toolbar.prototype.zoomOut = function() {
 	if (this._zoom > this._zoomMin) {
 		this._zoomTo(this._zoom - this._zoomStep);
 	}
@@ -713,7 +741,7 @@ Toolbar.prototype._zoomOut = function() {
  *
  * @private
  */
-Toolbar.prototype._zoomReset = function() {
+Toolbar.prototype.zoomReset = function() {
 	this._zoomTo(1);
 	return false;
 };
@@ -723,7 +751,7 @@ Toolbar.prototype._zoomReset = function() {
  *
  * @private
  */
-Toolbar.prototype._toggleHelp = function() {
+Toolbar.prototype.toggleHelp = function() {
 	this.editor.toggleHelp();
 	return false;
 };
@@ -733,7 +761,7 @@ Toolbar.prototype._toggleHelp = function() {
  *
  * @private
  */
-Toolbar.prototype._rotate = function() {
+Toolbar.prototype.rotate = function() {
 	this.editor.rotate();
 	return false;
 };

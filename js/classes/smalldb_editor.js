@@ -23,7 +23,19 @@ var SmalldbEditor = function(el) {
 		canvasOffsetY: 25, // px start rendering states from top left corner of diagram - canvasOffset
 		canvasExtraWidth: 1500, // px added to each side of diagram bounding box
 		canvasExtraHeight: 1500, // px added to each side of diagram bounding box
-		canvasSpeed: 2 // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
+		canvasSpeed: 2, // Mouse pan multiplication (when mouse moves by 1 px, canvas scrolls for pan_speed px).
+		onInit: function(widget) {}, // Called during initialization of the widget
+		onHelpToggle: function(isAvailable) {},
+		onCopyAvailable: function(isAvailable) {},
+		onCutAvailable: function(isAvailable) {},
+		onPasteAvailable: function(isAvailable) {},
+		onUndoAvailable: function(isAvailable) {},
+		onRedoAvailable: function(isAvailable) {},
+		onZoomInAvailable: function(isAvailable) {},
+		onZoomOutAvailable: function(isAvailable) {},
+		onZoomResetAvailable: function(isAvailable) {},
+		onToggleCycles: function(cyclesVisible) {},
+		onToggleControlPoints: function(controlPointsVisible) {},
 	};
 
 	this.showControlPoints = false;
@@ -336,6 +348,11 @@ SmalldbEditor.prototype.init = function() {
 	this.render();
 	this.canvas.$container[0].scrollLeft = (this.box);
 	this.canvas.$container.scroll(); // force scroll event to save center of viewport
+
+	if (this.options.onInit) {
+		this.options.onInit(this);
+	}
+
 	this.initializing = false;
 };
 
@@ -670,12 +687,19 @@ SmalldbEditor.prototype._createHelp = function() {
 /**
  * Toggles help modal window
  */
-SmalldbEditor.prototype.toggleHelp = function() {
-	if (this.$help) {
-		this.$help.remove();
-		delete this.$help;
+SmalldbEditor.prototype.toggleHelp = function(on) {
+	var enable = (on === undefined ? !this.$help : on);
+	if (enable) {
+		if (!this.$help) {
+			this._createHelp();
+			this.options.onHelpToggle(true);
+		}
 	} else {
-		this._createHelp();
+		if (this.$help) {
+			this.$help.remove();
+			delete this.$help;
+			this.options.onHelpToggle(false);
+		}
 	}
 };
 
