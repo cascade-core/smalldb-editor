@@ -2,6 +2,7 @@
  * Creates new Action instance
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ * @copyright Josef Kufner <josef@kufner.cz>, 2016
  *
  * @param {State} state
  * @class
@@ -10,13 +11,21 @@ var Action = function(id, data, editor) {
 	data = data || {};
 	this.id = id;
 	this.data = data;
-	this.label = 'label' in data ? data.label : id;
 	this.color = (id === '__noaction__' ? '#dd0000' : ('color' in data ? data.color : '#000000'));
 	this.editor = editor;
-	this.canvas = editor.canvas;
-	this.states = editor.states;
-	this._processData(data);
+
+	// Process data
+	this.transitions = {};
+	if ('transitions' in data) {
+		for (var id in data.transitions) {
+			var key = id || '__start__';
+			if (key in this.editor.states) {
+				this.addTransition(key, new Transition(this, key, data.transitions[id]));
+			}
+		}
+	}
 };
+
 
 /**
  * @type {String[]} automatic colors
@@ -24,25 +33,6 @@ var Action = function(id, data, editor) {
 Action.colors = ['#009900', '#003D00', '#6B8F00', '#522900', '#754719', '#A32900', '#7A003D', '#D11975', '#3D0099', '#000000',
 				'#1B0A33', '#0000CC', '#003333', '#0C3A3A', '#008080', '#00B200', '#991F00', '#A31947', '#003366', '#444444'];
 
-Action.prototype._processData = function(data) {
-	this.transitions = {};
-	if ('transitions' in data) {
-		for (var id in data.transitions) {
-			var key = id.split('-')[0] || '__start__';
-			if (key in this.states) {
-				var targets = data.transitions[id].targets || [];
-				for (var t in targets) {
-					var target = targets[t] || '__end__';
-					if (target in this.states) {
-						var trans = new Transition(this, data.transitions[id], key + '-' + t, target, key === target);
-						this.addTransition(key, trans);
-						this.states[key].addConnection(target);
-					}
-				}
-			}
-		}
-	}
-};
 
 /**
  * Finds out whether this action uses end node
@@ -50,14 +40,17 @@ Action.prototype._processData = function(data) {
  * @returns {Boolean} is there any transition to __end__ state?
  */
 Action.prototype.usesEndNode = function() {
-	var endFound = false;
-	for (var id in this.transitions) {
-		if (this.transitions[id].target === '__end__') {
-			endFound = true;
+	for (var t in this.transitions) {
+		for (var a in this.transitions[t].arrows) {
+			var arrow = this.transitions[t].arrows[a];
+			if (arrow.target === '__end__') {
+				return true;
+			}
 		}
 	}
-	return endFound;
+	return false;
 };
+
 
 /**
  * Serializes current action to JSON object
@@ -66,32 +59,22 @@ Action.prototype.usesEndNode = function() {
  */
 Action.prototype.serialize = function() {
 	var A = {
-		label: this.label,
 		color: this.color,
 		transitions: {}
 	};
 	for (var id in this.transitions) {
 		var trans = this.transitions[id];
-		var source = trans.source.split('-')[0]; // cut random suffix
-		source = source === '__start__' ? '' : source;
-		if (trans.dagrePath && 'dagre' in window) {
-			source += '-' + Math.random().toString(36).slice(10); // use again random suffix when dagre path loaded
-		}
-		if (A.transitions[source] !== undefined) {
-			// multiple transitions from same source -> merge
-			var target = trans.target === '__end__' ? '' : trans.target;
-			A.transitions[source].targets.push(target);
-		} else {
-			A.transitions[source] = trans.serialize();
-		}
+		id = id === '__start__' ? '' : id;
+		A.transitions[id] = trans.serialize();
 	}
 	for (var t in this.data) {
-		if (['label', 'color', 'transitions'].indexOf(t) === -1) {
+		if (['color', 'transitions'].indexOf(t) === -1) {
 			A[t] = this.data[t];
 		}
 	}
 	return A;
 };
+
 
 /**
  * Renders transitions to canvas
@@ -100,11 +83,11 @@ Action.prototype.serialize = function() {
  * @param {Object} index - how many same connections did we rendered, stored by key "{source.id}-{target.id}"
  */
 Action.prototype.renderTransitions = function(states, index) {
-	for (var id in this.transitions) {
-		var trans = this.transitions[id];
-		trans.render(states, index);
+	for (var t in this.transitions) {
+		this.transitions[t].render(states, index);
 	}
 };
+
 
 /**
  * Assigns transition to this action
@@ -113,11 +96,9 @@ Action.prototype.renderTransitions = function(states, index) {
  * @param {Transition} transition
  */
 Action.prototype.addTransition = function(source, transition) {
-	// key - append random hash to allow multiple transitions from same source
-	var key = source + '-' + Math.random().toString(36).slice(10);
-	transition.key = key;
-	this.transitions[key] = transition;
+	this.transitions[source] = transition;
 };
+
 
 /**
  * Removes transition from this action
@@ -127,3 +108,4 @@ Action.prototype.addTransition = function(source, transition) {
 Action.prototype.removeTransition = function(transition) {
 	delete this.transitions[transition.key];
 };
+

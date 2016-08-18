@@ -294,11 +294,11 @@ Canvas.prototype.drawDagreConnection = function(trans, index, cycle) {
 	}
 
 	index = index || 1;
-	var path = this._drawPath(points, trans.color, trans.isActive(), trans.label === '');
+	var path = this._drawPath(points, trans.color, trans.isActive(), trans.action.id === '');
 
 	// draw action label
 	var mid = points[Math.floor(points.length / 2)];
-	this._writeText(trans.label, mid.x + 15, mid.y + 5, path, trans.color, trans.isActive(), !this.editor.dragging);
+	this._writeText(trans.action.id, mid.x + 15, mid.y + 5, path, trans.color, trans.isActive(), !this.editor.dragging);
 
 	// render control point buttons
 	if (this.editor.showControlPoints || trans.isActive()) {

@@ -2,6 +2,7 @@
  * Creates new state instance
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ * @copyright Josef Kufner <josef@kufner.cz>, 2016
  *
  * @param {String} id - state identification
  * @param {Object} data - state properties
@@ -10,7 +11,6 @@
  */
 var State = function(id, data, editor) {
 	this.id = id;
-	this.label = 'label' in data ? data.label : id;
 	this.color = 'color' in data ? data.color.toLowerCase() : '#eeeeee';
 	this.data = data || {};
 	this.editor = editor;
@@ -446,8 +446,7 @@ State.prototype.create = function() {
 	}
 
 	// state id and remove button
-	this.$container.attr('data-title', this.label);
-	this.$container.text(this.label);
+	this.$container.text(this.id == '__start__' || this.id == '__end__' ? '' : this.id);
 	this.$container.data(SmalldbEditor._namespace + '-id', this.id);
 	if (this.id.indexOf('__') === 0) {
 		if (this.id === '__start__') {

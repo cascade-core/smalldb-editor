@@ -2,6 +2,7 @@
  * Editor panel, with state, transition and machine summary views
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ * @copyright Josef Kufner <josef@kufner.cz>, 2016
  *
  * @param {SmalldbEditor} editor - plugin instance
  * @class
@@ -118,11 +119,14 @@ Editor.prototype._bind = function() {
 					var act = this.editor.actions[a];
 					for (var t in act.transitions) {
 						var trans = act.transitions[t];
-						if (trans.contains(pos)) {
-							if (trans.isActive()) { // transition already active, create new control point
-								this._createNewCP(trans, pos);
+						for (var ar in trans.arrows) {
+							var arrow  = trans.arrows[ar];
+							if (arrow.contains(pos)) {
+								if (trans.isActive()) { // transition already active, create new control point
+									this._createNewCP(trans, pos);
+								}
+								return trans.activate();
 							}
-							return trans.activate();
 						}
 					}
 				}
@@ -261,18 +265,6 @@ Editor.prototype._createEdgeView = function() {
 
 	if (this.item.action.id.indexOf('__') !== 0) { // do not display for internal states (start & end) and actions (noaction)
 		// change both action and transition labes when equal (for all attached transitions)
-		this._addTextInputRow('label', 'Label', this.item.action.label, this.item.action, true, function(e) {
-			var val = $(e.target).val();
-			var tr = this.item.action.transitions;
-			for (var t in tr) {
-				if (this.item.action.label === tr[t].label) {
-					tr[t].label = val;
-					if (this.item === tr[t]) {
-						$('#smalldb-editor-editor-panel-label-' + this.item.key).val(val);
-					}
-				}
-			}
-		});
 		this._addColorInputRow('color', 'Color', this.item.action.color, this.item.action, function(e) {
 			var val = $(e.target).val();
 			var tr = this.item.action.transitions;
@@ -317,20 +309,12 @@ Editor.prototype._createEdgeView = function() {
 			.append($('<th colspan="3">')
 			.text(_('Transition options'))));
 
-	// rows
-	var src = this.item.source.split('-')[0];
-	if (src.indexOf('__') === 0) {
-		src = src.substring(2, src.length - 2);
-	}
-	var tgt = this.item.target.split('-')[0];
-	if (tgt.indexOf('__') === 0) {
-		tgt = tgt.substring(2, tgt.length - 2);
-	}
-	var $row = this._addTextInputRow('source', 'Source', src, this.item);
-	$row.find('input').prop('disabled', true);
-	$row = this._addTextInputRow('target', 'Target', tgt, this.item);
-	$row.find('input').prop('disabled', true);
-	this._addTextInputRow('label', 'Label', this.item.label, this.item, true);
+	this._addTextInputRow('source', 'Source', this.item.source === '__start__' ? '""' : this.item.source, this.item)
+		.find('input').prop('disabled', true);
+
+	this._addTextInputRow('target', 'Targets', this.item.getTargets().map(function(t) { return t === '__start__' || t === '__end__' ? '' : t; }), this.item, true)
+		.find('input').prop('disabled', true);
+
 	this._addColorInputRow('color', 'Color', this.item.color, this.item);
 
 	// rest of transition's properties
@@ -509,7 +493,6 @@ Editor.prototype._createStateView = function() {
 	// rows
 	if (this.item.id.indexOf('__') !== 0) { // do not display for internal states (start & end)
 		this._addTextInputRow('id', 'Name', this.item.id, this.item);
-		this._addTextInputRow('label', 'Label', this.item.label, this.item, true);
 		this._addColorInputRow('color', 'Color', this.item.color, this.item);
 	}
 
@@ -581,7 +564,17 @@ Editor.prototype._addColorInputRow = function(key, label, value, object, cb) {
 		.on('blur', this._onInputBlur.bind(this))
 		.on('change', function() {
 			var val = $(this).val();
-			$firstInput.val(val).keyup();
+			var oldval = $firstInput.val();
+			if (val) {
+				val = val.toLowerCase();
+			}
+			if (oldval) {
+				oldval = oldval.toLowerCase();
+			}
+			if (val !== oldval) {
+				$firstInput.val(val);
+				$firstInput.keyup();
+			}
 		})
 		.change();
 
@@ -638,7 +631,7 @@ Editor.prototype._removeProperty = function(key, object) {
  * @private
  */
 Editor.prototype._addTextInputRow = function(key, label, value, object, live, cb) {
-	var json = typeof(value) === 'object';
+	var json = typeof(value) === 'object' || typeof(value) === 'array';
 	value = json ? JSON.stringify(value) : value;
 	object = object || this.item || this.editor.properties;
 
@@ -710,7 +703,7 @@ Editor.prototype._onInputBlur = function(ev) {
 Editor.prototype._createSaveCallback = function(object, key, json, live) {
 	return function(e) {
 		var value = $(e.target).val();
-		console.log('Save:', value, "->", key);
+		console.log('Save:', value, "->", key, "(Old value:", object[key], ")");
 		if (json) {
 			try {
 				value = JSON.parse(value);

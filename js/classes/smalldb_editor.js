@@ -2,13 +2,14 @@
  * Smalldb Editor 1.0
  *
  * @copyright Martin Adamek <adamek@projectisimo.com>, 2015
+ * @copyright Josef Kufner <josef@kufner.cz>, 2016
  *
  * @param {HTMLElement} el - textarea element
  * @class
  */
 var SmalldbEditor = function(el) {
 	/** @property {jQuery} $el plugin data variable name */
-    this.$el = $(el);
+	this.$el = $(el);
 
 	/** @property {string} defaults default options */
 	this.defaults = {
@@ -194,19 +195,25 @@ SmalldbEditor.prototype.dagre = function(force) {
 	// create node connections
 	for (var id in this.actions) {
 		var action = this.actions[id];
-		var temp = [];
+		var arrows = [];
 		for (var t in action.transitions) {
 			var trans = action.transitions[t];
-			if (trans.cycle && trans.action.id === '__noaction__') {
-				continue;
+
+			for (var a in trans.arrows) {
+				var arrow = trans.arrows[a];
+				if (arrow.cycle && trans.action.id === '__noaction__') {
+					continue;
+				}
+				arrows.push(arrow);
 			}
-			var s = t.split('-')[0];
-			temp.push([s, trans]);
 		}
+
 		// add transitions in reversed order to prevent rendering overlapping multi-edges
-		temp.reverse();
-		for (var i in temp) {
-			g.setEdge(temp[i][0], temp[i][1].target, { transition: temp[i][1] });
+		arrows.reverse();
+		//console.log('Arrows:', arrows);
+		for (var a in arrows) {
+			var arrow = arrows[a];
+			g.setEdge(arrow.source, arrow.target, { transition: arrow.transition });
 		}
 	}
 
@@ -220,9 +227,12 @@ SmalldbEditor.prototype.dagre = function(force) {
 		var state = states[v];
 		if (force || (!state.x && !state.y)) {
 			var meta = g.node(v);
-			state.x = meta.x;
-			state.y = meta.y;
-			state.redraw(true);
+			//console.log('Placed state: ', v, '->', meta);
+			if (meta) {
+				state.x = meta.x;
+				state.y = meta.y;
+				state.redraw(true);
+			}
 		}
 		if (state.id === '__start__') {
 			endPos.x = state.x;
@@ -398,6 +408,8 @@ SmalldbEditor.prototype.processData = function() {
 			this.states.__end__.notFound = true;
 		}
 	}
+
+	//console.log('Actions:', this.actions);
 };
 
 /**
